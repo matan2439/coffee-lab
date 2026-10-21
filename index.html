@@ -932,6 +932,13 @@ body.froth-on { overflow: hidden; }
 .scan-steps li.done { color: var(--fg); } .scan-steps li.done::before { content: "\2713"; border: 0; background: var(--good, #4d7a58); color: #fff; font-size: 11px; line-height: 16px; text-align: center; }
 @keyframes spin { to { transform: rotate(360deg); } }
 
+/* modal scroll fix: grid auto-row let tall modals overflow the screen */
+.overlay { display: flex; justify-content: center; align-items: center; overscroll-behavior: contain; }
+.modal { min-height: 0; max-height: 100%; }
+.modal-b { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
+@media (max-width: 920px) { .overlay { align-items: flex-end; } }
+.note a.srcl { font-weight: 600; word-break: break-all; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -2556,7 +2563,7 @@ function beanForm(id, pre) {
   const L = (k, l) => l + mark(k);
   const procs = PROCESSES.slice(); if (b.process && !procs.includes(b.process)) procs.unshift(b.process);
   const q = encodeURIComponent([b.roaster, b.name, 'coffee'].filter(Boolean).join(' '));
-  const body = (pre && pre._note ? '<div class="note warn">' + esc(pre._note) + '</div>' : '') + (pre && pre._thumb ? '<img class="scan-th" alt="" src="' + pre._thumb + '">' : '') + (scanned ? '<div class="note">מולא מהצילום. בדקו את השדות לפני שמירה.' + (b.roaster || b.name ? ' <a href="https://www.google.com/search?q=' + q + '" target="_blank" rel="noopener">חיפוש השקית ברשת ↗</a>' : '') + '</div>' : '') +
+  const body = (pre && pre._note ? '<div class="note warn">' + esc(pre._note) + '</div>' : '') + (pre && pre._thumb ? '<img class="scan-th" alt="" src="' + pre._thumb + '">' : '') + (scanned ? '<div class="note">מולא מהצילום. בדקו את השדות לפני שמירה.' + (pre._src ? ' <a class="srcl" href="' + esc(pre._src) + '" target="_blank" rel="noopener">עמוד המוצר באתר הקלייה ↗</a>' : '') + '</div>' : '') +
     '<div class="form-g">' + fldH('name', L('name', 'שם הקפה'), { v: b.name, cls: 'full' }) + fldH('roaster', L('roaster', 'בית קלייה'), { v: b.roaster, list: 'dl-co' }) + '<datalist id="dl-co">' + state.companies.filter((c) => c.kind !== 'equipment').map((c) => '<option value="' + esc(c.name) + '">').join('') + '</datalist>' +
     fldH('originCountry', L('originCountry', 'מקור'), { v: b.originCountry, list: 'dl-or' }) + '<datalist id="dl-or">' + ORIGINS.map((o) => '<option value="' + o + '">').join('') + '</datalist>' +
     fldH('process', L('process', 'עיבוד'), { type: 'select', v: b.process, opts: procs, blank: '—' }) + fldH('roastLevel', L('roastLevel', 'רמת קלייה'), { type: 'select', v: b.roastLevel, opts: ROAST_LEVELS, blank: '—' }) + '</div>' +
@@ -2609,7 +2616,7 @@ async function enrichBean(pre, ctl) {
     pre.uncertain = (pre.uncertain || []).concat(filled.filter((k) => k !== 'roasterNotesText' || true));
     const bits = []; if (!e.sourceUrl) bits.push(e.pagesRead ? 'לא נמצא עמוד מוצר מתאים.' : 'לא נמצא עמוד מוצר באינטרנט.'); if (filled.length) bits.push('הושלמו מהאינטרנט: ' + filled.map((k) => ENR_LABEL[k] || k).join(', ') + '. כדאי לוודא.');
     if (typeof e.info === 'string' && e.info.trim()) bits.push(e.info.trim());
-    if (typeof e.sourceUrl === 'string' && /^https?:\/\//.test(e.sourceUrl)) bits.push('מקור: ' + e.sourceUrl);
+    if (typeof e.sourceUrl === 'string' && /^https?:\/\//.test(e.sourceUrl)) pre._src = e.sourceUrl;
     if (bits.length) pre._note = (pre._note ? pre._note + ' ' : '') + bits.join(' ');
   } catch (err) { /* enrichment is best-effort */ } finally { clearTimeout(t); }
 }
