@@ -996,6 +996,102 @@ body.froth-on { overflow: hidden; }
 .mk-stk { font-size: 12.5px; color: var(--muted); } .mk-stk.lo { color: var(--warn, #b8741a); font-weight: 600; } .mk-stk.z { color: var(--bad, #b5483a); font-weight: 600; }
 .mk-bt { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; } .mk-bt a.btn { text-decoration: none; }
 
+/* ============ store ============ */
+.sp { display: grid; gap: 14px; min-width: 0; }
+.sp h1 { font-family: var(--f-display); margin: 0; font-size: 26px; }
+.sp-top { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.sp-cartb { position: relative; width: 48px; height: 48px; border-radius: 16px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: grid; place-items: center; cursor: pointer; flex: none; }
+.sp-cartb svg { width: 24px; height: 24px; fill: none; stroke: currentColor; stroke-width: 1.7; }
+.sp-cartb em { position: absolute; top: -6px; inset-inline-end: -6px; min-width: 22px; height: 22px; padding: 0 5px; border-radius: 99px; background: var(--accent); color: var(--accent-fg); font: 700 12px/22px inherit; font-style: normal; text-align: center; }
+.sp-search { display: flex; align-items: center; gap: 8px; padding: 0 14px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-height: 48px; }
+.sp-search svg { width: 20px; height: 20px; fill: none; stroke: var(--muted); stroke-width: 1.8; flex: none; }
+.sp-search input { flex: 1; min-width: 0; border: 0; background: transparent; color: var(--fg); font: inherit; font-size: 16px; outline: none; padding: 12px 0; }
+.sp .chips-row { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; padding-bottom: 2px; }
+.sp .chips-row::-webkit-scrollbar { display: none; }
+.sp .tchip.add { border-style: dashed; color: var(--muted); }
+.sp-sec { display: grid; gap: 10px; }
+.sp-h { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; } .sp-h h2 { margin: 0; font-family: var(--f-display); font-size: 19px; } .sp-h small { color: var(--muted); }
+.sp-re { display: grid; grid-auto-flow: column; grid-auto-columns: minmax(250px, 82%); gap: 10px; overflow-x: auto; scroll-snap-type: x mandatory; padding-bottom: 4px; scrollbar-width: none; }
+.sp-re::-webkit-scrollbar { display: none; }
+.sp-ro { scroll-snap-align: start; display: grid; grid-template-columns: 84px 1fr; gap: 12px; padding: 10px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--bc) 40%, var(--line)); border-inline-start: 6px solid var(--bc); background: linear-gradient(110deg, color-mix(in srgb, var(--bc) 20%, var(--surface)), color-mix(in srgb, var(--bc2) 8%, var(--surface))); color: var(--fg); font: inherit; text-align: start; cursor: pointer; box-shadow: var(--shadow); }
+.sp-ro.low { outline: 2px solid color-mix(in srgb, #c0612b 55%, transparent); outline-offset: -2px; }
+.sp-ro-im { width: 84px; height: 84px; border-radius: 12px; overflow: hidden; background: #f4efe8; } .sp-ro-im img { width: 100%; height: 100%; object-fit: cover; }
+.sp-ro-b { display: grid; gap: 4px; align-content: center; min-width: 0; } .sp-ro-b b { font-size: 14.5px; line-height: 1.3; overflow-wrap: anywhere; } .sp-ro-b small { color: var(--muted); font-size: 12px; }
+.sp-ro.low .sp-ro-b small { color: #b0561f; font-weight: 600; }
+.stk { display: block; height: 7px; border-radius: 99px; background: color-mix(in srgb, var(--fg) 10%, transparent); overflow: hidden; } .stk i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--bc), var(--bc2)); }
+.sp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.sp-card { display: grid; grid-template-rows: auto 1fr; padding: 0; border: 1px solid var(--line); border-radius: 18px; overflow: hidden; background: var(--surface); color: var(--fg); font: inherit; text-align: start; cursor: pointer; box-shadow: var(--shadow); transition: transform .15s ease; }
+.sp-card:active { transform: scale(.98); }
+.sp-card.own { border-color: color-mix(in srgb, var(--bc, var(--accent)) 55%, var(--line)); }
+.sp-card.off .sp-img img { opacity: .55; filter: grayscale(.4); }
+.sp-img { position: relative; display: block; aspect-ratio: 1; background: #f4efe8; overflow: hidden; }
+.sp-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.sp-img i { position: absolute; inset: 0; display: grid; place-items: center; font-style: normal; font-size: 36px; }
+.sp-card.own .sp-img::after { content: ""; position: absolute; inset: auto 0 0 0; height: 6px; background: linear-gradient(90deg, var(--bc), var(--bc2)); }
+.sp-badge { position: absolute; top: 8px; inset-inline-start: 8px; font-style: normal; font-size: 11.5px; font-weight: 700; padding: 3px 9px; border-radius: 99px; background: rgba(23, 22, 21, .82); color: #fff; backdrop-filter: blur(4px); }
+.sp-badge.out { inset-inline-start: auto; inset-inline-end: 8px; background: rgba(255, 255, 255, .9); color: #49372e; }
+.sp-meta { display: grid; gap: 3px; padding: 10px 12px 12px; align-content: start; min-width: 0; }
+.sp-meta small { color: var(--muted); font-size: 11.5px; }
+.sp-t { font-size: 14px; font-weight: 600; line-height: 1.3; overflow-wrap: anywhere; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.sp-pr { display: flex; align-items: baseline; gap: 4px; } .sp-pr b { font-size: 16px; } .sp-pr small { font-size: 11.5px; color: var(--muted); }
+.sp-empty, .sp-note { padding: 8px 2px; } .sp-note a { color: var(--accent); }
+.sp-back { justify-self: start; }
+.sp-pp-grid { display: grid; gap: 16px; }
+@media (min-width: 820px) { .sp-pp-grid { grid-template-columns: 1fr 1fr; align-items: start; } }
+.sp-gal { display: grid; grid-auto-flow: column; grid-auto-columns: 100%; overflow-x: auto; scroll-snap-type: x mandatory; border-radius: 22px; background: #f4efe8; aspect-ratio: 1; max-width: 100%; scrollbar-width: none; border: 1px solid var(--line); }
+.sp-gal.tinted { border: 0; box-shadow: inset 0 -8px 0 var(--bc), 0 0 0 1px color-mix(in srgb, var(--bc) 40%, transparent); }
+.sp-gal::-webkit-scrollbar { display: none; }
+.sp-gal img { width: 100%; height: 100%; object-fit: contain; scroll-snap-align: center; }
+.sp-gal i { display: grid; place-items: center; font-size: 64px; font-style: normal; }
+.sp-info { display: grid; gap: 12px; min-width: 0; }
+.sp-info h1 { font-size: 24px; line-height: 1.25; text-wrap: balance; }
+.sp-store { color: var(--muted); text-decoration: none; font-size: 13px; font-weight: 600; letter-spacing: .02em; }
+.sp-price { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; } .sp-price b { font-size: 28px; font-family: var(--f-display); } .sp-price small { color: var(--muted); }
+.sp-opt { display: grid; gap: 6px; } .sp-opt > span { font-size: 12.5px; color: var(--muted); font-weight: 600; }
+.qty { display: inline-flex; align-items: center; border: 1px solid var(--line); border-radius: 14px; overflow: hidden; justify-self: start; background: var(--surface); }
+.qty button { width: 44px; height: 44px; border: 0; background: transparent; color: var(--fg); font-size: 20px; cursor: pointer; } .qty b { min-width: 30px; text-align: center; }
+.sp-cta { display: grid; gap: 8px; } .sp-cta .btn { min-height: 50px; justify-content: center; font-size: 15.5px; text-decoration: none; }
+@media (min-width: 520px) { .sp-cta { grid-template-columns: 1fr 1fr; } }
+.sp-desc { font-size: 14px; line-height: 1.7; color: color-mix(in srgb, var(--fg) 85%, var(--muted)); max-width: 65ch; border-top: 1px solid var(--line); padding-top: 12px; }
+.sp-mine { display: grid; gap: 10px; padding: 14px; border-radius: 18px; border: 1px solid color-mix(in srgb, var(--bc) 40%, var(--line)); background: color-mix(in srgb, var(--bc) 12%, var(--surface)); }
+.sp-mine h3 { margin: 0; font-family: var(--f-display); }
+.sp-kv { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; } .sp-kv div { display: grid; } .sp-kv b { font-size: 19px; } .sp-kv small { color: var(--muted); font-size: 12px; }
+@media (min-width: 640px) { .sp-kv { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.sp-co { display: grid; gap: 10px; padding: 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+.sp-li { display: grid; grid-template-columns: 64px 1fr auto; gap: 10px; align-items: center; }
+.sp-li img, .sp-li > span { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; background: #f4efe8; }
+.sp-li .grow { display: grid; gap: 2px; min-width: 0; } .sp-li small { color: var(--muted); } .sp-li a { color: var(--accent); font-size: 12.5px; text-decoration: none; }
+.sp-li .qty button { width: 36px; height: 36px; }
+.sp-tot { display: flex; justify-content: space-between; border-top: 1px dashed var(--line); padding-top: 10px; } .sp-tot b { font-size: 18px; }
+
+/* ============ status dashboard ============ */
+.st { display: grid; gap: 14px; }
+.kpis { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; }
+@media (min-width: 760px) { .kpis { grid-template-columns: repeat(4, minmax(0, 1fr)); } }
+.kpi { display: grid; gap: 2px; padding: 14px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow); min-width: 0; }
+.kpi small { color: var(--muted); font-size: 12px; font-weight: 600; letter-spacing: .02em; } .kpi b { font-family: var(--f-display); font-size: 28px; line-height: 1.1; } .kpi span { color: var(--muted); font-size: 12px; }
+.kpi.warn { background: color-mix(in srgb, #c0612b 14%, var(--surface)); border-color: color-mix(in srgb, #c0612b 40%, var(--line)); }
+.st-card { display: grid; gap: 10px; } .st-h { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; flex-wrap: wrap; } .st-h h2 { margin: 0; font-size: 18px; font-family: var(--f-display); } .st-h small { color: var(--muted); }
+.st-2 { display: grid; gap: 14px; } @media (min-width: 900px) { .st-2 { grid-template-columns: 1fr 1fr; } }
+.inv { display: grid; gap: 8px; }
+.inv-r { display: grid; grid-template-columns: 52px 1fr; gap: 12px; align-items: center; padding: 8px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; text-align: start; cursor: pointer; border-inline-start: 5px solid var(--bc); }
+.inv-r img, .inv-ph { width: 52px; height: 52px; border-radius: 10px; object-fit: cover; background: var(--bc); display: block; }
+.inv-b { display: grid; gap: 5px; min-width: 0; } .inv-t { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; } .inv-t b { font-size: 14.5px; overflow-wrap: anywhere; } .inv-t small { color: var(--muted); white-space: nowrap; }
+.inv-bar { display: block; height: 10px; border-radius: 99px; background: color-mix(in srgb, var(--fg) 9%, transparent); overflow: hidden; } .inv-bar i { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg, var(--bc), var(--bc2)); }
+.inv-m { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; } .inv-m small { color: var(--muted); font-size: 12px; }
+.fr { font-style: normal; font-size: 11.5px; font-weight: 600; padding: 2px 8px; border-radius: 99px; background: var(--surface2); color: var(--muted); }
+.fr.rest { background: color-mix(in srgb, #4f7fa8 18%, var(--surface)); color: #3d6688; } .fr.peak { background: color-mix(in srgb, #5d8a5a 20%, var(--surface)); color: #3f6a3c; } .fr.fade { background: color-mix(in srgb, #c9a227 22%, var(--surface)); color: #86691a; } .fr.old { background: color-mix(in srgb, #b5483a 18%, var(--surface)); color: #9a3b2f; }
+.st-tips { display: grid; gap: 8px; }
+.st-tip { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; padding: 10px 12px; border-radius: 14px; background: var(--surface2); }
+.st-tip-i { font-size: 20px; text-align: center; } .st-tip p { margin: 0; font-size: 14px; line-height: 1.5; }
+@media (max-width: 480px) { .st-tip { grid-template-columns: 30px 1fr; } .st-tip .btn { grid-column: 2; justify-self: start; } }
+:root[data-theme="dark"] .fr.rest, :root[data-theme="dark"] .fr.peak, :root[data-theme="dark"] .fr.fade, :root[data-theme="dark"] .fr.old { color: var(--fg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .fr.rest, :root:not([data-theme="light"]) .fr.peak, :root:not([data-theme="light"]) .fr.fade, :root:not([data-theme="light"]) .fr.old { color: var(--fg); } }
+.btn svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.8; }
+
+.sp-sub { font-size: 12px; color: var(--muted); line-height: 1.3; overflow-wrap: anywhere; } .sp-sub2 { margin: -6px 0 0; color: var(--muted); font-size: 15px; }
+.st-h { display: grid; gap: 2px; } .st-card { overflow: hidden; } .st-card svg.chart { width: 100%; height: auto; display: block; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -2582,7 +2678,7 @@ function ensureCompany(name, kind) { const n = (name || '').trim(); if (!n || st
 RENDER.beans = function () {
   const all = UI.beans.all; const list = state.beans.map((b) => { const bags = state.bags.filter((g) => g.beanId === b.id); const act = bags.filter((g) => activeBags().includes(g)); const rem = sum(act.map(bagRemaining)); const sc = dataset().filter((r) => r.beanId === b.id && isNum(r.overall)).map((r) => r.overall); const fresh = act.map((g) => roastAgeAt(g)).filter((x) => x != null); return { b, act, rem, n: sc.length, avg: sc.length ? mean(sc) : null, age: fresh.length ? Math.min(...fresh) : null }; })
     .filter((x) => all || x.act.length).sort((a, c) => (c.act.length ? 1 : 0) - (a.act.length ? 1 : 0) || (a.age == null ? 999 : a.age) - (c.age == null ? 999 : c.age));
-  return '<div class="page narrow">' + head('פולים', '<button class="btn" data-act="market-open">🛒 שוק</button><button class="btn pri" data-act="beans-menu">' + svgI('camera') + 'סריקה' + '</button>' + '<button class="btn" data-act="bean-add">+ ידני</button>') +
+  return '<div class="page narrow">' + head('פולים', '<button class="btn" data-act="market-open">'+svgI('shop')+'חנות</button><button class="btn pri" data-act="beans-menu">' + svgI('camera') + 'סריקה' + '</button>' + '<button class="btn" data-act="bean-add">+ ידני</button>') +
     '<div class="chips-row"><button class="tchip' + (!all ? ' on' : '') + '" data-act="beans-all" data-v="0">במלאי</button><button class="tchip' + (all ? ' on' : '') + '" data-act="beans-all" data-v="1">הכל · ' + state.beans.length + '</button></div>' +
     (list.length ? '<div class="blist">' + list.map((x) => '<button type="button" class="bcard' + (x.b.color ? ' tint' : '') + '"' + (x.b.color ? ' style="--bc:' + x.b.color + ';--bc2:' + (x.b.color2 || x.b.color) + '"' : '') + ' data-act="bean-open" data-id="' + x.b.id + '">' + (photoOf(x.b.id, 'pack') ? '<img alt="" src="' + photoOf(x.b.id, 'pack') + '">' : '<span class="bph">' + esc((x.b.name || '?').charAt(0)) + '</span>') + '<span class="bmain"><b>' + esc(x.b.name) + '</b><small>' + esc([x.b.roaster, x.b.originCountry, x.b.process].filter(Boolean).join(' · ')) + '</small>' + (x.act.length ? '<span class="meter' + (x.rem < 60 ? ' low' : '') + '"><i style="width:' + clamp(x.rem / Math.max(1, sum(x.act.map((g) => g.weight))) * 100, 0, 100) + '%"></i></span>' : '') + '</span><span class="bside">' + (x.act.length ? '<b class="num">' + fmtN(x.rem, 0) + ' g</b>' : '<small>נגמר</small>') + (x.age != null ? '<small>' + x.age + ' ימים</small>' : '') + (x.n ? scorePill(x.avg) : '') + '</span></button>').join('') + '</div>'
       : '<div class="card">' + emptyBox(state.beans.length ? 'אין פולים במלאי' : 'עוד אין פולים', 'צלמו שקית והפרטים יתמלאו.', '<button class="btn pri" data-act="beans-menu">' + svgI('camera') + 'סריקה' + '</button>') + '</div>') + '</div>';
@@ -3336,7 +3432,7 @@ AFTER.beans = (function (prev) { return function () { if (prev) prev.apply(this,
 async function siteImgData(url) {
   try {
     const r = await fetch('api/img?u=' + encodeURIComponent(url)); if (!r.ok) return null; const bl = await r.blob();
-    return await new Promise((res) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 420 / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k)); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.82)); }; im.onerror = () => res(null); im.src = fr.result; }; fr.onerror = () => res(null); fr.readAsDataURL(bl); });
+    return await new Promise((res) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 420 / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k)); const x = c.getContext('2d'); x.fillStyle = '#f4efe8'; x.fillRect(0, 0, c.width, c.height); x.drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.82)); }; im.onerror = () => res(null); im.src = fr.result; }; fr.onerror = () => res(null); fr.readAsDataURL(bl); });
   } catch (e) { return null; }
 }
 const _adopting = new Set();
@@ -3346,88 +3442,301 @@ async function adoptSiteImage(beanId, url) {
   const c = await colorFrom(d); b.siteImage = url; if (c) { b.color = c.c1; b.color2 = c.c2; }
   const old = state.photos.find((p) => p.beanId === beanId && p.kind === 'pack'); if (old && !state.photos.some((p) => p.beanId === beanId && p.kind === 'scan')) state.photos.push({ id: uid('ph'), beanId, kind: 'scan', data: old.data });
   state.photos = state.photos.filter((p) => !(p.beanId === beanId && p.kind === 'pack')); state.photos.push({ id: uid('ph'), beanId, kind: 'pack', data: d });
-  save(); render(); if (typeof mkRender === 'function' && $('#mk_body')) mkRender(); return true;
+  save(); render(); return true;
 }
 
-/* ---------- market: buy again from the roaster's own shop ---------- */
-const MK = { roaster: '', cache: {}, busy: false };
-const MK_OTHER = /cold ?brew|matcha|מאצ|tea\b|תה|drip bag|capsule|קפסול|concentrate|syrup|סירופ|mug|כוס|grinder|מטחנ|dripper|filter paper|פילטר|kettle|קומקום|gift|מתנה|subscription|מנוי|chocolate|שוקולד|merch|t-?shirt|bottle|בקבוק/i;
-const MK_JUNK = /\btest\b|gift card|כרטיס מתנה|\bsample\b|wholesale|\b(1|2|5) ?kg\b/i;
 const CUR_SYM = { ILS: '₪', USD: '$', EUR: '€', GBP: '£', NOK: 'kr', SEK: 'kr', DKK: 'kr', CAD: 'C$', AUD: 'A$' };
-function mkRoasters() {
-  const m = new Map(); state.beans.forEach((b) => { const r = (b.roaster || '').trim(); if (!r) return; const o = m.get(coKey(r)) || { name: r, site: '', beans: [] }; if (!o.site && b.site) o.site = b.site; o.beans.push(b); m.set(coKey(r), o); });
-  ((prefs().marketRoasters) || []).forEach((x) => { const k = coKey(x.name); if (!m.has(k)) m.set(k, { name: x.name, site: x.site || '', beans: [] }); else if (x.site && !m.get(k).site) m.get(k).site = x.site; });
-  return Array.from(m.values());
-}
 function mkMoney(amount, cur) { if (!isNum(amount)) return ''; const s = CUR_SYM[cur] || cur || ''; const n = fmtN(amount, amount % 1 ? 2 : 0); return s.length === 1 || s === 'C$' || s === 'A$' ? s + n : n + (s ? ' ' + s : ''); }
-function mkPrice(p, cur) { return mkMoney(p.price, cur); }
-function mkMatch(b, prods) {
-  const u = (b.productUrl || '').split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase(); const byUrl = u && prods.find((p) => p.url.toLowerCase() === u); if (byUrl) return byUrl;
-  const n = coKey(b.name); if (!n) return null; return prods.find((p) => { const t = coKey(p.title); return t === n || t.includes(n) || n.includes(t); }) || null;
+
+/* ============================================================
+   V4 — Store (catalogs of the roasters' own web shops, product pages,
+   shopping list, hand-off to the official site) + Status dashboard
+   ============================================================ */
+ICON.shop = '<path d="M5 8h14l-1.2 12H6.2z"/><path d="M9 8V6.5a3 3 0 0 1 6 0V8"/>';
+ICON.stats = '<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4.5-5"/><path d="M3 20h18"/>';
+(function () { const v = { brew: VIEWS.brew, beans: VIEWS.beans, shop: { he: 'חנות' }, stats: { he: 'מצב' }, log: VIEWS.log, settings: VIEWS.settings }; Object.keys(VIEWS).forEach((k) => delete VIEWS[k]); Object.assign(VIEWS, v); })();
+
+const SHOP = { cats: {}, busy: {}, det: {}, q: '', cat: 'all', store: '', page: 'store', k: '', pid: '', size: {}, qty: {} };
+const SHOP_LS = 'cl_shop_v2';
+try { const c = JSON.parse(localStorage.getItem(SHOP_LS) || '{}'); if (c && typeof c === 'object') SHOP.cats = c; } catch (e) { /* no storage */ }
+function shopPersist() { try { localStorage.setItem(SHOP_LS, JSON.stringify(SHOP.cats)); } catch (e) { /* full or blocked */ } }
+const SHOP_JUNK = /\btest\b|gift ?card|כרטיס מתנה|\bsample\b|wholesale|סיטונא/i;
+const SHOP_STOP = new Set(['coffee', 'קפה', 'the', 'and', 'roasters', 'roastery', 'roasting', 'roaster', 'company', 'co', 'בית', 'קלייה', 'קליית', 'beans', 'פולי', 'www', 'com', 'shop']);
+const spNorm = (s) => String(s || '').toLowerCase().replace(/[׳'"`’״]/g, '').replace(/[^a-z0-9֐-׿]+/g, ' ').trim();
+const spToks = (s) => spNorm(s).split(' ').filter((w) => w.length >= 3 && !SHOP_STOP.has(w) && !/^\d+$/.test(w));
+const spHost = (u) => { try { return new URL(u).hostname.replace(/^www\./, '').toLowerCase(); } catch (e) { return ''; } };
+const spSplit = (t) => { const i = String(t).indexOf(' | '); return i > 0 ? [t.slice(0, i), t.slice(i + 3)] : [t, '']; };
+const spMoney = (a, c) => mkMoney(a, c || 'ILS');
+
+/* ---------- stores = roasters grouped by web site / name ---------- */
+function shopGroups() {
+  const gs = [];
+  const add = (name, site, bean) => {
+    const h = spHost(site), t = spToks(name);
+    let g = gs.find((x) => (h && x.host === h) || t.some((w) => x.toks.has(w)));
+    if (!g) { g = { host: h, site: site || '', names: [], toks: new Set(), beans: [] }; gs.push(g); }
+    if (!g.site && site) { g.site = site; g.host = h; }
+    if (name && !g.names.includes(name)) g.names.push(name); t.forEach((w) => g.toks.add(w)); if (bean) g.beans.push(bean);
+  };
+  state.beans.forEach((b) => { if ((b.roaster || '').trim() || b.site) add((b.roaster || '').trim(), b.site || '', b); });
+  ((prefs().marketRoasters) || []).forEach((x) => add(x.name, x.site || '', null));
+  gs.forEach((g) => { g.key = g.host || ('n:' + Array.from(g.toks).sort().join('-')); g.name = g.names.find((n) => /[a-z]/i.test(n) && /[֐-׿]/.test(n)) || g.names[0] || g.host; });
+  return gs;
 }
-function mkStats(b) {
-  const bags = state.bags.filter((g) => g.beanId === b.id); const act = bags.filter((g) => activeBags().includes(g)); const rem = Math.round(sum(act.map(bagRemaining)));
-  const sc = dataset().filter((x) => x.beanId === b.id && isNum(x.overall)).map((x) => x.overall); const paid = bags.filter((g) => isNum(g.price) && g.price > 0).sort((a, c) => (c.purchaseDate || '') < (a.purchaseDate || '') ? -1 : 1)[0];
-  return { bags, act, rem, n: bags.length, avg: sc.length ? mean(sc) : null, paid, cups: sc.length };
+const groupOf = (k) => shopGroups().find((g) => g.key === k);
+function allProducts() {
+  const out = []; shopGroups().forEach((g) => { const c = SHOP.cats[g.key]; ((c && c.products) || []).forEach((p) => { if (!SHOP_JUNK.test(p.title)) out.push(Object.assign({ g, cur: p.currency || c.currency || '' }, p)); }); }); return out;
 }
-function mkTile(b, m, data) {
-  const st = mkStats(b); const img = photoOf(b.id, 'pack') || ''; const link = (m && m.url) || b.productUrl || (data.site ? data.site + '/search?q=' + encodeURIComponent(b.name) : '');
-  const cur = (m && isNum(m.price)) ? data.currency : (b.listPrice && b.listPrice.currency); const amt = (m && isNum(m.price)) ? m.price : (b.listPrice && b.listPrice.amount); const w = (m && m.grams) || (b.listPrice && b.listPrice.weight) || (st.bags[0] && st.bags[0].weight) || null;
-  const price = isNum(amt) ? mkMoney(amt, cur) : '';
-  const out = m && !m.available; const low = st.rem > 0 && st.rem < 80; const stock = st.rem > 0 ? 'במלאי ' + st.rem + ' g' + (st.act.length > 1 ? ' · ' + st.act.length + ' שקיות' : '') : 'אין במלאי';
-  const paid = st.paid ? 'שילמת ' + mkMoney(st.paid.price, 'ILS') : '';
-  const fav = st.n >= 2 || (st.avg != null && st.avg >= 8);
-  return '<div class="mk-tile' + (b.color ? '' : ' nc') + '" style="--bc:' + esc(b.color || 'var(--accent)') + ';--bc2:' + esc(b.color2 || b.color || 'var(--accent)') + '">' +
-    '<div class="mk-im">' + (img ? '<img alt="" loading="lazy" src="' + esc(img) + '">' : '<span>' + esc((b.name || '?').trim().charAt(0)) + '</span>') + '</div>' +
-    '<div class="mk-bd"><div class="mk-t"><b>' + esc(b.name) + '</b>' + (fav ? '<i class="mk-fv" title="חביב / חוזר">★</i>' : '') + '</div>' +
-    '<div class="mk-pr">' + (price ? '<b>' + esc(price) + '</b>' + (w ? '<small> · ' + w + ' g</small>' : '') : '<small class="muted">מחיר לא ידוע</small>') + (out ? '<span class="mk-tag off">אזל באתר</span>' : '') + '</div>' +
-    '<div class="mk-stk' + (st.rem === 0 ? ' z' : low ? ' lo' : '') + '">' + stock + (st.avg != null ? ' · ציון ' + fmtN(st.avg, 1) : '') + (paid ? ' · ' + paid : '') + '</div>' +
-    '<div class="mk-bt">' + (link ? '<a class="btn pri sm" href="' + esc(link) + '" target="_blank" rel="noopener">הזמנה באתר ↗</a>' : '') + '<button type="button" class="btn sm" data-act="mk-manage" data-id="' + esc(b.id) + '">ניהול</button></div></div></div>';
+function ownerOf(p) { return p.g.beans.find((b) => b.shopPid === p.id) || null; }
+function beanStock(b) { const act = state.bags.filter((g) => g.beanId === b.id && activeBags().includes(g)); return { rem: Math.round(sum(act.map(bagRemaining))), n: act.length }; }
+function pcat(p) {
+  const s = (p.title + ' ' + (p.cats || []).join(' ') + ' ' + (p.slug || '')).toLowerCase();
+  if (/gift|מתנה|bundle|מארז|trio|שלישיי|variety|subscription|מנוי/.test(s)) return 'bundle';
+  if (/cold ?brew|קרה|matcha|מאצ|\btea\b|\bתה\b|concentrate|תרכיז|capsule|קפסול|drip ?bag/.test(s)) return 'drinks';
+  if (/grinder|מטחנ|\bcups?\b|כוס|mug|ספל|kettle|קומקום|dripper|filter paper|פילטר נייר|מסנני|scale|accessor|אביזר|fellow|acme|huskee|equipment|ציוד|brewer|carafe|קנקן|t-?shirt|merch/.test(s)) return 'gear';
+  if (/blend|תערובת|בלנד/.test(s)) return 'blend';
+  return 'beans';
 }
-function mkCard(p, cur) { return '<a class="mk-card' + (p.available ? '' : ' off') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + (p.image ? '<img alt="" loading="lazy" src="' + esc(p.image) + '">' : '<span class="mk-ph">☕</span>') + '<b>' + esc(p.title) + '</b><small>' + esc(mkPrice(p, cur)) + (p.available ? '' : ' · אזל') + '</small></a>'; }
-function mkRender() {
-  const host = $('#mk_body'); if (!host) return; const rs = mkRoasters(); const cur = rs.find((r) => coKey(r.name) === coKey(MK.roaster)) || rs[0];
-  const chips = rs.map((r) => '<button type="button" class="tchip' + (cur && r === cur ? ' on' : '') + '" data-act="mk-pick" data-v="' + esc(r.name) + '">' + esc(r.name) + '</button>').join('');
-  let body = '';
-  if (!cur) body = '<p class="muted">הוסיפו קלייה כדי לראות מה אפשר לקנות ישירות מהאתר שלה.</p>';
-  else {
-    const data = MK.cache[coKey(cur.name)];
-    if (!data) body = '<p class="muted s">טוען מהאתר של ' + esc(cur.name) + '…</p>';
-    else if (!data.site) body = '<p class="muted">לא מצאתי אתר רשמי עבור ' + esc(cur.name) + '. אפשר להזין כתובת אתר למטה.</p>';
-    else {
-      const prods = (data.products || []).filter((p) => !MK_JUNK.test(p.title));
-      const other = prods.filter((p) => MK_OTHER.test(p.title + ' ' + p.type + ' ' + (p.tags || []).join(' '))); const coffee = prods.filter((p) => !other.includes(p)).sort((a, b) => (a.available === b.available ? (a.updated < b.updated ? 1 : -1) : a.available ? -1 : 1));
-      const mine = cur.beans.map((b) => ({ b, m: mkMatch(b, prods) })).sort((a, c) => { const A = mkStats(a.b), C = mkStats(c.b); return (C.rem > 0) - (A.rem > 0) || C.n - A.n; });
-      const matched = new Set(mine.map((x) => x.m && x.m.url).filter(Boolean));
-      mine.forEach((x) => { if (x.m && x.m.image && x.b.siteImage !== x.m.image) adoptSiteImage(x.b.id, x.m.image); });
-      const fresh = coffee.filter((p) => !matched.has(p.url));
-      body = '<div class="mk-site"><a href="' + esc(data.site) + '" target="_blank" rel="noopener">האתר הרשמי ↗</a>' + (data.shopify === false ? ' <small class="muted">הקטלוג לא נטען אוטומטית מהאתר הזה, הקישורים מובילים לעמודי המוצר שנשמרו</small>' : '') + '</div>' +
-        (mine.length ? '<div class="blk-h">הקפה שלך · הזמנה חוזרת</div><div class="mk-list">' + mine.map((x) => mkTile(x.b, x.m, data)).join('') + '</div>' : '<p class="muted">עוד אין פולים של הקלייה הזו בספרייה.</p>') +
-        (fresh.length ? '<div class="blk-h">חדש באתר · פולי קפה</div><div class="mk-grid">' + fresh.slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '') +
-        (other.length ? '<div class="blk-h">עוד מוצרי קפה</div><div class="mk-grid">' + other.slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '');
+const SHOP_CATS = [['all', 'הכל'], ['mine', 'הקפה שלי'], ['beans', 'פולי קפה'], ['blend', 'תערובות'], ['drinks', 'Cold brew ומשקאות'], ['gear', 'ציוד וכוסות'], ['bundle', 'מארזים ומתנות']];
+
+/* ---------- catalog loading + matching my beans to shop products ---------- */
+function shopRefresh() { if (UI.view === 'shop' || UI.view === 'stats' || UI.view === 'beans') render(); }
+async function shopLoad(g, force) {
+  const c = SHOP.cats[g.key]; if (SHOP.busy[g.key]) return;
+  if (c && !force && !c.err && Date.now() - (c.at || 0) < 6 * 3600e3) { await shopMatch(g); return; }
+  SHOP.busy[g.key] = true;
+  try {
+    const r = await fetch('api/market?roaster=' + encodeURIComponent(g.name || '') + (g.site ? '&site=' + encodeURIComponent(g.site) : ''));
+    const j = await r.json();
+    if (j && !j.error) {
+      SHOP.cats[g.key] = Object.assign({ at: Date.now() }, j);
+      if (j.site && !g.site) { g.beans.forEach((b) => { if (!b.site) b.site = j.site; }); const pr = prefs(); pr.marketRoasters = (pr.marketRoasters || []).filter((x) => !g.names.includes(x.name)); pr.marketRoasters.push({ name: g.name, site: j.site }); save(); if (spHost(j.site) !== g.key) { SHOP.cats[spHost(j.site)] = SHOP.cats[g.key]; } }
+      shopPersist();
     }
+  } catch (e) { if (!c) SHOP.cats[g.key] = { at: Date.now(), site: g.site, products: [], err: true }; }
+  SHOP.busy[g.key] = false; const g2 = groupOf(g.key) || shopGroups().find((x) => x.host && x.host === spHost((SHOP.cats[g.key] || {}).site)) || g; await shopMatch(g2); shopRefresh();
+}
+function matchScore(b, p, rt) {
+  const slug = String(p.slug || '').replace(/-\d+$/, '');
+  const bt = spToks(b.name).filter((w) => !rt.has(w)); const pt = new Set(spNorm(p.title + ' ' + slug).split(' '));
+  let s = 0; bt.forEach((w) => { if (pt.has(w)) s += 2; });
+  const nums = (x) => (spNorm(x).match(/\d+/g) || []).map(Number).filter((n) => n < 500);
+  const bn = nums(b.name), pn = nums(p.title).concat(nums(slug));
+  if (bn.length) { if (bn.some((n) => pn.includes(n))) s += 3; else if (pn.length) s -= 4; }
+  const bl = (x) => /blend|תערובת|בלנד/.test(spNorm(x)); if (bl(b.name) && bl(p.title + ' ' + slug)) s += 2;
+  return s;
+}
+function linkBean(b, p, cat) {
+  b.shopPid = p.id; b.productUrl = p.url; if (cat.site) b.site = cat.site;
+  const sz = (p.sizes || [])[0];
+  if (isNum(p.price)) b.listPrice = { amount: p.price, currency: p.currency || cat.currency || '', weight: (sz && sz.grams) || null };
+}
+async function shopMatch(g) {
+  const cat = SHOP.cats[g.key]; if (!cat || !(cat.products || []).length) return;
+  const prods = cat.products.filter((p) => !SHOP_JUNK.test(p.title) && /beans|blend|drinks/.test(pcat(p)));
+  const all = cat.products; const rt = new Set(Array.from(g.toks).concat(spToks(g.host.split('.')[0])));
+  const tag = g.key + ':' + all.length; let changed = false; const need = [];
+  g.beans.forEach((b) => {
+    if (b.shopPid && all.some((p) => p.id === b.shopPid)) return;
+    const sc = prods.map((p) => ({ p, s: matchScore(b, p, rt) })).sort((a, c) => c.s - a.s);
+    if (sc[0] && sc[0].s >= 5 && (!sc[1] || sc[0].s - sc[1].s >= 2)) { linkBean(b, sc[0].p, cat); changed = true; } else if (b.shopTry !== tag) need.push(b);
+  });
+  if (need.length && location.protocol === 'https:') {
+    try {
+      const r = await fetch('api/market', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify({ roaster: g.name, beans: need.map((b) => ({ id: b.id, name: b.name, origin: b.originCountry || '' })), products: prods.map((p) => ({ id: p.id, title: p.title })) }) });
+      const j = await r.json(); const m = (j && j.matches) || {};
+      if (r.ok) need.forEach((b) => { b.shopTry = tag; const p = m[b.id] && all.find((x) => x.id === m[b.id]); if (p) linkBean(b, p, cat); changed = true; });
+    } catch (e) { /* offline: try again next time */ }
   }
-  host.innerHTML = '<div class="chips-row">' + chips + '</div>' + body + '<div class="row wrap mk-add"><input type="text" id="mk_new" placeholder="שם קלייה או כתובת אתר" aria-label="קלייה חדשה" style="max-width:240px"><button class="btn sm" data-act="mk-add">+ הוספת קלייה</button></div>';
+  g.beans.forEach((b) => { const p = b.shopPid && all.find((x) => x.id === b.shopPid); if (p) { if (isNum(p.price) && (!b.listPrice || b.listPrice.amount !== p.price)) { linkBean(b, p, cat); changed = true; } if (p.image && b.siteImage !== p.image) adoptSiteImage(b.id, p.image); } });
+  if (changed) { save(); shopRefresh(); }
 }
-async function mkLoad(r) {
-  const k = coKey(r.name); if (MK.cache[k] || MK.busy) return; MK.busy = true;
-  try { const u = 'api/market?roaster=' + encodeURIComponent(r.name) + (r.site ? '&site=' + encodeURIComponent(r.site) : ''); const j = await (await fetch(u)).json(); MK.cache[k] = j && typeof j === 'object' && !j.error ? j : { site: r.site || '', products: [] };
-    if (MK.cache[k].site && !r.site) { const pr = prefs(); pr.marketRoasters = (pr.marketRoasters || []).filter((x) => coKey(x.name) !== k); pr.marketRoasters.push({ name: r.name, site: MK.cache[k].site }); state.beans.forEach((b) => { if (coKey(b.roaster) === k && !b.site) b.site = MK.cache[k].site; }); save(); }
-  } catch (e) { MK.cache[k] = { site: r.site || '', products: [] }; }
-  MK.busy = false; mkRender();
+let _shopAuto = 0;
+function shopAuto(force) { if (!force && Date.now() - _shopAuto < 90000) return; _shopAuto = Date.now(); shopGroups().forEach((g) => { shopLoad(g, force); }); }
+async function shopDetails(p) {
+  const key = p.g.key + '|' + p.id; const cat = SHOP.cats[p.g.key]; if (SHOP.det[key] || !cat || cat.platform !== 'woocommerce' || !p.variable) return;
+  SHOP.det[key] = { loading: true };
+  try { const j = await (await fetch('api/market?site=' + encodeURIComponent(cat.site) + '&ids=' + encodeURIComponent(p.id))).json(); SHOP.det[key] = (j && j.details && j.details[p.id]) || {}; } catch (e) { SHOP.det[key] = {}; }
+  if (UI.view === 'shop' && SHOP.page === 'product') render();
 }
-ACT['market-open'] = () => {
-  const rs = mkRoasters(); if (!MK.roaster && rs.length) MK.roaster = rs[0].name;
-  openModal({ title: 'שוק · קנייה מהאתרים הרשמיים', body: '<div id="mk_body"></div>', actions: [{ label: 'סגירה', cls: 'pri', run: () => true }] }); mkRender(); const cur = rs.find((r) => coKey(r.name) === coKey(MK.roaster)); if (cur) mkLoad(cur);
+function sizesOf(p) { const d = SHOP.det[p.g.key + '|' + p.id]; const s = d && d.sizes && d.sizes.length ? d.sizes : (p.sizes || []); return s.filter((x) => x.label || x.grams); }
+function priceLabel(p) { if (!isNum(p.price)) return '<small class="muted">מחיר באתר</small>'; return (isNum(p.priceMax) && p.priceMax > p.price ? '<small>החל מ-</small>' : '') + '<b>' + esc(spMoney(p.price, p.cur)) + '</b>'; }
+
+/* ---------- store view ---------- */
+const spCartList = () => { const pr = prefs(); if (!Array.isArray(pr.cart)) pr.cart = []; return pr.cart; };
+function spCard(p) {
+  const own = ownerOf(p); const st = own ? beanStock(own) : null;
+  return '<button type="button" class="sp-card' + (own ? ' own' : '') + (p.available ? '' : ' off') + '" data-act="sp-open" data-k="' + esc(p.g.key) + '" data-id="' + esc(p.id) + '"' + (own && own.color ? ' style="--bc:' + esc(own.color) + ';--bc2:' + esc(own.color2 || own.color) + '"' : '') + '>' +
+    '<span class="sp-img">' + (p.thumb || p.image ? '<img alt="" loading="lazy" src="' + esc(p.thumb || p.image) + '">' : '<i>☕</i>') +
+    (own ? '<em class="sp-badge own">' + (st.rem > 0 ? 'בבית · ' + st.rem + ' g' : 'נגמר בבית') + '</em>' : '') + (!p.available ? '<em class="sp-badge out">אזל באתר</em>' : '') + '</span>' +
+    '<span class="sp-meta"><small>' + esc(p.g.name) + '</small><span class="sp-t">' + esc(spSplit(p.title)[0]) + '</span>' + (spSplit(p.title)[1] ? '<span class="sp-sub">' + esc(spSplit(p.title)[1]) + '</span>' : '') + '<span class="sp-pr">' + priceLabel(p) + '</span></span></button>';
+}
+function spReorder(prods) {
+  const mine = []; shopGroups().forEach((g) => g.beans.forEach((b) => { const p = prods.find((x) => x.g.key === g.key && x.id === b.shopPid); if (p) mine.push({ b, p, st: beanStock(b) }); }));
+  if (!mine.length) return '';
+  mine.sort((a, c) => a.st.rem - c.st.rem);
+  return '<section class="sp-sec"><div class="sp-h"><h2>להזמין שוב</h2><small>לפי מה שנשאר בבית</small></div><div class="sp-re">' + mine.map((x) => {
+    const pct = Math.round(clamp(x.st.rem / Math.max(1, (x.p.sizes && x.p.sizes[0] && x.p.sizes[0].grams) || 250), 0, 1) * 100); const low = x.st.rem < 80;
+    return '<button type="button" class="sp-ro' + (low ? ' low' : '') + '" data-act="sp-open" data-k="' + esc(x.p.g.key) + '" data-id="' + esc(x.p.id) + '" style="--bc:' + esc(x.b.color || 'var(--accent)') + ';--bc2:' + esc(x.b.color2 || x.b.color || 'var(--accent)') + '">' +
+      '<span class="sp-ro-im">' + (x.p.thumb || x.p.image ? '<img alt="" loading="lazy" src="' + esc(x.p.thumb || x.p.image) + '">' : '') + '</span>' +
+      '<span class="sp-ro-b"><b>' + esc(x.p.title) + '</b><span class="sp-pr">' + priceLabel(x.p) + '</span><span class="stk"><i style="width:' + pct + '%"></i></span><small>' + (x.st.rem > 0 ? 'נשארו ' + x.st.rem + ' g' : 'אין בבית') + (low ? ' · כדאי להזמין' : '') + '</small></span></button>';
+  }).join('') + '</div></section>';
+}
+function spGridHTML(prods) {
+  const q = spNorm(SHOP.q); let list = prods.filter((p) => (!SHOP.store || p.g.key === SHOP.store));
+  if (SHOP.cat === 'mine') list = list.filter((p) => ownerOf(p)); else if (SHOP.cat !== 'all') list = list.filter((p) => pcat(p) === SHOP.cat);
+  if (q) { const SYN = { 'קולד': 'cold', 'ברו': 'brew', 'בלנד': 'תערובת', blend: 'תערובת', 'אספרסו': 'espresso', 'מאצה': 'matcha', 'מאצ׳ה': 'matcha', 'מטחנה': 'מטחנת', 'grinder': 'מטחנת' }; const alt = q.split(' ').map((w) => SYN[w] || w).join(' '); list = list.filter((p) => { const t = spNorm(p.title + ' ' + (p.cats || []).join(' ') + ' ' + p.g.name + ' ' + (p.desc || '').slice(0, 200)); return t.includes(q) || t.includes(alt); }); }
+  list.sort((a, c) => (c.available - a.available) || ((ownerOf(c) ? 1 : 0) - (ownerOf(a) ? 1 : 0)) || ((/beans|blend/.test(pcat(c)) ? 1 : 0) - (/beans|blend/.test(pcat(a)) ? 1 : 0)));
+  if (!list.length) return '<p class="muted sp-empty">' + (prods.length ? 'אין מוצרים שמתאימים לסינון.' : 'הקטלוגים נטענים מהאתרים הרשמיים…') + '</p>';
+  return '<div class="sp-grid">' + list.slice(0, 120).map(spCard).join('') + '</div>';
+}
+function spStoreHTML() {
+  const gs = shopGroups(); const prods = allProducts(); const n = sum(spCartList().map((x) => x.qty || 1)); const loading = gs.some((g) => SHOP.busy[g.key]);
+  const stores = '<div class="chips-row sp-stores"><button type="button" class="tchip' + (!SHOP.store ? ' on' : '') + '" data-act="sp-store" data-v="">כל החנויות</button>' + gs.map((g) => { const c = SHOP.cats[g.key]; return '<button type="button" class="tchip' + (SHOP.store === g.key ? ' on' : '') + '" data-act="sp-store" data-v="' + esc(g.key) + '">' + esc(g.name) + (c && c.products ? ' · ' + c.products.filter((p) => !SHOP_JUNK.test(p.title)).length : SHOP.busy[g.key] ? ' …' : '') + '</button>'; }).join('') + '<button type="button" class="tchip add" data-act="sp-add-store">+ חנות</button></div>';
+  const cats = '<div class="chips-row sp-cats">' + SHOP_CATS.map((c) => '<button type="button" class="tchip' + (SHOP.cat === c[0] ? ' on' : '') + '" data-act="sp-cat" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
+  const noCat = gs.filter((g) => { const c = SHOP.cats[g.key]; return c && !SHOP.busy[g.key] && !(c.products || []).length; });
+  return '<div class="page sp">' + '<div class="sp-top"><div><h1>חנות</h1><small class="muted">קטלוגים מהאתרים הרשמיים של הקליות שלך' + (loading ? ' · מתעדכן…' : '') + '</small></div><button type="button" class="sp-cartb" data-act="sp-cart" aria-label="רשימת קנייה">' + svgI('shop') + (n ? '<em>' + n + '</em>' : '') + '</button></div>' +
+    '<label class="sp-search">' + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>' + '<input type="search" data-on="sp-q" placeholder="חיפוש: בלנד, אתיופיה, קולד ברו…" value="' + esc(SHOP.q) + '" aria-label="חיפוש מוצרים"></label>' +
+    stores + (SHOP.cat === 'all' && !SHOP.q ? spReorder(prods.filter((p) => !SHOP.store || p.g.key === SHOP.store)) : '') + cats + '<div id="sp_grid">' + spGridHTML(prods) + '</div>' +
+    (noCat.length ? '<p class="muted s sp-note">' + noCat.map((g) => esc(g.name)).join(', ') + ': האתר לא חושף קטלוג אוטומטי. ' + noCat.map((g) => (SHOP.cats[g.key].site ? '<a href="' + esc(SHOP.cats[g.key].site) + '" target="_blank" rel="noopener">לאתר ' + esc(g.name) + ' ↗</a>' : '')).join(' ') + '</p>' : '') +
+    (!gs.length ? '<div class="empty"><p>עוד אין קליות בספרייה. סרקו שקית או הוסיפו חנות.</p></div>' : '') + '</div>';
+}
+function spProductHTML() {
+  const p = allProducts().find((x) => x.g.key === SHOP.k && x.id === SHOP.pid); if (!p) { SHOP.page = 'store'; return spStoreHTML(); }
+  shopDetails(p);
+  const own = ownerOf(p); const sizes = sizesOf(p); const si = Math.min(SHOP.size[p.id] || 0, Math.max(0, sizes.length - 1)); const sz = sizes[si]; const qty = SHOP.qty[p.id] || 1;
+  const price = sz && isNum(sz.price) ? sz.price : p.price; const cat = SHOP.cats[p.g.key] || {};
+  const imgs = (p.images && p.images.length ? p.images : [p.image]).filter(Boolean);
+  const per100 = isNum(price) && sz && sz.grams ? price / sz.grams * 100 : null;
+  const quick = cat.platform === 'shopify' && sz && sz.variantId ? cat.site + '/cart/' + sz.variantId + ':' + qty : '';
+  const det = SHOP.det[p.g.key + '|' + p.id];
+  let mine = '';
+  if (own) {
+    const st = beanStock(own); const rows = dataset().filter((r) => r.beanId === own.id); const sc = rows.filter((r) => isNum(r.overall)).map((r) => r.overall); const bags = state.bags.filter((g) => g.beanId === own.id);
+    const paid = bags.filter((g) => isNum(g.price) && g.price > 0).map((g) => g.price);
+    mine = '<section class="sp-mine" style="--bc:' + esc(own.color || 'var(--accent)') + '"><h3>אצלך בבית</h3><div class="sp-kv"><div><b>' + st.rem + ' g</b><small>במלאי' + (st.n > 1 ? ' · ' + st.n + ' שקיות' : '') + '</small></div><div><b>' + bags.length + '</b><small>שקיות שנקנו</small></div><div><b>' + (sc.length ? fmtN(mean(sc), 1) : '—') + '</b><small>ציון ממוצע · ' + rows.length + ' חליטות</small></div><div><b>' + (paid.length ? spMoney(paid[paid.length - 1]) : '—') + '</b><small>שילמת בפעם האחרונה</small></div></div>' +
+      '<button type="button" class="btn sm" data-act="sp-bean" data-id="' + esc(own.id) + '">לכרטיס הפולים, המתכונים והטיפים</button></section>';
+  }
+  return '<div class="page sp sp-pp">' + '<button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button>' +
+    '<div class="sp-pp-grid"><div class="sp-gal' + (own && own.color ? ' tinted' : '') + '"' + (own && own.color ? ' style="--bc:' + esc(own.color) + ';--bc2:' + esc(own.color2 || own.color) + '"' : '') + '>' + (imgs.length ? imgs.map((u) => '<img alt="" src="' + esc(u) + '">').join('') : '<i>☕</i>') + '</div>' +
+    '<div class="sp-info"><a class="sp-store" href="' + esc(cat.site || '#') + '" target="_blank" rel="noopener">' + esc(p.g.name) + ' ↗</a><h1>' + esc(spSplit(p.title)[0]) + '</h1>' + (spSplit(p.title)[1] ? '<p class="sp-sub2">' + esc(spSplit(p.title)[1]) + '</p>' : '') +
+    '<div class="sp-price"><b>' + (isNum(price) ? esc(spMoney(price, p.cur)) : 'מחיר באתר') + '</b>' + (sz && sz.grams ? '<small>' + sz.grams + ' g' + (per100 ? ' · ' + spMoney(per100, p.cur) + ' ל-100 g' : '') + '</small>' : '') + (!p.available ? '<span class="mk-tag off">אזל באתר</span>' : '') + '</div>' +
+    (sizes.length > 1 ? '<div class="sp-opt"><span>גודל</span><div class="chips-row">' + sizes.map((x, i) => '<button type="button" class="tchip' + (i === si ? ' on' : '') + '" data-act="sp-size" data-id="' + esc(p.id) + '" data-v="' + i + '">' + esc(x.label || x.grams + ' g') + (isNum(x.price) ? ' · ' + esc(spMoney(x.price, p.cur)) : '') + '</button>').join('') + '</div></div>' : '') +
+    (det && det.loading ? '<small class="muted">טוען מחירים לפי גודל…</small>' : '') +
+    '<div class="sp-opt"><span>כמות</span><div class="qty"><button type="button" data-act="sp-qty" data-id="' + esc(p.id) + '" data-v="-1" aria-label="פחות">−</button><b>' + qty + '</b><button type="button" data-act="sp-qty" data-id="' + esc(p.id) + '" data-v="1" aria-label="עוד">+</button></div></div>' +
+    '<div class="sp-cta"><button type="button" class="btn pri" data-act="sp-cart-add" data-k="' + esc(p.g.key) + '" data-id="' + esc(p.id) + '">הוספה לרשימת הקנייה</button>' +
+    (quick ? '<a class="btn" href="' + esc(quick) + '" target="_blank" rel="noopener">קנייה מהירה באתר ↗</a>' : '<a class="btn" href="' + esc(p.url) + '" target="_blank" rel="noopener">להזמנה באתר הרשמי ↗</a>') + '</div>' +
+    '<button type="button" class="btn ghost sm" data-act="sp-bought" data-k="' + esc(p.g.key) + '" data-id="' + esc(p.id) + '">✓ קניתי, להוסיף למלאי</button>' +
+    (p.desc ? '<div class="sp-desc">' + esc(p.desc).replace(/\n/g, '<br>') + '</div>' : '') + '</div></div>' + mine + '</div>';
+}
+function spCartHTML() {
+  const items = spCartList(); const gs = shopGroups();
+  if (!items.length) return '<div class="page sp"><button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button><h1>רשימת קנייה</h1><div class="empty"><p>הרשימה ריקה. הוסיפו מוצרים מהחנות.</p></div></div>';
+  const by = {}; items.forEach((it, i) => { (by[it.k] = by[it.k] || []).push(Object.assign({ i }, it)); });
+  return '<div class="page sp"><button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button><h1>רשימת קנייה</h1><p class="muted s">ההזמנה עצמה נעשית באתר הרשמי של כל קלייה. אחרי הקנייה סמנו "קניתי" והשקיות יתווספו למלאי עם המחיר.</p>' +
+    Object.keys(by).map((k) => {
+      const g = gs.find((x) => x.key === k); const cat = SHOP.cats[k] || {}; const its = by[k]; const tot = sum(its.map((x) => (x.price || 0) * (x.qty || 1))); const cur = (its[0] && its[0].cur) || cat.currency;
+      const quick = cat.platform === 'shopify' && its.every((x) => x.variantId) ? cat.site + '/cart/' + its.map((x) => x.variantId + ':' + (x.qty || 1)).join(',') : '';
+      return '<section class="sp-co"><div class="sp-h"><h2>' + esc(g ? g.name : k) + '</h2><small>' + its.length + ' מוצרים</small></div>' + its.map((x) => '<div class="sp-li">' + (x.img ? '<img alt="" src="' + esc(x.img) + '">' : '<span></span>') + '<div class="grow"><b>' + esc(x.title) + '</b><small>' + esc([x.size, isNum(x.price) ? spMoney(x.price, x.cur) : ''].filter(Boolean).join(' · ')) + '</small><a href="' + esc(x.url) + '" target="_blank" rel="noopener">פתיחה באתר ↗</a></div><div class="qty"><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="-1" aria-label="פחות">−</button><b>' + (x.qty || 1) + '</b><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="1" aria-label="עוד">+</button></div></div>').join('') +
+        '<div class="sp-tot"><span>סה״כ משוער</span><b>' + esc(spMoney(tot, cur)) + '</b></div><div class="sp-cta">' + (quick ? '<a class="btn pri" href="' + esc(quick) + '" target="_blank" rel="noopener">מעבר לקופה ב-' + esc(g ? g.name : '') + ' ↗</a>' : '<a class="btn pri" href="' + esc(its[0].url) + '" target="_blank" rel="noopener">להזמנה באתר ' + esc(g ? g.name : '') + ' ↗</a>') + '<button type="button" class="btn" data-act="sp-bought-all" data-k="' + esc(k) + '">✓ קניתי הכל</button></div></section>';
+    }).join('') + '</div>';
+}
+RENDER.shop = function () { return SHOP.page === 'product' ? spProductHTML() : SHOP.page === 'cart' ? spCartHTML() : spStoreHTML(); };
+AFTER.shop = () => shopAuto();
+AFTER.beans = (function (prev) { return function () { if (prev) prev.apply(this, arguments); shopAuto(); }; })(AFTER.beans);
+const spTop = () => { const m = $('.main'); if (m) m.scrollTop = 0; window.scrollTo(0, 0); };
+ON['sp-q'] = (v) => { SHOP.q = v; const h = $('#sp_grid'); if (h) h.innerHTML = spGridHTML(allProducts()); };
+ACT['sp-store'] = (d) => { SHOP.store = d.v; render(); };
+ACT['sp-cat'] = (d) => { SHOP.cat = d.v; render(); };
+ACT['sp-open'] = (d) => { SHOP.page = 'product'; SHOP.k = d.k; SHOP.pid = d.id; if (UI.view !== 'shop') UI.view = 'shop'; render(); spTop(); };
+ACT['sp-back'] = () => { SHOP.page = 'store'; render(); spTop(); };
+ACT['sp-cart'] = () => { SHOP.page = 'cart'; render(); spTop(); };
+ACT['sp-size'] = (d) => { SHOP.size[d.id] = +d.v; render(); };
+ACT['sp-qty'] = (d) => { SHOP.qty[d.id] = clamp((SHOP.qty[d.id] || 1) + (+d.v), 1, 20); render(); };
+ACT['sp-bean'] = (d) => { UI.bean.id = d.id; UI.tab.bean = 'overview'; go('beans'); };
+ACT['market-open'] = () => { SHOP.page = 'store'; go('shop'); };
+function spItem(p) { const sizes = sizesOf(p); const sz = sizes[Math.min(SHOP.size[p.id] || 0, Math.max(0, sizes.length - 1))]; return { k: p.g.key, id: p.id, title: p.title, size: sz ? (sz.label || sz.grams + ' g') : '', grams: (sz && sz.grams) || null, price: sz && isNum(sz.price) ? sz.price : p.price, cur: p.cur, qty: SHOP.qty[p.id] || 1, img: p.thumb || p.image || '', url: p.url, variantId: (sz && sz.variantId) || null, kind: pcat(p) }; }
+ACT['sp-cart-add'] = (d) => {
+  const p = allProducts().find((x) => x.g.key === d.k && x.id === d.id); if (!p) return; const it = spItem(p); const c = spCartList();
+  const ex = c.find((x) => x.k === it.k && x.id === it.id && x.size === it.size); if (ex) ex.qty = (ex.qty || 1) + it.qty; else c.push(it); save(); toast('נוסף לרשימת הקנייה'); render();
 };
-ACT['mk-pick'] = (d) => { MK.roaster = d.v; mkRender(); const r = mkRoasters().find((x) => coKey(x.name) === coKey(d.v)); if (r) mkLoad(r); };
-ACT['mk-add'] = () => {
-  const i = $('#mk_new'); const v = ((i && i.value) || '').trim(); if (!v) return; const pr = prefs(); pr.marketRoasters = pr.marketRoasters || []; let site = '', name = v;
-  try { if (/^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(v)) { const u = new URL(/^https?:/.test(v) ? v : 'https://' + v); site = u.origin; name = u.hostname.replace(/^www\./, '').split('.')[0]; } } catch (e) { /* name only */ }
-  if (!pr.marketRoasters.some((x) => coKey(x.name) === coKey(name))) pr.marketRoasters.push({ name, site }); save(); MK.roaster = name; mkRender(); const r = mkRoasters().find((x) => coKey(x.name) === coKey(name)); if (r) mkLoad(r);
+ACT['sp-cq'] = (d) => { const c = spCartList(); const it = c[+d.i]; if (!it) return; it.qty = (it.qty || 1) + (+d.v); if (it.qty <= 0) c.splice(+d.i, 1); save(); render(); };
+function recordPurchase(it) {
+  if (!/beans|blend|bundle/.test(it.kind || 'beans') || it.kind === 'bundle') return false;
+  const g = groupOf(it.k); let b = state.beans.find((x) => x.shopPid === it.id && (!g || g.beans.includes(x)));
+  if (!b) { b = insert('beans', { name: it.title, roaster: g ? g.name : '', roasterNotes: [], profile: {}, createdAt: nowISO(), productUrl: it.url, site: g ? g.site : '', shopPid: it.id }, 'bean'); try { ensureCompany(b.roaster, 'roaster'); } catch (e) { /* optional */ } const p = allProducts().find((x) => x.g.key === it.k && x.id === it.id); if (p && p.image) adoptSiteImage(b.id, p.image); }
+  for (let i = 0; i < (it.qty || 1); i++) insert('bags', { beanId: b.id, weight: it.grams || 250, price: /^(ILS|NIS)?$/.test(it.cur || '') && isNum(it.price) ? it.price : null, purchaseDate: toDateInput(nowISO()), roastDate: null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: 'נקנה דרך החנות', createdAt: nowISO() }, 'bag');
+  return true;
+}
+ACT['sp-bought'] = (d) => { const p = allProducts().find((x) => x.g.key === d.k && x.id === d.id); if (!p) return; const it = spItem(p); if (!recordPurchase(it)) { toast('זה לא פולי קפה, לא נוסף למלאי'); return; } save(); toast((it.qty || 1) + ' שקיות נוספו למלאי'); render(); };
+ACT['sp-bought-all'] = (d) => { const c = spCartList(); const mine = c.filter((x) => x.k === d.k); let n = 0; mine.forEach((x) => { if (recordPurchase(x)) n += x.qty || 1; }); prefs().cart = c.filter((x) => x.k !== d.k); save(); toast(n ? n + ' שקיות נוספו למלאי' : 'הרשימה נוקתה'); render(); };
+ACT['sp-add-store'] = () => {
+  openModal({ title: 'הוספת חנות', body: '<p class="muted s">שם הקלייה או כתובת האתר שלה. חנויות Shopify ו-WooCommerce נטענות אוטומטית.</p>' + fld('v', 'קלייה או אתר', { v: '' }), actions: [{ label: 'ביטול' }, { label: 'הוספה', cls: 'pri', run: (v) => {
+    const s = (v.v || '').trim(); if (!s) return false; let site = '', name = s;
+    try { if (/^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(s)) { const u = new URL(/^https?:/.test(s) ? s : 'https://' + s); site = u.origin; name = u.hostname.replace(/^www\./, '').split('.')[0]; } } catch (e) { /* name only */ }
+    const pr = prefs(); pr.marketRoasters = (pr.marketRoasters || []).filter((x) => coKey(x.name) !== coKey(name)); pr.marketRoasters.push({ name, site }); save();
+    const g = shopGroups().find((x) => x.names.includes(name)); if (g) { SHOP.store = g.key; shopLoad(g, true); } render();
+  } }] });
 };
 
-ACT['mk-manage'] = (d) => { closeModal(); UI.bean.id = d.id; UI.tab.bean = 'overview'; go('beans'); };
+/* ---------- status dashboard ---------- */
+function freshOf(bag) {
+  const a = roastAgeAt(bag); if (a == null) return { t: 'אין תאריך קלייה', c: 'mute' };
+  if (a < 5) return { t: 'במנוחה · ' + a + ' ימים', c: 'rest' }; if (a <= 30) return { t: 'בשיא · ' + a + ' ימים', c: 'peak' }; if (a <= 50) return { t: 'מתחיל לדעוך · ' + a + ' ימים', c: 'fade' }; return { t: 'ישן · ' + a + ' ימים', c: 'old' };
+}
+function dayKey(d) { const x = new Date(d); return x.getFullYear() + '-' + String(x.getMonth() + 1).padStart(2, '0') + '-' + String(x.getDate()).padStart(2, '0'); }
+function statsData() {
+  const now = Date.now(); const tx = state.transactions.filter((t) => t.type === 'brew' && isNum(t.grams));
+  const days = []; for (let i = 29; i >= 0; i--) { const d = new Date(now - i * DAY); days.push({ k: dayKey(d), d, g: 0 }); }
+  const idx = {}; days.forEach((x, i) => { idx[x.k] = i; }); tx.forEach((t) => { const i = idx[dayKey(t.date)]; if (i != null) days[i].g += t.grams; });
+  const used30 = sum(days.map((x) => x.g)); const first = tx.length ? Math.min(...tx.map((t) => new Date(t.date).getTime())) : null;
+  const span = first ? clamp(Math.ceil((now - first) / DAY) + 1, 7, 30) : 30; const rate = used30 / span;
+  const act = activeBags(); const stock = Math.round(sum(act.map(bagRemaining)));
+  const months = []; for (let i = 5; i >= 0; i--) { const d = new Date(); d.setDate(1); d.setMonth(d.getMonth() - i); months.push({ k: d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0'), lab: d.toLocaleDateString('he-IL', { month: 'short' }), v: 0 }); }
+  state.bags.forEach((b) => { if (!isNum(b.price) || b.price <= 0) return; const k = String(b.purchaseDate || b.createdAt || '').slice(0, 7); const m = months.find((x) => x.k === k); if (m) m.v += b.price; });
+  const spend30 = sum(state.bags.filter((b) => isNum(b.price) && new Date(b.purchaseDate || b.createdAt).getTime() > now - 30 * DAY).map((b) => b.price));
+  const priced = state.bags.filter((b) => isNum(b.price) && b.price > 0 && b.weight > 0); const per100 = priced.length ? sum(priced.map((b) => b.price)) / sum(priced.map((b) => b.weight)) * 100 : null;
+  const rows = dataset(); const wk = rows.filter((r) => r.t > now - 7 * DAY).length; const sc30 = rows.filter((r) => r.t > now - 30 * DAY && isNum(r.overall)).map((r) => r.overall);
+  return { days, rate, used30, stock, act, months, spend30, per100, wk, sc30, rows };
+}
+function statsTips(D) {
+  const tips = []; const prods = allProducts();
+  const byBean = {}; D.act.forEach((g) => { (byBean[g.beanId] = byBean[g.beanId] || []).push(g); });
+  Object.keys(byBean).forEach((id) => {
+    const b = byId('beans', id); if (!b) return; const rem = sum(byBean[id].map(bagRemaining)); const inf = byBean[id].map(bagInfo); const rate = Math.max(0, ...inf.map((x) => x.rate || 0)) || D.rate;
+    const daysLeft = rate > 0 ? Math.round(rem / rate) : null; const p = b.shopPid && prods.find((x) => x.id === b.shopPid);
+    if (rem < 80 || (daysLeft != null && daysLeft <= 5)) tips.push({ ic: '🛍', t: '"' + b.name + '" עומד להיגמר (' + Math.round(rem) + ' g' + (daysLeft != null ? ', כ-' + daysLeft + ' ימים' : '') + '). כדאי להזמין עכשיו כדי שיגיע בזמן.', a: p ? { act: 'sp-open', k: p.g.key, id: p.id, l: 'להזמנה' } : null, w: 3 });
+    byBean[id].forEach((g) => { const a = roastAgeAt(g); if (a != null && a < 4) tips.push({ ic: '⏳', t: '"' + b.name + '" נקלה לפני ' + a + ' ימים. תנו לו לנוח עוד ' + (5 - a) + ' ימים לפני חליטות פילטר, ועד שבועיים לאספרסו.', w: 2 }); else if (a != null && a > 45) tips.push({ ic: '❄️', t: '"' + b.name + '" בן ' + a + ' ימים מהקלייה. סיימו אותו בקרוב או הקפיאו מנות סגורות.', w: 2 }); if (!g.roastDate) tips.push({ ic: '📅', t: 'לשקית של "' + b.name + '" אין תאריך קלייה. הוספה שלו תאפשר מעקב טריות.', a: { act: 'bean-open', id: b.id, l: 'לפולים' }, w: 1 }); });
+    if (p) { const sz = sizesOf(p); const big = sz.filter((x) => isNum(x.price) && x.grams).sort((x, y) => x.price / x.grams - y.price / y.grams)[0]; const small = sz.filter((x) => isNum(x.price) && x.grams).sort((x, y) => x.grams - y.grams)[0]; if (big && small && big !== small) { const save_ = Math.round((1 - (big.price / big.grams) / (small.price / small.grams)) * 100); if (save_ >= 10) tips.push({ ic: '💡', t: 'ב-' + p.g.name + ' חבילת ' + (big.label || big.grams + ' g') + ' של "' + p.title + '" זולה ב-' + save_ + '% ל-100 גרם מהחבילה הקטנה. בקצב הצריכה שלך היא תספיק לכ-' + (D.rate > 0 ? Math.round(big.grams / D.rate) : '?') + ' ימים.', w: 1 }); } }
+  });
+  const unrated = doneSessions().filter((s) => !evalOf(s.id)).length; if (unrated) tips.push({ ic: '⭐', t: unrated + ' חליטות עוד בלי ציון. דירוג שלהן משפר את ההמלצות למתכון הבא.', a: { act: 'nav', v: 'log', l: 'ליומן' }, w: 1 });
+  const best = meanByGroup(D.rows, (r) => r.beanId).filter((x) => x.n >= 2)[0]; if (best) { const b = byId('beans', best.key); const p = b && b.shopPid && prods.find((x) => x.id === b.shopPid); if (b) tips.push({ ic: '🏆', t: 'הכי טעים לך עד עכשיו: "' + b.name + '" (ציון ' + fmtN(best.mean, 1) + ' ב-' + best.n + ' חליטות).', a: p ? { act: 'sp-open', k: p.g.key, id: p.id, l: 'להזמין שוב' } : { act: 'bean-open', id: b.id, l: 'לפולים' }, w: 1 }); }
+  if (!D.wk && D.rows.length) tips.push({ ic: '☕', t: 'לא נרשמו חליטות השבוע. רישום גם של כוס מהירה שומר על תמונת מלאי מדויקת.', w: 0 });
+  if (!D.act.length) tips.push({ ic: '🛍', t: 'אין שקיות פעילות במלאי. סרקו שקית חדשה או הזמינו מהחנות.', a: { act: 'nav', v: 'shop', l: 'לחנות' }, w: 3 });
+  return tips.sort((a, c) => c.w - a.w).slice(0, 8);
+}
+RENDER.stats = function () {
+  const D = statsData(); const daysLeft = D.rate > 0 ? Math.round(D.stock / D.rate) : null;
+  const kpi = (v, l, s, cls) => '<div class="kpi' + (cls ? ' ' + cls : '') + '"><small>' + l + '</small><b>' + v + '</b>' + (s ? '<span>' + s + '</span>' : '') + '</div>';
+  const kpis = '<div class="kpis">' + kpi(D.stock + ' g', 'מלאי בבית', D.act.length + ' שקיות פתוחות וסגורות') + kpi(daysLeft != null ? daysLeft : '—', 'ימים עד שייגמר', D.rate > 0 ? 'בקצב ' + fmtN(D.rate, 0) + ' g ליום' : 'עוד אין מספיק חליטות', daysLeft != null && daysLeft <= 5 ? 'warn' : '') + kpi(spMoney(D.spend30), 'הוצאה ב-30 יום', D.per100 ? 'ממוצע ' + spMoney(D.per100) + ' ל-100 g' : '') + kpi(D.wk, 'חליטות השבוע', D.sc30.length ? 'ציון ממוצע ' + fmtN(mean(D.sc30), 1) : '') + '</div>';
+  const inv = D.act.length ? '<div class="inv">' + D.act.slice().sort((a, c) => bagRemaining(a) - bagRemaining(c)).map((g) => {
+    const b = byId('beans', g.beanId) || { name: '—' }; const rem = Math.round(bagRemaining(g)); const pct = Math.round(clamp(rem / (g.weight || 1), 0, 1) * 100); const f = freshOf(g); const inf = bagInfo(g); const img = photoOf(g.beanId, 'pack');
+    return '<button type="button" class="inv-r" data-act="bean-open" data-id="' + esc(b.id || '') + '" style="--bc:' + esc(b.color || 'var(--accent)') + ';--bc2:' + esc(b.color2 || b.color || 'var(--accent)') + '">' + (img ? '<img alt="" src="' + esc(img) + '">' : '<span class="inv-ph"></span>') + '<span class="inv-b"><span class="inv-t"><b>' + esc(b.name) + '</b><small>' + rem + ' / ' + g.weight + ' g</small></span><span class="inv-bar"><i style="width:' + pct + '%"></i></span><span class="inv-m"><em class="fr ' + f.c + '">' + f.t + '</em>' + (inf.forecastDays != null ? '<small>~' + inf.forecastDays + ' ימים</small>' : '') + (inf.per100 ? '<small>' + spMoney(inf.per100) + '/100 g</small>' : '') + '</span></span></button>';
+  }).join('') + '</div>' : '<div class="empty"><p>אין שקיות במלאי.</p></div>';
+  const cons = columnChart(D.days.map((x, i) => ({ label: i % 5 === 4 || i === 29 ? String(x.d.getDate()) : '', value: x.g, tip: x.d.toLocaleDateString('he-IL') + ' · ' + Math.round(x.g) + ' g' })), { empty: 'אין חליטות' });
+  const spend = D.months.some((m) => m.v) ? columnChart(D.months.map((m) => ({ label: m.lab, value: m.v, tip: m.lab + ' · ' + spMoney(m.v) }))) : emptyChart('הוסיפו מחיר לשקיות כדי לראות הוצאות');
+  const beanPrice = state.beans.map((b) => { const bs = state.bags.filter((g) => g.beanId === b.id && isNum(g.price) && g.price > 0 && g.weight > 0); return bs.length ? { label: b.name, value: sum(bs.map((g) => g.price)) / sum(bs.map((g) => g.weight)) * 100, color: b.color } : null; }).filter(Boolean).sort((a, c) => a.value - c.value);
+  const beanScore = meanByGroup(D.rows, (r) => r.beanId).map((x) => { const b = byId('beans', x.key); return b ? { label: b.name, value: x.mean, n: x.n, color: b.color } : null; }).filter(Boolean);
+  const tips = statsTips(D);
+  const card = (t, body, sub) => '<section class="card st-card"><div class="st-h"><h2>' + t + '</h2>' + (sub ? '<small>' + sub + '</small>' : '') + '</div>' + body + '</section>';
+  return '<div class="page st">' + head('מצב', '<button class="btn" data-act="nav" data-v="shop">' + svgI('shop') + 'חנות</button>') + kpis +
+    (tips.length ? card('טיפים לשיפור', '<div class="st-tips">' + tips.map((t) => '<div class="st-tip"><span class="st-tip-i">' + t.ic + '</span><p>' + esc(t.t) + '</p>' + (t.a ? '<button type="button" class="btn sm" data-act="' + t.a.act + '"' + (t.a.k ? ' data-k="' + esc(t.a.k) + '"' : '') + (t.a.id ? ' data-id="' + esc(t.a.id) + '"' : '') + (t.a.v ? ' data-v="' + esc(t.a.v) + '"' : '') + '>' + t.a.l + '</button>' : '') + '</div>').join('') + '</div>') : '') +
+    card('המלאי בבית', inv, 'כמה נשאר בכל שקית וכמה היא טרייה') +
+    '<div class="st-2">' + card('צריכה יומית', cons, '30 הימים האחרונים · ' + Math.round(D.used30) + ' g') + card('הוצאות על קפה', spend, '6 חודשים') + '</div>' +
+    '<div class="st-2">' + card('מחיר ל-100 g', barList(beanPrice, { fmt: (i) => spMoney(i.value), empty: 'אין מחירים עדיין' }), 'לפי מה ששילמת') + card('ציון לפי פולים', barList(beanScore, { max: 10, empty: 'עוד אין חליטות עם ציון' }), 'ממוצע הציון הכללי') + '</div></div>';
+};
+AFTER.stats = () => shopAuto();
+setTimeout(() => { try { shopAuto(); } catch (e) { console.error(e); } }, 3500);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
