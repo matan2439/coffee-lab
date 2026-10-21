@@ -61,7 +61,7 @@ async function toHebrew(items) {
   return items;
 }
 async function ogImages(items, ms) {
-  const job = Promise.all(items.filter((x) => !x.image).slice(0, 14).map(async (x) => { const h = await get(x.url, ms, true); if (!h) return; const m = h.slice(0, 200000).match(/<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]*>/i); const c = m && (m[0].match(/content=["']([^"']+)["']/i) || [])[1]; if (c) { try { x.image = new URL(ent(c), x.url).href; } catch (e) { /* skip */ } } }));
+  const job = Promise.all(items.filter((x) => !x.image).slice(0, 26).map(async (x) => { const h = await get(x.url, ms, true); if (!h) return; const m = h.slice(0, 200000).match(/<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]*>/i); const c = m && (m[0].match(/content=["']([^"']+)["']/i) || [])[1]; if (c) { try { x.image = new URL(ent(c), x.url).href; } catch (e) { /* skip */ } } }));
   await Promise.race([job, new Promise((r) => setTimeout(r, ms + 500))]); return items;
 }
 module.exports = async (req, res) => {
@@ -71,7 +71,7 @@ module.exports = async (req, res) => {
     const sites = (sp.get('sites') || '').split(',').map((s) => s.trim().toLowerCase()).filter((s) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s)).slice(0, 8).map((h) => 'https://' + h);
     const t0 = Date.now();
     const [posts, items, world] = await Promise.all([Promise.all(sites.map((s) => blog(s).catch(() => []))).then((a) => [].concat(...a)), sp.get('ai') === '0' ? Promise.resolve([]) : digest(q).catch(() => []), rss().then(toHebrew).catch(() => [])]);
-    const left = 52000 - (Date.now() - t0); if (left > 2500) await ogImages(items, Math.min(4000, left - 1500));
+    const left = 52000 - (Date.now() - t0); if (left > 2500) await ogImages(items.concat(world), Math.min(4000, left - 1500));
     send(200, { at: new Date().toISOString(), posts: posts.filter((p) => p.title && p.url), items: items.concat(world) }, true);
   } catch (e) { send(502, { error: 'fail' }); }
 };
