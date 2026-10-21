@@ -3208,6 +3208,67 @@ const _camOpen0 = ACT['cam-open']; ACT['cam-open'] = (...a) => { closeModal(); r
 const _beanAdd0 = ACT['bean-add']; ACT['bean-add'] = (...a) => { closeModal(); return _beanAdd0(...a); };
 
 /* ============================================================
+   Cloud sync (website only): state <-> /api/state, keyed by a personal code
+   ============================================================ */
+const SYNC = { code: '', linked: false, last: '', timer: null, busy: false, status: '', msg: '' };
+try { SYNC.code = localStorage.getItem('cl_sync') || ''; SYNC.linked = localStorage.getItem('cl_sync_ok') === '1'; } catch (e) { /* ignore */ }
+function syncText() { const m = { ok: 'מסונכרן ✓', busy: 'מסנכרן…', err: 'הסנכרון נכשל' + (SYNC.msg ? ' (' + SYNC.msg + ')' : '') + '. הנתונים נשמרים במכשיר.', off: 'לא מחובר' }; return m[SYNC.status || (SYNC.linked ? 'ok' : 'off')]; }
+function syncSet(s, msg) { SYNC.status = s; SYNC.msg = msg || ''; const e = $('#syncst'); if (e) e.textContent = syncText(); }
+async function syncCall(method, body) {
+  const r = await fetch('api/state', { method, headers: { 'x-sync': SYNC.code, 'content-type': 'application/json' }, body });
+  if (!r.ok) { const e = new Error('http ' + r.status); e.status = r.status; throw e; }
+  return r.json();
+}
+async function syncPush() {
+  if (!SYNC.code || !SYNC.linked) return;
+  let copy = state; let json = JSON.stringify(copy);
+  if (json.length > 3900000) { copy = Object.assign({}, state, { photos: [] }); json = JSON.stringify(copy); }
+  syncSet('busy'); await syncCall('PUT', JSON.stringify({ data: json, updatedAt: state.meta.updatedAt })); SYNC.last = state.meta.updatedAt; syncSet('ok');
+}
+function syncAdopt(j) {
+  const photos = state.photos; makeBackup('before-cloud'); const obj = JSON.parse(j.data); state = migrate(obj);
+  if ((!state.photos || !state.photos.length) && photos && photos.length) state.photos = photos;
+  state.meta.updatedAt = j.updatedAt; SYNC.last = j.updatedAt;
+  try { const s = JSON.stringify(state); if (persist.mode === 'local') localStorage.setItem(LS_KEY, s); if (IDB.db) idbPut('state', s); } catch (e) { /* ignore */ }
+  render();
+}
+async function syncPull(force) {
+  if (!SYNC.code || (!SYNC.linked && !force) || SYNC.busy) return; SYNC.busy = true;
+  try {
+    syncSet('busy'); const j = await syncCall('GET');
+    if (j.empty) { SYNC.linked = true; try { localStorage.setItem('cl_sync_ok', '1'); } catch (e) { /* ignore */ } await syncPush(); }
+    else if (force || String(j.updatedAt) > String(state.meta.updatedAt || '')) { SYNC.linked = true; try { localStorage.setItem('cl_sync_ok', '1'); } catch (e) { /* ignore */ } syncAdopt(j); syncSet('ok'); toast('הנתונים נטענו מהענן'); }
+    else if (String(j.updatedAt) < String(state.meta.updatedAt || '')) await syncPush();
+    else syncSet('ok');
+  } catch (e) { syncSet('err', e.status === 503 ? 'השרת לא מוגדר' : e.status === 413 ? 'הנתונים גדולים מדי' : ''); }
+  finally { SYNC.busy = false; }
+}
+function syncSchedule() {
+  if (!SYNC.code || !SYNC.linked) return; clearTimeout(SYNC.timer);
+  SYNC.timer = setTimeout(async () => { if (state.meta.updatedAt === SYNC.last || SYNC.busy) return; SYNC.busy = true; try { await syncPush(); } catch (e) { syncSet('err', e.status === 413 ? 'הנתונים גדולים מדי' : ''); } finally { SYNC.busy = false; } }, 2500);
+}
+listeners.change.push(syncSchedule);
+function genCode() { const a = new Uint8Array(9); crypto.getRandomValues(a); return 'coffee-' + Array.from(a, (x) => 'abcdefghjkmnpqrstuvwxyz23456789'[x % 31]).join(''); }
+ACT['sync-gen'] = () => { const i = $('#sync_code'); if (i) i.value = genCode(); };
+ACT['sync-link'] = async () => {
+  const i = $('#sync_code'); const c = ((i && i.value) || '').trim(); if (c.length < 8) { toast('הקוד קצר מדי (לפחות 8 תווים)'); return; }
+  SYNC.code = c; try { localStorage.setItem('cl_sync', c); } catch (e) { /* ignore */ }
+  const probe = await syncCall('GET').catch((e) => { syncSet('err', e.status === 503 ? 'השרת לא מוגדר' : ''); return null; }); if (!probe) return;
+  if (!probe.empty) { confirmDialog('בענן כבר יש נתונים עם הקוד הזה. לטעון אותם למכשיר? (הנתונים שבמכשיר יישמרו בגיבוי מקומי)', () => { syncPull(true); }, { yes: 'טעינה מהענן' }); return; }
+  SYNC.linked = true; try { localStorage.setItem('cl_sync_ok', '1'); } catch (e) { /* ignore */ } await syncPush().catch(() => syncSet('err')); toast('החיבור לענן הופעל'); render();
+};
+ACT['sync-off'] = () => { SYNC.code = ''; SYNC.linked = false; try { localStorage.removeItem('cl_sync'); localStorage.removeItem('cl_sync_ok'); } catch (e) { /* ignore */ } syncSet('off'); render(); };
+const _afterSet = AFTER.settings;
+AFTER.settings = async function () {
+  await _afterSet(); const el = $('#stor'); if (!el) return;
+  const box = document.createElement('div'); box.className = 'syncbox';
+  box.innerHTML = '<div class="blk-h" style="margin-top:14px">סנכרון בענן</div>' + (SYNC.linked ? '<p class="muted s" style="margin:4px 0">קוד אישי: <b dir="ltr">' + esc(SYNC.code) + '</b><br>הזינו אותו במכשיר אחר כדי לראות אותם פולים ומתכונים.</p><p class="s" id="syncst">' + esc(syncText()) + '</p><div class="row wrap"><button class="btn sm" data-act="sync-now">סנכרון עכשיו</button><button class="btn sm" data-act="sync-off">ניתוק</button></div>' : '<p class="muted s" style="margin:4px 0">שומר את הפולים, המתכונים והחליטות בענן, כדי שלא יאבדו וייראו בכל מכשיר. בחרו קוד אישי (או צרו אחד) והזינו אותו גם במכשירים האחרים.</p><div class="row wrap"><input type="text" id="sync_code" dir="ltr" placeholder="קוד אישי" aria-label="קוד אישי" autocapitalize="off" autocomplete="off" style="max-width:240px" value="' + esc(SYNC.code) + '"><button class="btn sm" data-act="sync-gen">יצירת קוד</button><button class="btn sm pri" data-act="sync-link">חיבור</button></div><p class="s" id="syncst">' + esc(SYNC.status === 'err' ? syncText() : '') + '</p>');
+  el.appendChild(box);
+};
+ACT['sync-now'] = async () => { if (SYNC.busy) return; SYNC.busy = true; try { await syncPush(); toast('סונכרן'); } catch (e) { syncSet('err'); } finally { SYNC.busy = false; } };
+if (location.protocol === 'https:') { setTimeout(() => syncPull(false), 1500); document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') syncPull(false); }); }
+
+/* ============================================================
    MAIN — events, cloud mirror, boot
    ============================================================ */
 document.documentElement.setAttribute('dir', 'rtl'); document.documentElement.setAttribute('lang', 'he');
