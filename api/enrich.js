@@ -12,9 +12,9 @@ async function getPage(u) {
     const r = await fetch(u, { signal: c.signal, redirect: 'follow', headers: { 'user-agent': 'Mozilla/5.0 (compatible; CoffeeLabBot/1.0)', accept: 'text/html,*/*' } });
     if (!r.ok || !/html|text/.test(r.headers.get('content-type') || '')) return null;
     const h = (await r.text()).slice(0, 700000);
-    const ld = (h.match(/<script[^>]+ld\+json[^>]*>[\s\S]*?<\/script>/gi) || []).map((x) => x.replace(/<[^>]+>/g, ' ')).join(' ').slice(0, 3000);
+    const ld = (h.match(/<script[^>]+ld\+json[^>]*>[\s\S]*?<\/script>/gi) || []).map((x) => x.replace(/<[^>]+>/g, ' ')).filter((x) => /"Product"/.test(x)).join(' ').slice(0, 2500) + ' ' + (h.match(/<meta[^>]+(?:property="og:description"|name="description")[^>]*>/gi) || []).map((x) => (x.match(/content="([^"]*)"/i) || [])[1] || '').join(' ');
     const title = ((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '').trim();
-    const text = (ld + ' ' + strip(h)).slice(0, 9000);
+    const text = (title + ' ' + ld + ' ' + strip(h.replace(/<(header|nav|footer|aside|form|dialog)[\s\S]*?<\/\1>/gi, ' '))).slice(0, 12000);
     return text.length > 200 ? { url: u, title, text } : null;
   } catch (e) { return null; } finally { clearTimeout(t); }
 }
@@ -40,7 +40,7 @@ module.exports = async (req, res) => {
     const pages = (await Promise.all(top.map(getPage))).filter(Boolean);
     let out = first;
     if (pages.length) {
-      const p2 = 'The label of a coffee bag showed (JSON): ' + JSON.stringify(known) + '\n\nBelow are web pages. Find the one that is the product page for THIS exact coffee (same roaster, same coffee name/lot) and extract details from it only. If none of the pages is about this coffee, return {} . Reply with ONLY one JSON object ' + SCHEMA + ', null when the page does not state it. sourceUrl must be one of the page URLs below.\n\n' + pages.map((p, i) => '### PAGE ' + (i + 1) + ' ' + p.url + '\nTitle: ' + p.title + '\n' + p.text).join('\n\n');
+      const p2 = 'The label of a coffee bag showed (JSON): ' + JSON.stringify(known) + '\n\nBelow are web pages. Find the one that is the product page for THIS exact coffee (same roaster, same coffee name/lot) and extract details from it only. The label name may be partial (e.g. label 'Finca Tamana' matches a page 'Finca Tamana Variedad Colombia' by the same roaster): choose the best matching page and extract from it. Return {} only if no page is plausibly this coffee. Reply with ONLY one JSON object ' + SCHEMA + ', null when the page does not state it. sourceUrl must be one of the page URLs below.\n\n' + pages.map((p, i) => '### PAGE ' + (i + 1) + ' ' + p.url + '\nTitle: ' + p.title + '\n' + p.text).join('\n\n');
       const j2 = await call({ max_tokens: 1500, messages: [{ role: 'user', content: p2 }] });
       const dbgKeep = out; const raw2 = textOf(j2); const second = jsonOf(raw2); if (known._debug) dbgKeep.dbg = { top, raw2: raw2.slice(0, 700), pages: pages.map((p) => ({ url: p.url, len: p.text.length, head: p.text.slice(0, 250) })) };
       out = Object.assign({}, first, { dbg: dbgKeep.dbg }); Object.keys(second).forEach((k) => { if (second[k] != null && second[k] !== '') out[k] = second[k]; });
