@@ -1092,6 +1092,35 @@ body.froth-on { overflow: hidden; }
 .sp-sub { font-size: 12px; color: var(--muted); line-height: 1.3; overflow-wrap: anywhere; } .sp-sub2 { margin: -6px 0 0; color: var(--muted); font-size: 15px; }
 .st-h { display: grid; gap: 2px; } .st-card { overflow: hidden; } .st-card svg.chart { width: 100%; height: auto; display: block; }
 
+/* ============ v4b ============ */
+.topset { margin-inline-start: auto; width: 40px; height: 40px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); display: grid; place-items: center; cursor: pointer; }
+.topset svg { width: 21px; height: 21px; fill: none; stroke: currentColor; stroke-width: 1.7; } .topset.on { background: var(--ink); color: var(--ink-fg); }
+.sp-mini { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; } .sp-mini .btn { text-decoration: none; }
+.sp-shead { display: grid; gap: 10px; padding: 14px; border-radius: 18px; border: 1px solid var(--line); background: var(--surface); }
+.sp-sh-t { display: flex; justify-content: space-between; gap: 10px; align-items: center; } .sp-sh-t h2 { margin: 0; font-family: var(--f-display); font-size: 20px; } .sp-sh-t small { color: var(--muted); }
+.sp-acct { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; font-size: 13.5px; } .sp-acct .tchip { min-height: 32px; padding: 4px 10px; font-size: 12.5px; }
+.sp-ret { display: grid; gap: 6px; padding: 14px; border-radius: 18px; background: color-mix(in srgb, var(--accent) 16%, var(--surface)); border: 1px solid color-mix(in srgb, var(--accent) 45%, var(--line)); }
+.sp-ret span { font-size: 14px; }
+.sp-card.nomatch { cursor: default; } .sp-card.nomatch .sp-meta { gap: 6px; }
+.sp-pick { display: grid; gap: 8px; max-height: 60vh; overflow-y: auto; }
+.sp-pk { display: grid; grid-template-columns: 56px 1fr; gap: 10px; align-items: center; padding: 8px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); color: var(--fg); font: inherit; text-align: start; cursor: pointer; }
+.sp-pk img, .sp-pk > span:first-child { width: 56px; height: 56px; border-radius: 10px; object-fit: cover; background: #f4efe8; } .sp-pk b { display: block; font-size: 14px; } .sp-pk small { color: var(--muted); }
+.nw { display: grid; gap: 14px; } .nw-sec { display: grid; gap: 10px; } .nw-sec h2 { margin: 6px 0 0; font-family: var(--f-display); font-size: 20px; }
+.nw-list { display: grid; gap: 10px; }
+.nw-card { display: grid; grid-template-columns: 1fr; border: 1px solid var(--line); border-radius: 18px; background: var(--surface); overflow: hidden; text-decoration: none; color: var(--fg); box-shadow: var(--shadow); }
+.nw-card:has(.nw-img) { grid-template-columns: 110px 1fr; }
+.nw-img { display: block; background: #f4efe8; min-height: 100%; } .nw-img img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.nw-b { display: grid; gap: 4px; padding: 12px 14px; min-width: 0; } .nw-b b { font-size: 15.5px; line-height: 1.35; text-wrap: balance; } .nw-s { font-size: 13.5px; line-height: 1.55; color: color-mix(in srgb, var(--fg) 82%, var(--muted)); } .nw-b small { color: var(--accent); font-size: 12px; }
+.nw-k { font-size: 11.5px; font-weight: 700; letter-spacing: .02em; color: var(--muted); display: flex; gap: 6px; align-items: center; } .nw-k i { font-style: normal; }
+.nw-card.k-workshop { border-inline-start: 5px solid #5d8a5a; } .nw-card.k-event { border-inline-start: 5px solid #c0612b; } .nw-card.k-blog, .nw-card.k-release { border-inline-start: 5px solid var(--accent); }
+.nw-load { display: flex; gap: 12px; align-items: center; padding: 18px; border-radius: 18px; background: var(--surface); border: 1px dashed var(--line); color: var(--muted); }
+.nw-load i { width: 22px; height: 22px; border-radius: 50%; border: 3px solid var(--line); border-top-color: var(--accent); animation: nwspin 1s linear infinite; flex: none; }
+@keyframes nwspin { to { transform: rotate(360deg); } }
+.fx { display: grid; gap: 4px; border-inline-start: 5px solid var(--m); } .fx-h { display: flex; gap: 10px; align-items: center; } .fx-h .mdot { width: 10px; height: 10px; border-radius: 99px; background: var(--m); } .fx-h b { font-size: 16px; } .fx-h small { display: block; color: var(--muted); }
+.fx-v { margin: 4px 0 0; font-size: 14px; }
+.fx-save { display: flex; gap: 12px; align-items: center; flex-wrap: wrap; } .fx-save .grow { flex: 1; min-width: 180px; display: grid; } .fx-save small { color: var(--muted); }
+@media (max-width: 480px) { .nw-card:has(.nw-img) { grid-template-columns: 92px 1fr; } }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -2693,7 +2722,7 @@ ACT['bean-open'] = (d) => {
   const bestBy = Object.values(groupBy(rated.filter((r) => r.recipeId), (r) => r.recipeId)).map((rows) => rows.sort((x, y) => y.overall - x.overall)[0]);
   const kv = [['קלייה', b.roaster], ['מקור', [b.originCountry, b.region].filter(Boolean).join(', ')], ['זן', b.variety], ['עיבוד', b.process], ['רמת קלייה', b.roastLevel ? (ROAST_LEVELS.find((x) => x[0] === b.roastLevel) || ['', b.roastLevel])[1] : ''], ['גובה', b.elevation ? b.elevation + ' מ׳' : ''], ['טעמים לפי האריזה', b.roasterNotesText]].filter((x) => x[1]);
   const body = (photoOf(b.id, 'pack') ? '<img class="photo" alt="" src="' + photoOf(b.id, 'pack') + '">' : '') + (kv.length ? '<dl class="kv">' + kv.map((x) => '<dt>' + x[0] + '</dt><dd>' + esc(x[1]) + '</dd>').join('') + '</dl>' : '') +
-    '<div class="blk-h">שקיות</div>' + (bags.length ? '<div class="list">' + bags.map((g) => { const bi = bagInfo(g); const act = activeBags().includes(g); return '<div class="item"><div class="grow"><b class="num">' + fmtN(bi.remaining, 0) + ' / ' + fmtN(g.weight, 0) + ' g</b><small>' + [g.roastDate ? 'נקלה ' + fmtDate(g.roastDate) : '', freshDays(g), isNum(g.price) ? '₪' + fmtN(g.price, 0) : '', act ? '' : 'נגמרה'].filter(Boolean).join(' · ') + '</small></div>' + (act ? '<button class="btn sm ghost" data-act="bag-done" data-id="' + g.id + '">נגמרה</button>' : '') + '</div>'; }).join('') + '</div>' : '<p class="muted">אין שקיות.</p>') +
+    '<div class="blk-h">שקיות</div>' + (bags.length ? '<div class="list">' + bags.map((g) => { const bi = bagInfo(g); const act = activeBags().includes(g); return '<div class="item"><div class="grow"><b class="num">' + fmtN(bi.remaining, 0) + ' / ' + fmtN(g.weight, 0) + ' g</b><small>' + [g.roastDate ? 'נקלה ' + fmtDate(g.roastDate) : '', freshDays(g), isNum(g.price) ? '₪' + fmtN(g.price, 0) : '', act ? '' : 'נגמרה'].filter(Boolean).join(' · ') + '</small></div>' + '<button class="btn sm ghost" data-act="bag-edit" data-id="' + g.id + '">עריכה</button>' + (act ? '<button class="btn sm ghost" data-act="bag-done" data-id="' + g.id + '">נגמרה</button>' : '') + '</div>'; }).join('') + '</div>' : '<p class="muted">אין שקיות.</p>') +
     '<button class="btn sm" style="margin-top:8px" data-act="bag-add" data-bean="' + b.id + '">+ שקית</button>' +
     (bestBy.length ? '<div class="blk-h" style="margin-top:14px">הכי טוב עם הפולים האלה</div><div class="list">' + bestBy.map((r) => '<div class="item"><div class="grow"><b>' + esc((byId('recipes', r.recipeId) || { name: methodHe(r.method) }).name) + '</b><small class="num">' + esc(paramSummary(r.method, r.s.planned.params)) + '</small></div>' + scorePill(r.overall) + '</div>').join('') + '</div>' : '') +
     (ds.length ? '<p class="muted" style="margin-top:10px">' + ds.length + ' חליטות' + (rated.length ? ' · ממוצע ' + fmtN(mean(rated.map((r) => r.overall)), 1) : '') + '</p>' : '');
@@ -2704,7 +2733,21 @@ ACT['bag-done'] = (d) => { patch('bags', d.id, { status: 'finished' }); save(); 
 ACT['bag-add'] = (d) => {
   openModal({ title: 'שקית חדשה', body: '<div class="form-g">' + fld('weight', 'משקל', { type: 'number', u: 'g', v: 250 }) + fld('roastDate', 'תאריך קלייה', { type: 'date' }) + fld('price', 'מחיר', { type: 'number', u: '₪' }) + '</div>', actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
     const errs = {}; if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; if (!showErrors(form, errs)) return false;
-    insert('bags', { beanId: d.bean, weight: v.weight, price: v.price, purchaseDate: toDateInput(), roastDate: v.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag'); save(); toast('השקית נוספה'); render();
+    insert('bags', { beanId: d.bean, weight: v.weight, price: v.price, purchaseDate: toDateInput(nowISO()), roastDate: v.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag'); save(); toast('השקית נוספה'); render(); setTimeout(() => ACT['bean-open']({ id: d.bean }), 0);
+  } }] });
+};
+
+function bagApply(g, o) {
+  const p = { roastDate: o.roastDate || null, price: isNum(o.price) ? o.price : null, weight: isNum(o.weight) && o.weight > 0 ? o.weight : g.weight };
+  if (o.purchaseDate !== undefined) p.purchaseDate = o.purchaseDate || ''; if (o.status) p.status = o.status; if (o.frozen !== undefined) p.frozen = !!o.frozen;
+  patch('bags', g.id, p);
+  if (isNum(o.remaining)) { const want = clamp(o.remaining, 0, p.weight); const delta = (p.weight - want) - bagConsumed(g.id); if (Math.abs(delta) > 0.4) state.transactions.push({ id: uid('tx'), bagId: g.id, sessionId: null, type: 'adjust', grams: delta, date: nowISO(), note: 'עדכון ידני' }); if (want > 0.05 && p.status !== 'finished' && g.status === 'finished') patch('bags', g.id, { status: 'active' }); }
+}
+ACT['bag-edit'] = (d) => {
+  const g = byId('bags', d.id); if (!g) return; const rem = Math.round(bagRemaining(g));
+  openModal({ title: 'עריכת שקית', body: '<div class="form-g">' + fld('roastDate', 'תאריך קלייה', { type: 'date', v: g.roastDate || '' }) + fld('purchaseDate', 'תאריך קנייה', { type: 'date', v: g.purchaseDate || toDateInput(g.createdAt) }) + fld('weight', 'משקל השקית', { type: 'number', u: 'g', v: g.weight }) + fld('remaining', 'נשאר בשקית', { type: 'number', u: 'g', v: rem }) + fld('price', 'מחיר', { type: 'number', u: '₪', v: g.price }) + fld('status', 'מצב', { type: 'select', v: g.status || 'active', opts: [['active', 'פעילה'], ['finished', 'נגמרה']] }) + fld('frozen', 'במקפיא', { type: 'check', v: !!g.frozen }) + '</div>', actions: [{ label: 'ביטול', run: () => { setTimeout(() => ACT['bean-open']({ id: g.beanId }), 0); } }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
+    const errs = {}; if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; if (isNum(v.remaining) && (v.remaining < 0 || v.remaining > v.weight)) errs.remaining = 'בין 0 למשקל השקית'; if (!showErrors(form, errs)) return false;
+    bagApply(g, { roastDate: v.roastDate, purchaseDate: v.purchaseDate, weight: v.weight, remaining: v.remaining, price: v.price, status: v.status, frozen: v.frozen }); save(); toast('השקית עודכנה'); render(); setTimeout(() => ACT['bean-open']({ id: g.beanId }), 0);
   } }] });
 };
 
@@ -2716,20 +2759,23 @@ function beanForm(id, pre) {
   const mark = (k) => (scanned && b[k] ? (unsure.has(k) ? ' <span class="unsure">לבדוק</span>' : ' <span class="fromscan">📷</span>') : scanned && !id && MISS.includes(k) ? (pre._src ? ' <span class="nodata">אין נתונים באתר</span>' : ' <span class="nodata">לא זוהה</span>') : '');
   const L = (k, l) => l + mark(k);
   const procs = PROCESSES.slice(); if (b.process && !procs.includes(b.process)) procs.unshift(b.process);
-  const q = encodeURIComponent([b.roaster, b.name, 'coffee'].filter(Boolean).join(' '));
+  const curBag = id ? (activeBags().filter((g) => g.beanId === id).sort((x, y) => (x.createdAt < y.createdAt ? 1 : -1))[0] || state.bags.filter((g) => g.beanId === id).sort((x, y) => (x.createdAt < y.createdAt ? 1 : -1))[0]) : null;
   const body = (pre && pre._note ? '<div class="note warn">' + esc(pre._note) + '</div>' : '') + (pre && pre._thumb ? '<img class="scan-th" alt="" src="' + pre._thumb + '">' : '') + (scanned ? '<div class="note">מולא מהצילום. בדקו את השדות לפני שמירה.' + (pre._src ? ' <a class="srcl" href="' + esc(pre._src) + '" target="_blank" rel="noopener">עמוד המוצר באתר הקלייה ↗</a>' : '') + '</div>' : '') +
     '<div class="form-g">' + fldH('name', L('name', 'שם הקפה'), { v: b.name, cls: 'full' }) + fldH('roaster', L('roaster', 'בית קלייה'), { v: b.roaster, list: 'dl-co' }) + '<datalist id="dl-co">' + state.companies.filter((c) => c.kind !== 'equipment').map((c) => '<option value="' + esc(c.name) + '">').join('') + '</datalist>' +
     fldH('originCountry', L('originCountry', 'מקור'), { v: b.originCountry, list: 'dl-or' }) + '<datalist id="dl-or">' + ORIGINS.map((o) => '<option value="' + o + '">').join('') + '</datalist>' +
     fldH('process', L('process', 'עיבוד'), { type: 'select', v: b.process, opts: procs, blank: '—' }) + fldH('roastLevel', L('roastLevel', 'רמת קלייה'), { type: 'select', v: b.roastLevel, opts: ROAST_LEVELS, blank: '—' }) + '</div>' +
     '<details class="sec"' + (scanned ? ' open' : '') + '><summary>עוד פרטים</summary><div class="form-g">' + fldH('region', L('region', 'אזור'), { v: b.region }) + fldH('variety', L('variety', 'זן'), { v: b.variety }) + fldH('producer', L('producer', 'חווה / מגדל'), { v: b.producer }) + fldH('elevation', L('elevation', 'גובה (מ׳)'), { type: 'number', v: b.elevation }) + fldH('roasterNotesText', L('roasterNotesText', 'טעמים לפי האריזה'), { v: b.roasterNotesText, cls: 'full' }) + '</div></details>' +
-    (!id ? '<div class="qbag"><div class="form-g">' + fld('addBag', 'יש לי שקית עכשיו', { type: 'check', v: true, cls: 'full' }) + fldH('weight', L('weight', 'משקל (g)'), { type: 'number', v: b.weight || 250 }) + fldH('roastDate', L('roastDate', 'תאריך קלייה'), { type: 'date', v: b.roastDate || '' }) + fldH('price', L('price', 'מחיר (₪)'), { type: 'number', v: b.price }) + '</div></div>' : '');
+    (!id ? '<div class="qbag"><div class="form-g">' + fld('addBag', 'יש לי שקית עכשיו', { type: 'check', v: true, cls: 'full' }) + fldH('weight', L('weight', 'משקל (g)'), { type: 'number', v: b.weight || 250 }) + fldH('roastDate', L('roastDate', 'תאריך קלייה'), { type: 'date', v: b.roastDate || '' }) + fldH('price', L('price', 'מחיר (₪)'), { type: 'number', v: b.price }) + '</div></div>' : '') +
+    (id && curBag ? '<div class="qbag"><div class="blk-h">השקית הנוכחית</div><div class="form-g">' + fld('bRoast', 'תאריך קלייה', { type: 'date', v: curBag.roastDate || '' }) + fld('bPrice', 'מחיר', { type: 'number', u: '₪', v: curBag.price }) + fld('bWeight', 'משקל', { type: 'number', u: 'g', v: curBag.weight }) + fld('bRem', 'נשאר בשקית', { type: 'number', u: 'g', v: Math.round(bagRemaining(curBag)) }) + '</div></div>' : '');
   openModal({ title: id ? 'עריכת פולים' : scanned ? 'פולים מהסריקה' : 'פולים חדשים', body, actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
     const errs = {}; needStr(errs, v, 'name', 'יש להזין שם'); numRange(errs, v, 'elevation', 0, 3000, 'גובה'); if (!id && v.addBag) { if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; }
+    if (id && curBag) { if (v.bRoast && new Date(v.bRoast) > new Date(Date.now() + DAY)) errs.bRoast = 'בעתיד'; if (v.bWeight != null && v.bWeight <= 0) errs.bWeight = 'משקל חיובי'; if (v.bRem != null && (v.bRem < 0 || v.bRem > (v.bWeight || curBag.weight))) errs.bRem = 'בין 0 למשקל השקית'; }
     if (!showErrors(form, errs)) return false;
+    if (id && curBag) bagApply(curBag, { roastDate: v.bRoast || null, price: v.bPrice, weight: v.bWeight || curBag.weight, remaining: v.bRem });
     const rec = { name: v.name, roaster: v.roaster,  originCountry: v.originCountry, process: v.process, roastLevel: v.roastLevel, region: v.region, variety: v.variety, producer: v.producer, elevation: v.elevation, roasterNotesText: v.roasterNotesText };
     if (pre && pre._src) rec.productUrl = pre._src; if (pre && pre.site) rec.site = pre.site; if (pre && pre._list) rec.listPrice = Object.assign({}, pre._list, pre.weight ? { weight: pre.weight } : {}); if (pre && pre._harvest) rec.harvest = pre._harvest;
     ensureCompany(v.roaster, 'roaster');
-    let bean; if (id) bean = patch('beans', id, rec); else { bean = insert('beans', Object.assign({ roasterNotes: [], profile: {}, createdAt: nowISO() }, rec), 'bean'); if (v.addBag) insert('bags', { beanId: bean.id, weight: v.weight, price: v.price, purchaseDate: toDateInput(), roastDate: v.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag'); }
+    let bean; if (id) bean = patch('beans', id, rec); else { bean = insert('beans', Object.assign({ roasterNotes: [], profile: {}, createdAt: nowISO() }, rec), 'bean'); if (v.addBag) insert('bags', { beanId: bean.id, weight: v.weight, price: v.price, purchaseDate: toDateInput(nowISO()), roastDate: v.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag'); }
     if (pre && pre._thumb) { colorFrom(pre._thumb).then((c) => { if (c) { patch('beans', bean.id, { color: c.c1, color2: c.c2 }); save(); render(); } }); }
     if (pre && pre._thumb) { state.photos = state.photos.filter((p) => !(p.beanId === bean.id && p.kind === 'pack')); state.photos.push({ id: uid('ph'), beanId: bean.id, kind: 'pack', data: pre._thumb }); }
     if (pre && pre._img) adoptSiteImage(bean.id, pre._img);
@@ -3470,19 +3516,27 @@ const spMoney = (a, c) => mkMoney(a, c || 'ILS');
 
 /* ---------- stores = roasters grouped by web site / name ---------- */
 function shopGroups() {
-  const gs = [];
-  const add = (name, site, bean) => {
+  const gs = []; const hidden = (prefs().shopHidden) || [];
+  const add = (name, site, bean, src, il) => {
     const h = spHost(site), t = spToks(name);
-    let g = gs.find((x) => (h && x.host === h) || t.some((w) => x.toks.has(w)));
-    if (!g) { g = { host: h, site: site || '', names: [], toks: new Set(), beans: [] }; gs.push(g); }
+    let g = gs.find((x) => (h && x.host === h) || (!(h && x.host) && t.some((w) => x.toks.has(w))));
+    if (!g) { g = { host: h, site: site || '', names: [], toks: new Set(), beans: [], src, il: !!il }; gs.push(g); }
     if (!g.site && site) { g.site = site; g.host = h; }
+    if (src !== 'def') g.mine = true; if (il) g.il = true; if (src === 'def' && !g.defName) g.defName = name;
     if (name && !g.names.includes(name)) g.names.push(name); t.forEach((w) => g.toks.add(w)); if (bean) g.beans.push(bean);
   };
-  state.beans.forEach((b) => { if ((b.roaster || '').trim() || b.site) add((b.roaster || '').trim(), b.site || '', b); });
-  ((prefs().marketRoasters) || []).forEach((x) => add(x.name, x.site || '', null));
-  gs.forEach((g) => { g.key = g.host || ('n:' + Array.from(g.toks).sort().join('-')); g.name = g.names.find((n) => /[a-z]/i.test(n) && /[֐-׿]/.test(n)) || g.names[0] || g.host; });
-  return gs;
+  state.beans.forEach((b) => { if ((b.roaster || '').trim() || b.site) add((b.roaster || '').trim(), b.site || '', b, 'bean'); });
+  ((prefs().marketRoasters) || []).forEach((x) => add(x.name, x.site || '', null, 'pref'));
+  SHOP_DEFAULT.forEach((x) => { if (!hidden.includes(spHost(x.site))) add(x.name, x.site, null, 'def', x.il); });
+  gs.forEach((g) => { g.key = g.host || ('n:' + Array.from(g.toks).sort().join('-')); if (/\.il$/.test(g.host)) g.il = true; g.name = (!g.mine && g.defName) || g.names.find((n) => /[a-z]/i.test(n) && /[֐-׿]/.test(n)) || g.defName || g.names[0] || g.host; });
+  return gs.sort((a, c) => (c.mine ? 1 : 0) - (a.mine ? 1 : 0) || (c.il ? 1 : 0) - (a.il ? 1 : 0));
 }
+const SHOP_DEFAULT = [
+  { name: 'Nahat (נחת)', site: 'https://www.nahatcoffee.com', il: true }, { name: 'יוניקו Unicoffee', site: 'https://unicoffee.co.il', il: true }, { name: 'Ruth Coffee רות', site: 'https://ruthcoffee.co.il', il: true },
+  { name: 'מינוטו Minuto', site: 'https://minuto.co.il', il: true }, { name: 'צ׳ופצ׳יק Chupchik', site: 'https://chupchik.co.il', il: true }, { name: 'קפליקס Cafelix', site: 'https://cafelix.co.il', il: true },
+  { name: 'Tim Wendelboe', site: 'https://timwendelboe.no' }, { name: 'Coffee Collective', site: 'https://coffeecollective.dk' }, { name: 'La Cabra', site: 'https://lacabra.dk' },
+  { name: 'Onyx Coffee Lab', site: 'https://onyxcoffeelab.com' }, { name: 'DAK Coffee Roasters', site: 'https://www.dakcoffeeroasters.com' }
+];
 const groupOf = (k) => shopGroups().find((g) => g.key === k);
 function allProducts() {
   const out = []; shopGroups().forEach((g) => { const c = SHOP.cats[g.key]; ((c && c.products) || []).forEach((p) => { if (!SHOP_JUNK.test(p.title)) out.push(Object.assign({ g, cur: p.currency || c.currency || '' }, p)); }); }); return out;
@@ -3491,9 +3545,10 @@ function ownerOf(p) { return p.g.beans.find((b) => b.shopPid === p.id) || null; 
 function beanStock(b) { const act = state.bags.filter((g) => g.beanId === b.id && activeBags().includes(g)); return { rem: Math.round(sum(act.map(bagRemaining))), n: act.length }; }
 function pcat(p) {
   const s = (p.title + ' ' + (p.cats || []).join(' ') + ' ' + (p.slug || '')).toLowerCase();
+  if (/סדנ|workshop|course|קורס|cupping|קאפינג|\bclass\b|masterclass|שיעור|הדרכ|אירוע|ערב טעימות|barista training/.test(s)) return 'workshop';
   if (/gift|מתנה|bundle|מארז|trio|שלישיי|variety|subscription|מנוי/.test(s)) return 'bundle';
-  if (/cold ?brew|קרה|matcha|מאצ|\btea\b|\bתה\b|concentrate|תרכיז|capsule|קפסול|drip ?bag/.test(s)) return 'drinks';
-  if (/grinder|מטחנ|\bcups?\b|כוס|mug|ספל|kettle|קומקום|dripper|filter paper|פילטר נייר|מסנני|scale|accessor|אביזר|fellow|acme|huskee|equipment|ציוד|brewer|carafe|קנקן|t-?shirt|merch/.test(s)) return 'gear';
+  if (/cold ?brew|קרה|matcha|מאצ|\btea\b|\bתה\b|concentrate|תרכיז|capsule|קפסול|drip ?bag|\brtd\b|ready to drink/.test(s)) return 'drinks';
+  if (/grinder|מטחנ|\bcups?\b|כוס|mug|ספל|kettle|קומקום|dripper|filter paper|פילטר נייר|מסנני|scale|accessor|אביזר|fellow|acme|huskee|equipment|ציוד|brewer|carafe|קנקן|t-?shirt|merch|ממברנה|osmosis|אוסמוזה|water filter|פילטר לריכוך|bialetti|ביאלטי|hario|v60 |french press|פרנץ|מקינטה/.test(s)) return 'gear';
   if (/blend|תערובת|בלנד/.test(s)) return 'blend';
   return 'beans';
 }
@@ -3559,6 +3614,12 @@ async function shopDetails(p) {
   try { const j = await (await fetch('api/market?site=' + encodeURIComponent(cat.site) + '&ids=' + encodeURIComponent(p.id))).json(); SHOP.det[key] = (j && j.details && j.details[p.id]) || {}; } catch (e) { SHOP.det[key] = {}; }
   if (UI.view === 'shop' && SHOP.page === 'product') render();
 }
+function spBuyUrl(p, sz, qty) {
+  const cat = SHOP.cats[p.g.key] || {}; qty = qty || 1; const sep = p.url.includes('?') ? '&' : '?';
+  if (cat.platform === 'shopify' && sz && sz.variantId) return cat.site + '/cart/' + sz.variantId + ':' + qty;
+  if (cat.platform === 'woocommerce') { if (!p.variable) return p.url + sep + 'add-to-cart=' + encodeURIComponent(p.id) + '&quantity=' + qty; if (sz && sz.variantId) return p.url + sep + 'add-to-cart=' + encodeURIComponent(p.id) + '&variation_id=' + encodeURIComponent(sz.variantId) + '&quantity=' + qty + (sz.params || []).map((x) => { const k = String(x[0]).replace(/^attribute_/, ''); const kk = /^[a-z0-9_-]+$/.test(k) ? k : encodeURIComponent(encodeURIComponent(k).toLowerCase()); return '&attribute_' + kk + '=' + encodeURIComponent(x[1]); }).join(''); }
+  return p.url;
+}
 function sizesOf(p) { const d = SHOP.det[p.g.key + '|' + p.id]; const s = d && d.sizes && d.sizes.length ? d.sizes : (p.sizes || []); return s.filter((x) => x.label || x.grams); }
 function priceLabel(p) { if (!isNum(p.price)) return '<small class="muted">מחיר באתר</small>'; return (isNum(p.priceMax) && p.priceMax > p.price ? '<small>החל מ-</small>' : '') + '<b>' + esc(spMoney(p.price, p.cur)) + '</b>'; }
 
@@ -3582,24 +3643,46 @@ function spReorder(prods) {
       '<span class="sp-ro-b"><b>' + esc(x.p.title) + '</b><span class="sp-pr">' + priceLabel(x.p) + '</span><span class="stk"><i style="width:' + pct + '%"></i></span><small>' + (x.st.rem > 0 ? 'נשארו ' + x.st.rem + ' g' : 'אין בבית') + (low ? ' · כדאי להזמין' : '') + '</small></span></button>';
   }).join('') + '</div></section>';
 }
+function spInStore(p) { return !SHOP.store || (SHOP.store === '@mine' ? p.g.mine : SHOP.store === '@il' ? p.g.il : p.g.key === SHOP.store); }
+function spUnmatched() { const out = []; shopGroups().forEach((g) => { if (SHOP.store && !(SHOP.store === '@mine' ? g.mine : SHOP.store === '@il' ? g.il : g.key === SHOP.store)) return; const c = SHOP.cats[g.key]; g.beans.forEach((b) => { if (!(b.shopPid && c && (c.products || []).some((p) => p.id === b.shopPid))) out.push({ b, g }); }); }); return out; }
+function spBeanCard(x) {
+  const b = x.b; const st = beanStock(b); const img = photoOf(b.id, 'pack'); const site = x.g.site || (SHOP.cats[x.g.key] || {}).site || '';
+  return '<div class="sp-card own nomatch" style="--bc:' + esc(b.color || 'var(--accent)') + ';--bc2:' + esc(b.color2 || b.color || 'var(--accent)') + '">' +
+    '<span class="sp-img">' + (img ? '<img alt="" loading="lazy" src="' + esc(img) + '">' : '<i>☕</i>') + '<em class="sp-badge own">' + (st.rem > 0 ? 'בבית · ' + st.rem + ' g' : 'נגמר בבית') + '</em>' + (b.siteImageApprox ? '<em class="sp-badge out">תמונה מייצגת</em>' : '') + '</span>' +
+    '<span class="sp-meta"><small>' + esc(x.g.name) + '</small><span class="sp-t">' + esc(b.name) + '</span><span class="sp-sub">לא נמצא בקטלוג הנוכחי של האתר</span>' +
+    '<span class="sp-mini"><button type="button" class="btn sm" data-act="sp-link" data-id="' + esc(b.id) + '" data-k="' + esc(x.g.key) + '">קישור למוצר</button>' + (b.productUrl || site ? '<a class="btn sm ghost" data-out="' + esc(x.g.key) + '" href="' + esc(b.productUrl || site) + '" target="_blank" rel="noopener">לאתר ↗</a>' : '') + '</span></span></div>';
+}
 function spGridHTML(prods) {
-  const q = spNorm(SHOP.q); let list = prods.filter((p) => (!SHOP.store || p.g.key === SHOP.store));
+  const q = spNorm(SHOP.q); let list = prods.filter((p) => spInStore(p) && pcat(p) !== 'workshop');
   if (SHOP.cat === 'mine') list = list.filter((p) => ownerOf(p)); else if (SHOP.cat !== 'all') list = list.filter((p) => pcat(p) === SHOP.cat);
-  if (q) { const SYN = { 'קולד': 'cold', 'ברו': 'brew', 'בלנד': 'תערובת', blend: 'תערובת', 'אספרסו': 'espresso', 'מאצה': 'matcha', 'מאצ׳ה': 'matcha', 'מטחנה': 'מטחנת', 'grinder': 'מטחנת' }; const alt = q.split(' ').map((w) => SYN[w] || w).join(' '); list = list.filter((p) => { const t = spNorm(p.title + ' ' + (p.cats || []).join(' ') + ' ' + p.g.name + ' ' + (p.desc || '').slice(0, 200)); return t.includes(q) || t.includes(alt); }); }
-  list.sort((a, c) => (c.available - a.available) || ((ownerOf(c) ? 1 : 0) - (ownerOf(a) ? 1 : 0)) || ((/beans|blend/.test(pcat(c)) ? 1 : 0) - (/beans|blend/.test(pcat(a)) ? 1 : 0)));
-  if (!list.length) return '<p class="muted sp-empty">' + (prods.length ? 'אין מוצרים שמתאימים לסינון.' : 'הקטלוגים נטענים מהאתרים הרשמיים…') + '</p>';
-  return '<div class="sp-grid">' + list.slice(0, 120).map(spCard).join('') + '</div>';
+  if (q) { const SYN = { 'קולד': 'cold', 'ברו': 'brew', 'בלנד': 'תערובת', blend: 'תערובת', 'אספרסו': 'espresso', 'מאצה': 'matcha', 'מאצ׳ה': 'matcha', 'מטחנה': 'מטחנת', grinder: 'מטחנת' }; const alt = q.split(' ').map((w) => SYN[w] || w).join(' '); list = list.filter((p) => { const t = spNorm(p.title + ' ' + (p.cats || []).join(' ') + ' ' + p.g.name); return t.includes(q) || t.includes(alt); }); }
+  const rank = (p) => (ownerOf(p) ? 8 : 0) + (p.g.mine ? 4 : 0) + (p.g.il ? 2 : 0) + (/beans|blend/.test(pcat(p)) ? 1 : 0);
+  list.sort((a, c) => (c.available - a.available) || rank(c) - rank(a));
+  const extra = (SHOP.cat === 'mine' || SHOP.cat === 'all') && !q ? spUnmatched() : [];
+  if (!list.length && !extra.length) return '<p class="muted sp-empty">' + (prods.length ? 'אין מוצרים שמתאימים לסינון.' : 'הקטלוגים נטענים מהאתרים הרשמיים…') + '</p>';
+  const mineFirst = SHOP.cat === 'mine' ? extra.map(spBeanCard).join('') : '';
+  return '<div class="sp-grid">' + mineFirst + list.slice(0, 160).map(spCard).join('') + (SHOP.cat === 'all' ? extra.map(spBeanCard).join('') : '') + '</div>';
+}
+function spAcct(k) { const pr = prefs(); pr.shopAccounts = pr.shopAccounts || {}; return pr.shopAccounts[k] || {}; }
+function spLinks(g) { const c = SHOP.cats[g.key] || {}; const site = c.site || g.site || ''; if (!site) return {}; const shp = c.platform === 'shopify'; return { site, account: site + (shp ? '/account' : '/my-account/'), cart: site + (shp ? '/cart' : '/cart/') }; }
+function spStoreHead(g) {
+  const c = SHOP.cats[g.key] || {}; const a = spAcct(g.key); const L = spLinks(g); const n = (c.products || []).filter((p) => !SHOP_JUNK.test(p.title)).length;
+  return '<section class="sp-shead"><div class="sp-sh-t"><div><h2>' + esc(g.name) + '</h2><small>' + (n ? n + ' מוצרים · ' : '') + ({ shopify: 'Shopify', woocommerce: 'WooCommerce' }[c.platform] || 'קטלוג ידני') + (c.currency ? ' · ' + esc(c.currency) : '') + '</small></div>' + (L.site ? '<a class="btn sm" data-out="' + esc(g.key) + '" href="' + esc(L.site) + '" target="_blank" rel="noopener">לאתר ↗</a>' : '') + '</div>' +
+    '<div class="sp-acct">' + (a.email ? '<span>👤 ' + esc(a.email) + '</span>' : '<span class="muted">לא שמרת עדיין פרטי חשבון לחנות הזו</span>') + (a.grind ? '<span>טחינה: ' + esc(a.grind) + '</span>' : '') + (a.coupon ? '<button type="button" class="tchip" data-act="sp-copy" data-v="' + esc(a.coupon) + '">קופון ' + esc(a.coupon) + ' · העתקה</button>' : '') + '</div>' +
+    '<div class="sp-mini">' + '<button type="button" class="btn sm" data-act="sp-account" data-k="' + esc(g.key) + '">' + (a.email ? 'עריכת החשבון' : 'שמירת החשבון שלי') + '</button>' + (L.account ? '<a class="btn sm ghost" data-out="' + esc(g.key) + '" href="' + esc(L.account) + '" target="_blank" rel="noopener">החשבון באתר ↗</a><a class="btn sm ghost" data-out="' + esc(g.key) + '" href="' + esc(L.cart) + '" target="_blank" rel="noopener">הסל באתר ↗</a>' : '') + (!g.mine ? '<button type="button" class="btn sm ghost" data-act="sp-hide" data-k="' + esc(g.key) + '">הסתרת החנות</button>' : '') + '</div></section>';
 }
 function spStoreHTML() {
   const gs = shopGroups(); const prods = allProducts(); const n = sum(spCartList().map((x) => x.qty || 1)); const loading = gs.some((g) => SHOP.busy[g.key]);
-  const stores = '<div class="chips-row sp-stores"><button type="button" class="tchip' + (!SHOP.store ? ' on' : '') + '" data-act="sp-store" data-v="">כל החנויות</button>' + gs.map((g) => { const c = SHOP.cats[g.key]; return '<button type="button" class="tchip' + (SHOP.store === g.key ? ' on' : '') + '" data-act="sp-store" data-v="' + esc(g.key) + '">' + esc(g.name) + (c && c.products ? ' · ' + c.products.filter((p) => !SHOP_JUNK.test(p.title)).length : SHOP.busy[g.key] ? ' …' : '') + '</button>'; }).join('') + '<button type="button" class="tchip add" data-act="sp-add-store">+ חנות</button></div>';
+  const chip = (v, label) => '<button type="button" class="tchip' + (SHOP.store === v ? ' on' : '') + '" data-act="sp-store" data-v="' + esc(v) + '">' + label + '</button>';
+  const stores = '<div class="chips-row sp-stores">' + chip('', 'כל החנויות') + chip('@mine', 'החנויות שלי') + chip('@il', 'ישראל 🇮🇱') + gs.map((g) => { const c = SHOP.cats[g.key]; return chip(g.key, esc(g.name) + (c && c.products && c.products.length ? ' · ' + c.products.filter((p) => !SHOP_JUNK.test(p.title)).length : SHOP.busy[g.key] ? ' …' : '')); }).join('') + '<button type="button" class="tchip add" data-act="sp-add-store">+ חנות</button></div>';
   const cats = '<div class="chips-row sp-cats">' + SHOP_CATS.map((c) => '<button type="button" class="tchip' + (SHOP.cat === c[0] ? ' on' : '') + '" data-act="sp-cat" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
-  const noCat = gs.filter((g) => { const c = SHOP.cats[g.key]; return c && !SHOP.busy[g.key] && !(c.products || []).length; });
-  return '<div class="page sp">' + '<div class="sp-top"><div><h1>חנות</h1><small class="muted">קטלוגים מהאתרים הרשמיים של הקליות שלך' + (loading ? ' · מתעדכן…' : '') + '</small></div><button type="button" class="sp-cartb" data-act="sp-cart" aria-label="רשימת קנייה">' + svgI('shop') + (n ? '<em>' + n + '</em>' : '') + '</button></div>' +
+  const one = SHOP.store && SHOP.store[0] !== '@' ? gs.find((g) => g.key === SHOP.store) : null;
+  const noCat = gs.filter((g) => { const c = SHOP.cats[g.key]; return c && !SHOP.busy[g.key] && !(c.products || []).length && (!SHOP.store || g === one); });
+  return '<div class="page sp">' + '<div class="sp-top"><div><h1>חנות</h1><small class="muted">' + gs.length + ' חנויות רשמיות' + (loading ? ' · מתעדכן…' : '') + '</small></div><button type="button" class="sp-cartb" data-act="sp-cart" aria-label="רשימת קנייה">' + svgI('shop') + (n ? '<em>' + n + '</em>' : '') + '</button></div>' +
+    spReturnBanner() +
     '<label class="sp-search">' + '<svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="11" cy="11" r="6.5"/><path d="M16 16l4.5 4.5"/></svg>' + '<input type="search" data-on="sp-q" placeholder="חיפוש: בלנד, אתיופיה, קולד ברו…" value="' + esc(SHOP.q) + '" aria-label="חיפוש מוצרים"></label>' +
-    stores + (SHOP.cat === 'all' && !SHOP.q ? spReorder(prods.filter((p) => !SHOP.store || p.g.key === SHOP.store)) : '') + cats + '<div id="sp_grid">' + spGridHTML(prods) + '</div>' +
-    (noCat.length ? '<p class="muted s sp-note">' + noCat.map((g) => esc(g.name)).join(', ') + ': האתר לא חושף קטלוג אוטומטי. ' + noCat.map((g) => (SHOP.cats[g.key].site ? '<a href="' + esc(SHOP.cats[g.key].site) + '" target="_blank" rel="noopener">לאתר ' + esc(g.name) + ' ↗</a>' : '')).join(' ') + '</p>' : '') +
-    (!gs.length ? '<div class="empty"><p>עוד אין קליות בספרייה. סרקו שקית או הוסיפו חנות.</p></div>' : '') + '</div>';
+    stores + (one ? spStoreHead(one) : '') + (SHOP.cat === 'all' && !SHOP.q ? spReorder(prods.filter(spInStore)) : '') + cats + '<div id="sp_grid">' + spGridHTML(prods) + '</div>' +
+    (noCat.length ? '<p class="muted s sp-note">' + noCat.map((g) => esc(g.name)).join(', ') + ': האתר לא חושף קטלוג אוטומטי, אפשר להזמין ישירות באתר. ' + noCat.map((g) => (SHOP.cats[g.key].site ? '<a data-out="' + esc(g.key) + '" href="' + esc(SHOP.cats[g.key].site) + '" target="_blank" rel="noopener">לאתר ' + esc(g.name) + ' ↗</a>' : '')).join(' ') + '</p>' : '') + '</div>';
 }
 function spProductHTML() {
   const p = allProducts().find((x) => x.g.key === SHOP.k && x.id === SHOP.pid); if (!p) { SHOP.page = 'store'; return spStoreHTML(); }
@@ -3619,13 +3702,14 @@ function spProductHTML() {
   }
   return '<div class="page sp sp-pp">' + '<button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button>' +
     '<div class="sp-pp-grid"><div class="sp-gal' + (own && own.color ? ' tinted' : '') + '"' + (own && own.color ? ' style="--bc:' + esc(own.color) + ';--bc2:' + esc(own.color2 || own.color) + '"' : '') + '>' + (imgs.length ? imgs.map((u) => '<img alt="" src="' + esc(u) + '">').join('') : '<i>☕</i>') + '</div>' +
-    '<div class="sp-info"><a class="sp-store" href="' + esc(cat.site || '#') + '" target="_blank" rel="noopener">' + esc(p.g.name) + ' ↗</a><h1>' + esc(spSplit(p.title)[0]) + '</h1>' + (spSplit(p.title)[1] ? '<p class="sp-sub2">' + esc(spSplit(p.title)[1]) + '</p>' : '') +
+    '<div class="sp-info"><a class="sp-store" data-out="' + esc(p.g.key) + '" href="' + esc(cat.site || '#') + '" target="_blank" rel="noopener">' + esc(p.g.name) + ' ↗</a><h1>' + esc(spSplit(p.title)[0]) + '</h1>' + (spSplit(p.title)[1] ? '<p class="sp-sub2">' + esc(spSplit(p.title)[1]) + '</p>' : '') +
     '<div class="sp-price"><b>' + (isNum(price) ? esc(spMoney(price, p.cur)) : 'מחיר באתר') + '</b>' + (sz && sz.grams ? '<small>' + sz.grams + ' g' + (per100 ? ' · ' + spMoney(per100, p.cur) + ' ל-100 g' : '') + '</small>' : '') + (!p.available ? '<span class="mk-tag off">אזל באתר</span>' : '') + '</div>' +
     (sizes.length > 1 ? '<div class="sp-opt"><span>גודל</span><div class="chips-row">' + sizes.map((x, i) => '<button type="button" class="tchip' + (i === si ? ' on' : '') + '" data-act="sp-size" data-id="' + esc(p.id) + '" data-v="' + i + '">' + esc(x.label || x.grams + ' g') + (isNum(x.price) ? ' · ' + esc(spMoney(x.price, p.cur)) : '') + '</button>').join('') + '</div></div>' : '') +
     (det && det.loading ? '<small class="muted">טוען מחירים לפי גודל…</small>' : '') +
     '<div class="sp-opt"><span>כמות</span><div class="qty"><button type="button" data-act="sp-qty" data-id="' + esc(p.id) + '" data-v="-1" aria-label="פחות">−</button><b>' + qty + '</b><button type="button" data-act="sp-qty" data-id="' + esc(p.id) + '" data-v="1" aria-label="עוד">+</button></div></div>' +
     '<div class="sp-cta"><button type="button" class="btn pri" data-act="sp-cart-add" data-k="' + esc(p.g.key) + '" data-id="' + esc(p.id) + '">הוספה לרשימת הקנייה</button>' +
-    (quick ? '<a class="btn" href="' + esc(quick) + '" target="_blank" rel="noopener">קנייה מהירה באתר ↗</a>' : '<a class="btn" href="' + esc(p.url) + '" target="_blank" rel="noopener">להזמנה באתר הרשמי ↗</a>') + '</div>' +
+    '<a class="btn" data-out="' + esc(p.g.key) + '" data-pid="' + esc(p.id) + '" href="' + esc(spBuyUrl(p, sz, qty)) + '" target="_blank" rel="noopener">' + (quick ? 'קנייה מהירה באתר ↗' : cat.platform === 'woocommerce' ? 'הוספה לסל באתר ↗' : 'להזמנה באתר הרשמי ↗') + '</a></div>' +
+    '<div class="sp-mini"><a class="btn sm ghost" data-out="' + esc(p.g.key) + '" data-pid="' + esc(p.id) + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">עמוד המוצר באתר ↗</a>' + (spAcct(p.g.key).grind ? '<small class="muted">הטחינה שלך ב' + esc(p.g.name) + ': ' + esc(spAcct(p.g.key).grind) + '</small>' : '') + '</div>' +
     '<button type="button" class="btn ghost sm" data-act="sp-bought" data-k="' + esc(p.g.key) + '" data-id="' + esc(p.id) + '">✓ קניתי, להוסיף למלאי</button>' +
     (p.desc ? '<div class="sp-desc">' + esc(p.desc).replace(/\n/g, '<br>') + '</div>' : '') + '</div></div>' + mine + '</div>';
 }
@@ -3633,12 +3717,13 @@ function spCartHTML() {
   const items = spCartList(); const gs = shopGroups();
   if (!items.length) return '<div class="page sp"><button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button><h1>רשימת קנייה</h1><div class="empty"><p>הרשימה ריקה. הוסיפו מוצרים מהחנות.</p></div></div>';
   const by = {}; items.forEach((it, i) => { (by[it.k] = by[it.k] || []).push(Object.assign({ i }, it)); });
-  return '<div class="page sp"><button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button><h1>רשימת קנייה</h1><p class="muted s">ההזמנה עצמה נעשית באתר הרשמי של כל קלייה. אחרי הקנייה סמנו "קניתי" והשקיות יתווספו למלאי עם המחיר.</p>' +
+  return '<div class="page sp"><button type="button" class="btn ghost sm sp-back" data-act="sp-back">→ חזרה לחנות</button><h1>רשימת קנייה</h1><p class="muted s">הרשימה נשמרת באפליקציה ובענן, גם כשעוברים לאתרים ובחזרה. בכל מוצר "הוספה לסל באתר" מכניס אותו לסל האמיתי של החנות (הסל שם נשמר בדפדפן שלך). אחרי ההזמנה סמנו "קניתי" והשקיות יתווספו למלאי עם המחיר.</p>' +
     Object.keys(by).map((k) => {
       const g = gs.find((x) => x.key === k); const cat = SHOP.cats[k] || {}; const its = by[k]; const tot = sum(its.map((x) => (x.price || 0) * (x.qty || 1))); const cur = (its[0] && its[0].cur) || cat.currency;
       const quick = cat.platform === 'shopify' && its.every((x) => x.variantId) ? cat.site + '/cart/' + its.map((x) => x.variantId + ':' + (x.qty || 1)).join(',') : '';
-      return '<section class="sp-co"><div class="sp-h"><h2>' + esc(g ? g.name : k) + '</h2><small>' + its.length + ' מוצרים</small></div>' + its.map((x) => '<div class="sp-li">' + (x.img ? '<img alt="" src="' + esc(x.img) + '">' : '<span></span>') + '<div class="grow"><b>' + esc(x.title) + '</b><small>' + esc([x.size, isNum(x.price) ? spMoney(x.price, x.cur) : ''].filter(Boolean).join(' · ')) + '</small><a href="' + esc(x.url) + '" target="_blank" rel="noopener">פתיחה באתר ↗</a></div><div class="qty"><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="-1" aria-label="פחות">−</button><b>' + (x.qty || 1) + '</b><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="1" aria-label="עוד">+</button></div></div>').join('') +
-        '<div class="sp-tot"><span>סה״כ משוער</span><b>' + esc(spMoney(tot, cur)) + '</b></div><div class="sp-cta">' + (quick ? '<a class="btn pri" href="' + esc(quick) + '" target="_blank" rel="noopener">מעבר לקופה ב-' + esc(g ? g.name : '') + ' ↗</a>' : '<a class="btn pri" href="' + esc(its[0].url) + '" target="_blank" rel="noopener">להזמנה באתר ' + esc(g ? g.name : '') + ' ↗</a>') + '<button type="button" class="btn" data-act="sp-bought-all" data-k="' + esc(k) + '">✓ קניתי הכל</button></div></section>';
+      return '<section class="sp-co"><div class="sp-h"><h2>' + esc(g ? g.name : k) + '</h2><small>' + its.length + ' מוצרים</small></div>' + its.map((x) => '<div class="sp-li">' + (x.img ? '<img alt="" src="' + esc(x.img) + '">' : '<span></span>') + '<div class="grow"><b>' + esc(x.title) + '</b><small>' + esc([x.size, isNum(x.price) ? spMoney(x.price, x.cur) : ''].filter(Boolean).join(' · ')) + '</small><a data-out="' + esc(k) + '" href="' + esc(x.buy || x.url) + '" target="_blank" rel="noopener">' + (x.buy && x.buy !== x.url ? 'הוספה לסל באתר ↗' : 'פתיחה באתר ↗') + '</a></div><div class="qty"><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="-1" aria-label="פחות">−</button><b>' + (x.qty || 1) + '</b><button type="button" data-act="sp-cq" data-i="' + x.i + '" data-v="1" aria-label="עוד">+</button></div></div>').join('') +
+        (g ? '<div class="sp-acct">' + (spAcct(k).email ? '<span>👤 ' + esc(spAcct(k).email) + '</span>' : '<button type="button" class="tchip" data-act="sp-account" data-k="' + esc(k) + '">+ פרטי החשבון שלי ב' + esc(g.name) + '</button>') + (spAcct(k).coupon ? '<button type="button" class="tchip" data-act="sp-copy" data-v="' + esc(spAcct(k).coupon) + '">קופון ' + esc(spAcct(k).coupon) + ' · העתקה</button>' : '') + '</div>' : '') +
+        '<div class="sp-tot"><span>סה״כ משוער</span><b>' + esc(spMoney(tot, cur)) + '</b></div><div class="sp-cta">' + (quick ? '<a class="btn pri" data-out="' + esc(k) + '" href="' + esc(quick) + '" target="_blank" rel="noopener">מעבר לקופה ב-' + esc(g ? g.name : '') + ' ↗</a>' : '<a class="btn pri" data-out="' + esc(k) + '" href="' + esc(g ? spLinks(g).cart || its[0].url : its[0].url) + '" target="_blank" rel="noopener">לסל באתר ' + esc(g ? g.name : '') + ' ↗</a>') + '<button type="button" class="btn" data-act="sp-bought-all" data-k="' + esc(k) + '">✓ קניתי הכל</button></div></section>';
     }).join('') + '</div>';
 }
 RENDER.shop = function () { return SHOP.page === 'product' ? spProductHTML() : SHOP.page === 'cart' ? spCartHTML() : spStoreHTML(); };
@@ -3655,7 +3740,7 @@ ACT['sp-size'] = (d) => { SHOP.size[d.id] = +d.v; render(); };
 ACT['sp-qty'] = (d) => { SHOP.qty[d.id] = clamp((SHOP.qty[d.id] || 1) + (+d.v), 1, 20); render(); };
 ACT['sp-bean'] = (d) => { UI.bean.id = d.id; UI.tab.bean = 'overview'; go('beans'); };
 ACT['market-open'] = () => { SHOP.page = 'store'; go('shop'); };
-function spItem(p) { const sizes = sizesOf(p); const sz = sizes[Math.min(SHOP.size[p.id] || 0, Math.max(0, sizes.length - 1))]; return { k: p.g.key, id: p.id, title: p.title, size: sz ? (sz.label || sz.grams + ' g') : '', grams: (sz && sz.grams) || null, price: sz && isNum(sz.price) ? sz.price : p.price, cur: p.cur, qty: SHOP.qty[p.id] || 1, img: p.thumb || p.image || '', url: p.url, variantId: (sz && sz.variantId) || null, kind: pcat(p) }; }
+function spItem(p) { const sizes = sizesOf(p); const sz = sizes[Math.min(SHOP.size[p.id] || 0, Math.max(0, sizes.length - 1))]; return { k: p.g.key, id: p.id, title: p.title, size: sz ? (sz.label || sz.grams + ' g') : '', grams: (sz && sz.grams) || null, price: sz && isNum(sz.price) ? sz.price : p.price, cur: p.cur, qty: SHOP.qty[p.id] || 1, img: p.thumb || p.image || '', url: p.url, variantId: (sz && sz.variantId) || null, kind: pcat(p), buy: spBuyUrl(p, sz, SHOP.qty[p.id] || 1) }; }
 ACT['sp-cart-add'] = (d) => {
   const p = allProducts().find((x) => x.g.key === d.k && x.id === d.id); if (!p) return; const it = spItem(p); const c = spCartList();
   const ex = c.find((x) => x.k === it.k && x.id === it.id && x.size === it.size); if (ex) ex.qty = (ex.qty || 1) + it.qty; else c.push(it); save(); toast('נוסף לרשימת הקנייה'); render();
@@ -3737,6 +3822,177 @@ RENDER.stats = function () {
 };
 AFTER.stats = () => shopAuto();
 setTimeout(() => { try { shopAuto(); } catch (e) { console.error(e); } }, 3500);
+
+/* ============================================================
+   V4b — store accounts, return-from-site flow, manual product link,
+   image fallback, newsletter, fixed recipes in the log, nav
+   ============================================================ */
+ICON.news = '<path d="M5 4h11v16H6a2 2 0 0 1-2-2V6"/><path d="M16 8h3v10a2 2 0 0 1-2 2"/><path d="M8 8h5M8 12h5M8 16h3"/>';
+(function () { const v = {}; ['brew', 'beans', 'shop', 'stats', 'log', 'news', 'settings'].forEach((k) => { v[k] = VIEWS[k] || { he: 'חדשות' }; }); v.news = { he: 'חדשות' }; Object.keys(VIEWS).forEach((k) => delete VIEWS[k]); Object.assign(VIEWS, v); })();
+
+/* ---------- nav: settings moves to the top bar on phones ---------- */
+renderSide = (function (prev) {
+  return function () {
+    prev();
+    const bn = $('#bnav'); if (bn) { const s = bn.querySelector('[data-v="settings"]'); if (s) s.remove(); }
+    const top = $('header.top'); if (top && !$('#topset')) { const b = document.createElement('button'); b.type = 'button'; b.id = 'topset'; b.className = 'topset'; b.setAttribute('data-act', 'nav'); b.setAttribute('data-v', 'settings'); b.setAttribute('aria-label', 'הגדרות'); b.innerHTML = svgI('settings'); top.appendChild(b); }
+    const ts = $('#topset'); if (ts) ts.classList.toggle('on', UI.view === 'settings');
+  };
+})(renderSide);
+
+/* ---------- remember where I was (the PWA may reload after visiting a shop) ---------- */
+const UISTATE = 'cl_ui_v1';
+(function restoreUI() {
+  try { const o = JSON.parse(localStorage.getItem(UISTATE) || 'null'); if (o && Date.now() - o.at < 6 * 3600e3 && VIEWS[o.view] && o.view !== 'brew') { UI.view = o.view; Object.assign(SHOP, o.shop || {}); } } catch (e) { /* none */ }
+})();
+render = (function (prev) { return function () { prev(); try { localStorage.setItem(UISTATE, JSON.stringify({ at: Date.now(), view: UI.view, shop: { page: SHOP.page, k: SHOP.k, pid: SHOP.pid, store: SHOP.store, cat: SHOP.cat } })); } catch (e) { /* ignore */ } }; })(render);
+
+/* ---------- leaving to an official site and coming back ---------- */
+const SHOP_OUT = 'cl_shop_out';
+document.addEventListener('click', (e) => {
+  const a = e.target.closest ? e.target.closest('a[data-out]') : null; if (!a) return;
+  try { localStorage.setItem(SHOP_OUT, JSON.stringify({ k: a.dataset.out, pid: a.dataset.pid || '', at: Date.now(), page: SHOP.page })); } catch (err) { /* ignore */ }
+  try { flushSave(); } catch (err) { /* ignore */ } try { if (typeof syncPush === 'function' && SYNC.linked) syncPush().catch(() => {}); } catch (err) { /* ignore */ }
+}, true);
+function spOut() { try { const o = JSON.parse(localStorage.getItem(SHOP_OUT) || 'null'); return o && Date.now() - o.at < 4 * 3600e3 && Date.now() - o.at > 4000 ? o : null; } catch (e) { return null; } }
+function spReturnBanner() {
+  const o = spOut(); if (!o) return ''; const g = shopGroups().find((x) => x.key === o.k); if (!g) return '';
+  const inCart = spCartList().filter((x) => x.k === o.k); const p = o.pid && allProducts().find((x) => x.g.key === o.k && x.id === o.pid);
+  const what = inCart.length ? inCart.length + ' מוצרים מהרשימה' : p ? '"' + spSplit(p.title)[0] + '"' : '';
+  return '<section class="sp-ret"><b>חזרת מהאתר של ' + esc(g.name) + '</b><span>השלמת הזמנה' + (what ? ' של ' + esc(what) : '') + '? נעדכן את המלאי והמחירים.</span><div class="sp-mini">' +
+    (inCart.length ? '<button type="button" class="btn sm pri" data-act="sp-bought-all" data-k="' + esc(o.k) + '">✓ כן, הזמנתי</button>' : p ? '<button type="button" class="btn sm pri" data-act="sp-bought" data-k="' + esc(o.k) + '" data-id="' + esc(p.id) + '">✓ כן, הזמנתי</button>' : '') +
+    '<button type="button" class="btn sm ghost" data-act="sp-ret-no">עוד לא</button></div></section>';
+}
+ACT['sp-ret-no'] = () => { try { localStorage.removeItem(SHOP_OUT); } catch (e) { /* ignore */ } render(); };
+['sp-bought', 'sp-bought-all'].forEach((k) => { const f = ACT[k]; ACT[k] = (d) => { try { localStorage.removeItem(SHOP_OUT); } catch (e) { /* ignore */ } return f(d); }; });
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible' && spOut() && UI.view === 'shop' && !UI.modal) render(); });
+
+/* ---------- store accounts (no passwords: the browser's password manager keeps those) ---------- */
+ACT['sp-account'] = (d) => {
+  const g = shopGroups().find((x) => x.key === d.k); if (!g) return; const a = spAcct(d.k); const L = spLinks(g);
+  openModal({ title: 'החשבון שלי ב' + g.name, body: '<p class="muted s">נשמר אצלך ובסנכרון, כדי שכל הזמנה תהיה מהירה. את הסיסמה עדיף להשאיר למנהל הסיסמאות של הדפדפן, היא לא נשמרת כאן.</p><div class="form-g">' +
+    fld('email', 'אימייל / שם משתמש באתר', { v: a.email || '', cls: 'full' }) + fld('grind', 'טחינה מועדפת', { v: a.grind || '', ph: 'פולים שלמים' }) + fld('coupon', 'קוד קופון / מועדון', { v: a.coupon || '' }) + fld('ship', 'משלוח / איסוף', { v: a.ship || '', ph: 'משלוח עד הבית' }) + fld('note', 'הערה להזמנות', { type: 'textarea', v: a.note || '', cls: 'full', rows: 2 }) + '</div>' +
+    (L.account ? '<div class="sp-mini"><a class="btn sm ghost" data-out="' + esc(g.key) + '" href="' + esc(L.account) + '" target="_blank" rel="noopener">כניסה לחשבון באתר ↗</a></div>' : ''),
+  actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v) => { const pr = prefs(); pr.shopAccounts = pr.shopAccounts || {}; pr.shopAccounts[d.k] = { email: v.email, grind: v.grind, coupon: v.coupon, ship: v.ship, note: v.note, at: nowISO() }; save(); toast('נשמר'); render(); } }] });
+};
+ACT['sp-copy'] = (d) => { try { navigator.clipboard.writeText(d.v).then(() => toast('הועתק: ' + d.v), () => toast(d.v)); } catch (e) { toast(d.v); } };
+ACT['sp-hide'] = (d) => { const pr = prefs(); pr.shopHidden = (pr.shopHidden || []).concat([d.k]); if (SHOP.store === d.k) SHOP.store = ''; save(); toast('החנות הוסתרה. אפשר להחזיר מ"+ חנות"'); render(); };
+
+/* ---------- link a bean to a product by hand ---------- */
+ACT['sp-link'] = (d) => {
+  const b = byId('beans', d.id); const c = SHOP.cats[d.k]; if (!b) return; if (!c || !(c.products || []).length) { toast('הקטלוג של החנות עוד לא נטען'); return; }
+  const prods = c.products.filter((p) => !SHOP_JUNK.test(p.title) && /beans|blend|bundle/.test(pcat(p)));
+  openModal({ title: 'לאיזה מוצר באתר שייך "' + b.name + '"?', body: '<p class="muted s">בחירה מעדכנת את התמונה, הצבעים, המחיר והקישור להזמנה.</p><div class="sp-pick">' + prods.map((p) => '<button type="button" class="sp-pk" data-act="sp-link-do" data-id="' + esc(b.id) + '" data-k="' + esc(d.k) + '" data-p="' + esc(p.id) + '">' + (p.thumb || p.image ? '<img alt="" loading="lazy" src="' + esc(p.thumb || p.image) + '">' : '<span></span>') + '<span><b>' + esc(spSplit(p.title)[0]) + '</b><small>' + esc(spSplit(p.title)[1] || '') + (isNum(p.price) ? ' · ' + esc(spMoney(p.price, p.currency || c.currency)) : '') + '</small></span></button>').join('') + '</div>', actions: [{ label: 'סגירה' }] });
+};
+ACT['sp-link-do'] = (d) => {
+  const b = byId('beans', d.id); const c = SHOP.cats[d.k]; const p = c && c.products.find((x) => x.id === d.p); if (!b || !p) return;
+  linkBean(b, p, c); b.siteImageApprox = false; b.shopManual = true; if (p.image) adoptSiteImage(b.id, p.image); save(); closeModal(); toast('"' + b.name + '" קושר למוצר באתר'); render();
+};
+
+/* ---------- official image when the catalog has no match: web search, then a representative image ---------- */
+const _imgTry = new Set();
+shopMatch = (function (prev) {
+  return async function (g) {
+    await prev(g);
+    const c = SHOP.cats[g.key]; if (!c || location.protocol !== 'https:') return;
+    for (const b of g.beans) {
+      if (b.shopPid && (c.products || []).some((p) => p.id === b.shopPid)) continue;
+      if (b.siteImage || _imgTry.has(b.id) || !b.shopTry) continue; _imgTry.add(b.id);
+      let done = false;
+      if (!b.enrichTry) {
+        b.enrichTry = nowISO(); save();
+        try { const e = await srvEnrich({ name: b.name, roaster: b.roaster, originCountry: b.originCountry || undefined }); if (e && typeof e.image === 'string' && /^https:/.test(e.image)) { if (e.sourceUrl) b.productUrl = e.sourceUrl; done = await adoptSiteImage(b.id, e.image); } } catch (err) { /* offline */ }
+      }
+      if (!done && (c.products || []).length) {
+        const rt = new Set(Array.from(g.toks)); const cat0 = /blend|תערובת|בלנד/i.test(b.name) ? 'blend' : 'beans';
+        const cand = c.products.filter((p) => !SHOP_JUNK.test(p.title) && pcat(p) === cat0 && p.image).map((p) => ({ p, s: matchScore(Object.assign({}, b, { name: b.name.replace(/\d+/g, '') }), p, rt) })).sort((x, y) => y.s - x.s)[0];
+        if (cand) { done = await adoptSiteImage(b.id, cand.p.image); if (done) { b.siteImageApprox = true; save(); } }
+      }
+    }
+    shopRefresh();
+  };
+})(shopMatch);
+
+/* ---------- stats: the roast-date tip opens the bag editor ---------- */
+statsTips = (function (prev) { return function (D) { const t = prev(D); t.forEach((x) => { if (x.ic === '📅' && x.a && x.a.act === 'bean-open') { const g = D.act.find((bg) => bg.beanId === x.a.id && !bg.roastDate); if (g) x.a = { act: 'bag-edit', id: g.id, l: 'הוספת תאריך' }; } }); return t; }; })(statsTips);
+
+/* ============ newsletter ============ */
+const NEWS = { data: null, busy: false, err: '', f: 'all' };
+const NEWS_LS = 'cl_news_v1';
+try { const o = JSON.parse(localStorage.getItem(NEWS_LS) || 'null'); if (o && o.data) NEWS.data = o.data; } catch (e) { /* none */ }
+function newsQuery() {
+  const gs = shopGroups().filter((g) => g.mine && g.host); const ds = dataset().slice(-60);
+  const top = (arr) => Object.entries(arr.reduce((m, x) => { if (x) m[x] = (m[x] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4).map((x) => x[0]);
+  const q = { sites: gs.map((g) => g.host).slice(0, 6).sort().join(','), roasters: gs.map((g) => g.name).slice(0, 5).join(', '), origins: top(state.beans.map((b) => b.originCountry)).join(', '), methods: top(ds.map((r) => methodHe(r.method))).join(', '), loc: 'Israel' };
+  return Object.keys(q).map((k) => k + '=' + encodeURIComponent(q[k])).join('&');
+}
+async function newsLoad(force) {
+  if (NEWS.busy) return; const fresh = NEWS.data && NEWS.data.at && Date.now() - new Date(NEWS.data.at).getTime() < 12 * 3600e3;
+  if (fresh && !force) return; NEWS.busy = true; NEWS.err = ''; if (UI.view === 'news') render();
+  try { const r = await fetch('api/news?' + newsQuery() + (force ? '&t=' + Math.floor(Date.now() / 3600e3) : '')); const j = await r.json(); if (!r.ok || j.error) throw new Error('news'); NEWS.data = j; try { localStorage.setItem(NEWS_LS, JSON.stringify({ data: j })); } catch (e) { /* full */ } }
+  catch (e) { NEWS.err = 'לא הצלחתי לטעון חדשות עכשיו.'; }
+  NEWS.busy = false; if (UI.view === 'news') render();
+}
+const NEWS_KIND = { workshop: ['סדנה', '🎓'], event: ['אירוע', '📅'], news: ['חדשות', '📰'], release: ['חדש אצל הקליות', '✨'], blog: ['מהבלוג', '✍️'], shop: ['בחנות', '🛍'] };
+function newsCard(it) {
+  const k = NEWS_KIND[it.kind] || NEWS_KIND.news; const d = it.date ? new Date(it.date) : null;
+  return '<a class="nw-card k-' + esc(it.kind) + '" href="' + esc(it.url) + '" target="_blank" rel="noopener">' + (it.image ? '<span class="nw-img"><img alt="" loading="lazy" src="' + esc(it.image) + '"></span>' : '') +
+    '<span class="nw-b"><span class="nw-k"><i>' + k[1] + '</i>' + k[0] + (d && !isNaN(d) ? ' · ' + d.toLocaleDateString('he-IL', { day: 'numeric', month: 'short' }) : '') + (it.where ? ' · ' + esc(it.where) : '') + '</span><b>' + esc(it.title) + '</b>' + (it.summary ? '<span class="nw-s">' + esc(it.summary) + '</span>' : '') + '<small>' + esc(it.source || '') + ' ↗</small></span></a>';
+}
+RENDER.news = function () {
+  const D = NEWS.data || { posts: [], items: [] };
+  const shopW = allProducts().filter((p) => pcat(p) === 'workshop').map((p) => ({ kind: 'workshop', title: spSplit(p.title)[0], summary: (p.desc || '').slice(0, 180), url: p.url, image: p.thumb || p.image, source: p.g.name, price: p.price }));
+  const all = (D.items || []).concat(shopW, (D.posts || []));
+  const groups = [['learn', 'סדנאות ואירועים', all.filter((x) => x.kind === 'workshop' || x.kind === 'event')], ['mine', 'מהקליות שלך', all.filter((x) => x.kind === 'blog' || x.kind === 'release')], ['world', 'חדשות מעולם הקפה', all.filter((x) => x.kind === 'news')]];
+  const chips = '<div class="chips-row">' + [['all', 'הכל']].concat(groups.map((g) => [g[0], g[1]])).map((c) => '<button type="button" class="tchip' + (NEWS.f === c[0] ? ' on' : '') + '" data-act="nw-f" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
+  const when = D.at ? new Date(D.at).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const body = groups.filter((g) => NEWS.f === 'all' || NEWS.f === g[0]).map((g) => '<section class="nw-sec"><h2>' + g[1] + '</h2>' + (g[2].length ? '<div class="nw-list">' + g[2].sort(g[0] === 'learn' ? (a, b) => String(a.date || '9999').localeCompare(String(b.date || '9999')) : (a, b) => String(b.date || '').localeCompare(String(a.date || ''))).map(newsCard).join('') + '</div>' : '<p class="muted s">' + (NEWS.busy ? 'מחפש…' : 'אין כרגע פריטים.') + '</p>') + '</section>').join('');
+  return '<div class="page narrow nw">' + head('חדשות', '<button class="btn" data-act="nw-refresh"' + (NEWS.busy ? ' disabled' : '') + '>' + (NEWS.busy ? 'מעדכן…' : 'רענון') + '</button>') +
+    '<p class="muted s">ניוזלטר אישי: סדנאות ואירועי קפה בישראל, מה חדש אצל הקליות שלך וחדשות מעולם הספשיאלטי, לפי הפולים ושיטות ההכנה שלך.' + (when ? ' עודכן ' + when + '.' : '') + '</p>' + (NEWS.err ? '<div class="note warn">' + NEWS.err + '</div>' : '') + chips +
+    (!NEWS.data && NEWS.busy ? '<div class="nw-load"><i></i><span>מחפש סדנאות, אירועים וחדשות… זה לוקח כחצי דקה בפעם הראשונה.</span></div>' : body) + '</div>';
+};
+AFTER.news = () => { newsLoad(false); shopAuto(); };
+ACT['nw-f'] = (d) => { NEWS.f = d.v; render(); };
+ACT['nw-refresh'] = () => newsLoad(true);
+
+/* ============ fixed recipes in the log ============ */
+RENDER.log = (function (prev) {
+  return function () {
+    const tab = UI.tab.log || 'insights'; const T2 = [['insights', 'תובנות'], ['list', 'כל החליטות']], T3 = T2.concat([['recipes', 'מתכונים קבועים']]);
+    if (tab !== 'recipes') return prev().replace(tabsHTML('log', tab, T2), tabsHTML('log', tab, T3));
+    const fs = state.formulas.filter((f) => byId('recipes', f.presetId) && !byId('recipes', f.presetId).archived);
+    const rows = fs.map((f) => {
+      const p = byId('recipes', f.presetId); const ss = dataset().filter((r) => r.s.formulaId === f.id); const sc = ss.filter((r) => isNum(r.overall)).map((r) => r.overall); const last = ss[ss.length - 1];
+      return '<section class="card fx" style="--m:' + METHODS[p.method].color + '"><div class="fx-h"><span class="mdot"></span><div class="grow"><b>' + esc(f.name) + '</b><small>' + esc([p.name, f.beanId ? beanName(f.beanId) : 'כל הפולים'].join(' · ')) + '</small></div>' + (sc.length ? scorePill(mean(sc)) : '') + '</div>' +
+        '<p class="num fx-v">' + esc(paramSummary(p.method, Object.assign({}, (currentVersion(p) || {}).params || {}, f.vals))) + '</p><small class="muted">' + (ss.length ? ss.length + ' הכנות' + (last ? ' · אחרונה ' + fmtDate(last.date) : '') : 'עוד לא הוכן') + (f.fromSession ? ' · נשמר מהכנה של ' + fmtDate((byId('sessions', f.fromSession) || {}).date || f.createdAt) : '') + '</small>' +
+        '<div class="row" style="margin-top:8px"><button class="btn sm pri" data-act="fx-brew" data-id="' + f.id + '">להכנה</button><button class="btn sm" data-act="formula-edit" data-id="' + f.id + '">עריכה</button></div></section>';
+    }).join('');
+    const tabs = tabsHTML('log', 'recipes', T3);
+    return '<div class="page narrow">' + head('יומן', '<button class="btn sm" data-act="formula-new">+ מתכון</button>') + tabs + '<p class="muted s">מתכון קבוע = הערכים שעבדו לך, מוכנים בלחיצה. אפשר לשמור כל הכנה מהיומן ("שמירה כמתכון קבוע") או ממסך הסיום.</p>' + (rows || '<div class="card">' + emptyBox('עוד אין מתכונים קבועים', 'פתחו חליטה ב"כל החליטות" ולחצו "שמירה כמתכון קבוע".') + '</div>') + '</div>';
+  };
+})(RENDER.log);
+ACT['fx-brew'] = (d) => { const f = byId('formulas', d.id); if (!f) return; const bag = f.beanId ? activeBags().find((g) => g.beanId === f.beanId) : null; UI.brew = { stage: 'setup', presetId: f.presetId, bagId: bag ? bag.id : (UI.brew && UI.brew.bagId) || '', formulaId: f.id, valsFor: null }; go('brew'); };
+function sessionToFormula(sid) {
+  const s = byId('sessions', sid); if (!s) return; const p = byId('recipes', s.recipeId); if (!p) { toast('הפריסט של החליטה כבר לא קיים'); return; }
+  const bean = s.beanId ? byId('beans', s.beanId) : null; const ex = state.formulas.find((f) => f.fromSession === s.id);
+  if (ex) { toast('כבר נשמר כ"' + ex.name + '"'); return; }
+  const params = (s.planned && s.planned.params) || {}; const vals = {}; Object.keys(params).forEach((k) => { if (params[k] !== undefined && params[k] !== null && params[k] !== '') vals[k] = params[k]; });
+  const ev = evalOf(s.id);
+  openModal({ title: 'שמירה כמתכון קבוע', body: '<p class="muted s">' + esc(p.name) + ' · ' + esc(paramSummary(p.method, vals)) + (ev && isNum(ev.scores.overall) ? ' · ציון ' + ev.scores.overall : '') + '</p><div class="form-g">' + fld('name', 'שם המתכון', { v: (bean ? bean.name + ' · ' : '') + p.name, cls: 'full' }) + (bean ? fld('link', 'לטעון אוטומטית עם ' + bean.name, { type: 'check', v: true, cls: 'full' }) : '') + '</div>', actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
+    if (!showErrors(form, v.name ? {} : { name: 'יש להזין שם' })) return false;
+    insert('formulas', { presetId: p.id, beanId: bean && v.link ? bean.id : null, name: v.name.trim(), vals, fromSession: s.id, createdAt: nowISO(), updatedAt: nowISO() }, 'fm'); save(); toast('נשמר במתכונים הקבועים'); UI.tab.log = 'recipes'; render();
+  } }] });
+}
+ACT['sess-formula'] = (d) => sessionToFormula(d.id);
+ACT['session-open'] = (function (prev) {
+  return function (d) {
+    prev(d); const m = UI.modal; if (!m || !m.actions) return; const saved = state.formulas.find((f) => f.fromSession === d.id);
+    m.actions.splice(1, 0, { label: saved ? '★ במתכונים הקבועים' : '☆ שמירה כמתכון קבוע', run: () => { if (saved) { UI.tab.log = 'recipes'; go('log'); return; } setTimeout(() => sessionToFormula(d.id), 0); } }); renderModal();
+  };
+})(ACT['session-open']);
+brewDone = (function (prev) {
+  return function () { const r = B().result; const h = prev(); if (!r || r.formulaId) return h; const saved = state.formulas.find((f) => f.fromSession === r.sessionId); return h.replace('<div class="go-row">', '<section class="card fx-save"><div class="grow"><b>' + (saved ? '★ נשמר כמתכון קבוע' : 'יצא טוב?') + '</b><small>' + (saved ? esc(saved.name) : 'שמרו את מה שעשיתם עכשיו כמתכון קבוע ותוכלו לחזור עליו בלחיצה.') + '</small></div>' + (saved ? '' : '<button class="btn pri" data-act="sess-formula" data-id="' + r.sessionId + '">☆ שמירה כמתכון קבוע</button>') + '</section><div class="go-row">'); };
+})(brewDone);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
