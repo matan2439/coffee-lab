@@ -66,7 +66,8 @@ async function wooDetails(site, ids) {
     // map slug-style labels back to the readable term names
     const terms = (((pj.attributes || []).find((a) => SIZE_ATTR.test(a.name || '')) || {}).terms || []);
     const sizes = Object.values(byLabel).map((s) => { const t = terms.find((x) => { let sl = x.slug || ''; try { sl = decodeURIComponent(sl); } catch (e) { /* keep */ } return sl === s.label || ent(x.name) === s.label; }); if (t) { s.label = ent(t.name); s.grams = grams(t.name) || s.grams; } else { s.label = s.label.replace(/-/g, ' '); s.grams = s.grams || grams(s.label.replace(/קג$/, 'ק"ג')); } return s; }).sort((a, b) => (a.grams || 0) - (b.grams || 0));
-    out[id] = { sizes };
+    const opts = (pj.attributes || []).filter((a) => a.has_variations && !SIZE_ATTR.test(a.name || '') && (a.terms || []).length).map((a) => ({ key: 'attribute_' + (a.taxonomy || String(a.name || '').trim().toLowerCase().replace(/\s+/g, '-')), name: ent(a.name), terms: (a.terms || []).map((t) => ({ slug: t.slug, name: ent(t.name) })) }));
+    out[id] = { sizes, opts };
   }));
   return out;
 }
