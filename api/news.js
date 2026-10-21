@@ -23,8 +23,9 @@ async function digest(q) {
     'Their roasters: ' + (q.roasters || 'unknown') + '. Origins they drink: ' + (q.origins || 'various') + '. Brew methods: ' + (q.methods || 'filter, espresso') + '.\n' +
     'Use web search (Hebrew and English queries) to find REAL, current items:\n' +
     '1) upcoming coffee workshops, courses, cuppings and tastings in ' + (q.loc || 'Israel') + ' (barista courses, latte art, home brewing, roastery workshops), including from their roasters;\n' +
-    '2) upcoming coffee events and festivals in ' + (q.loc || 'Israel') + ', plus major international ones (World Coffee Championships etc.);\n' +
-    '3) new releases or news from their roasters.\n' +
+    '2) upcoming coffee events, festivals and new specialty cafés or roasteries in ' + (q.loc || 'Israel') + ' (Israeli events only);\n' +
+    '3) new releases or news from their roasters;\n' +
+    '4) a few light, fun world news about coffee discoveries and developments that a home brewer would enjoy: science and health research findings, new coffee varieties or processing methods, brewing innovations and new home gear, climate or harvest news that affects coffee taste or prices. NOT business deals, company earnings, café openings/closings abroad, design features, interviews or industry trade news.\n' +
     'Only include items you found in search results. Each url MUST be the specific page of that item (the article, the workshop page, the event page), never a homepage, a category or a /news listing page, and never the same url twice. Prefer items dated within the last 2 months or upcoming. 6 to 12 items.\n' +
     'Reply with ONLY JSON {"items":[{"kind":"workshop"|"event"|"news"|"release","title": Hebrew title,"summary": 1-2 Hebrew sentences why it is relevant to them,"date":"YYYY-MM-DD" or null (event/publish date),"where": city name or null,"url":"https://...","source": site name}]}';
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 3500, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }], messages: [{ role: 'user', content: prompt }] }) });
@@ -36,12 +37,13 @@ async function digest(q) {
   return (Array.isArray(o.items) ? o.items : []).filter((x) => { if (!x || !x.title || !/^https?:\/\//.test(x.url || '')) return false; let u; try { u = new URL(x.url); } catch (e) { return false; } const path = u.pathname.replace(/\/+$/, ''); if (!path || /^\/(news|blog|blogs|events?|workshops?|courses?|he|en|articles?|category\/[^/]+)$/i.test(path)) return false; const k = u.host + path; if (used.has(k)) return false; used.add(k); return true; }).map((x) => ({ kind: /^(workshop|event|news|release)$/.test(x.kind) ? x.kind : 'news', title: String(x.title).slice(0, 160), summary: String(x.summary || '').slice(0, 400), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where && !/^(online|אונליין|מקוון|null)$/i.test(String(x.where).trim()) ? String(x.where).slice(0, 60) : null, url: x.url, source: String(x.source || '').slice(0, 60), verified: seen.has(String(x.url).split('#')[0]) })).slice(0, 16);
 }
 
-const FEEDS = [['https://perfectdailygrind.com/feed/', 'Perfect Daily Grind'], ['https://sprudge.com/feed', 'Sprudge'], ['https://dailycoffeenews.com/feed/', 'Daily Coffee News']];
+const FEEDS = [['https://perfectdailygrind.com/feed/', 'Perfect Daily Grind'], ['https://sprudge.com/feed', 'Sprudge'], ['https://dailycoffeenews.com/feed/', 'Daily Coffee News'], ['https://www.sciencedaily.com/rss/plants_animals/food.xml', 'ScienceDaily'], ['https://worldcoffeeresearch.org/news/rss', 'World Coffee Research'], ['https://www.baristamagazine.com/feed/', 'Barista Magazine']];
 async function rss() {
   const out = [];
   await Promise.all(FEEDS.map(async ([u, src]) => {
     const x = await get(u, 6000, true); if (!x) return;
-    (x.match(/<item[\s\S]*?<\/item>/g) || []).slice(0, 5).forEach((it) => {
+    (x.match(/<item[\s\S]*?<\/item>/g) || []).slice(0, 8).forEach((it) => {
+      if (/sciencedaily/.test(u) && !/coffee|caffeine|espresso/i.test(it)) return;
       const g = (re) => { const m = it.match(re); return m ? m[1].replace(/^<!\[CDATA\[|\]\]>$/g, '') : ''; };
       const link = g(/<link>([^<]+)<\/link>/).trim(); const title = txt(g(/<title>([\s\S]*?)<\/title>/)); if (!link || !title) return;
       const desc = txt(g(/<description>([\s\S]*?)<\/description>/)).replace(/The post .*? appeared first on .*$/, '').slice(0, 300);
@@ -49,14 +51,15 @@ async function rss() {
       const d = new Date(g(/<pubDate>([^<]+)<\/pubDate>/)); out.push({ kind: 'news', title, summary: desc, url: link, date: isNaN(d) ? null : d.toISOString().slice(0, 10), image: img, source: src, en: true });
     });
   }));
-  return out.sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 12);
+  return out.sort((a, b) => String(b.date).localeCompare(String(a.date))).slice(0, 24);
 }
 async function toHebrew(items) {
   if (!KEY || !items.length) return items;
   try {
-    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 2500, messages: [{ role: 'user', content: 'Translate these specialty-coffee news headlines to natural Hebrew and write one short Hebrew sentence summary for each from its description. Keep names of people, farms and brands in English. Reply with ONLY a JSON array of {"i":index,"title":"...","summary":"..."}.\n' + JSON.stringify(items.map((x, i) => ({ i, title: x.title, description: x.summary }))) }] }) });
+    const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 2500, messages: [{ role: 'user', content: 'These are world specialty-coffee news headlines. The reader is a home coffee enthusiast in Israel who only wants light, fun news about coffee discoveries and developments: science or health research, new varieties or processing methods, brewing innovations and new home gear, harvest/climate/price news that affects what they drink, notable competition results. Mark keep=false for business and industry news (deals, funding, earnings, tariffs refunds), café or roastery openings/closings abroad, design or architecture features, interviews, staff/people news, promotions and local events abroad. For kept items translate the headline to natural Hebrew and write one short, friendly Hebrew sentence on what is interesting. Keep names of people, farms and brands in English. Reply with ONLY a JSON array of {"i":index,"keep":true|false,"title":"...","summary":"..."}.\n' + JSON.stringify(items.map((x, i) => ({ i, title: x.title, description: x.summary }))) }] }) });
     if (!r.ok) return items; const j = await r.json(); const t = (j.content || []).filter((x) => x.type === 'text').map((x) => x.text).join(''); const a = t.indexOf('['), b = t.lastIndexOf(']'); const arr = JSON.parse(t.slice(a, b + 1));
-    arr.forEach((x) => { const it = items[x.i]; if (it && x.title) { it.title = String(x.title).slice(0, 180); it.summary = String(x.summary || '').slice(0, 300); it.en = false; } });
+    arr.forEach((x) => { const it = items[x.i]; if (!it) return; if (x.keep === false) { it.drop = true; return; } if (x.title) { it.title = String(x.title).slice(0, 180); it.summary = String(x.summary || '').slice(0, 300); it.en = false; } });
+    return items.filter((x) => !x.drop && !x.en);
   } catch (e) { /* keep English */ }
   return items;
 }

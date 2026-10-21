@@ -84,6 +84,21 @@ async function aiMatch(body) {
   const ids = new Set(prods.map((p) => p.id)); const out = {}; beans.forEach((b) => { const v = o[b.id]; out[b.id] = v != null && ids.has(String(v)) ? String(v) : null; }); return out;
 }
 
+const KIND = { b: 'beans', l: 'blend', d: 'drinks', g: 'gear', x: 'bundle', w: 'workshop', o: 'other' };
+async function classifyOnce(model, items) {
+  const prompt = 'Classify each product of a coffee roaster web shop. Codes: b = coffee beans or ground coffee of a single origin / farm / lot (also decaf single origins); l = coffee blend (espresso blend, house blend, numbered blend); d = drinks and non-bean coffee formats: ready-to-drink, cold brew bottles or concentrate, capsules, drip bags, instant, tea, matcha, cocoa, syrups, milk; g = equipment and merchandise: grinders, brewers, machines, cups, mugs, glasses, filters, kettles, scales, cleaning products, water filters, spare parts, clothing, books, accessories; x = bundles: packs of several coffees, gift boxes, tasting sets, subscriptions, gift cards and vouchers for products; w = workshops, courses, classes, cuppings, tours, events, experiences (also vouchers for those); o = anything else. Titles may be Hebrew or English; categories from the shop are hints only.\nReply with ONLY a JSON object mapping each index to its code, e.g. {"0":"b","1":"g"}.\n' + JSON.stringify(items);
+  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model, max_tokens: 3000, messages: [{ role: 'user', content: prompt }] }) });
+  if (!r.ok) throw new Error('cls ' + r.status); const j = await r.json(); const t = (j.content || []).filter((x) => x.type === 'text').map((x) => x.text).join(''); const a = t.indexOf('{'), b = t.lastIndexOf('}'); return JSON.parse(t.slice(a, b + 1));
+}
+async function classify(products) {
+  if (!KEY || !products.length) return;
+  const items = products.slice(0, 260).map((p, i) => ({ i, t: String(p.title).slice(0, 90), c: (p.cats || []).slice(0, 4).join(' / ').slice(0, 80) }));
+  const chunks = []; for (let i = 0; i < items.length; i += 130) chunks.push(items.slice(i, i + 130));
+  await Promise.all(chunks.map(async (ch) => {
+    let o = null; try { o = await classifyOnce(process.env.CLASSIFY_MODEL || 'claude-haiku-5-5', ch); } catch (e) { try { o = await classifyOnce(MODEL, ch); } catch (e2) { o = null; } }
+    if (o) ch.forEach((it) => { const k = KIND[String(o[it.i] || '').trim().toLowerCase()]; if (k) products[it.i].kind = k; });
+  }));
+}
 module.exports = async (req, res) => {
   const send = (c, o, cache) => { res.statusCode = c; res.setHeader('content-type', 'application/json'); res.setHeader('cache-control', cache ? 'public, s-maxage=1800, stale-while-revalidate=3600' : 'no-store'); res.end(JSON.stringify(o)); };
   try {
@@ -101,6 +116,7 @@ module.exports = async (req, res) => {
     if (!site) return send(200, { site: '', products: [], note: 'site' });
     const cat = (await shopify(site)) || (await woo(site));
     if (!cat) return send(200, { site, platform: 'other', currency: '', products: [], shopify: false }, true);
-    send(200, Object.assign({ site, shopify: cat.platform === 'shopify' }, cat), true);
+    try { await Promise.race([classify(cat.products), new Promise((r) => setTimeout(r, 25000))]); } catch (e) { /* rules on the client */ }
+    send(200, Object.assign({ site, shopify: cat.platform === 'shopify', classified: cat.products.some((p) => p.kind) }, cat), true);
   } catch (e) { send(502, { error: 'fail' }); }
 };
