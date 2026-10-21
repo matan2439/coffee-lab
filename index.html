@@ -3123,12 +3123,16 @@ async function liveLoop() {
       (data.words || []).forEach((w) => { if (w.confidence < 55 || !w.text || w.text.trim().length < 2) return; const b = w.bbox; const x = b.x0 / sx * sc + ox, y = b.y0 / sx * sc + oy, ww = (b.x1 - b.x0) / sx * sc, hh = (b.y1 - b.y0) / sx * sc; const hit = [...res.used].some((u) => u.toLowerCase().includes(w.text.toLowerCase())); g.lineWidth = hit ? 2.5 : 1.2; g.strokeStyle = hit ? '#5ee08a' : 'rgba(255,255,255,.7)'; g.fillStyle = hit ? 'rgba(94,224,138,.22)' : 'rgba(255,255,255,.08)'; g.beginPath(); g.roundRect ? g.roundRect(x - 2, y - 2, ww + 4, hh + 4, 5) : g.rect(x - 2, y - 2, ww + 4, hh + 4); g.fill(); g.stroke(); }); }
     const key = JSON.stringify(res.fields); LIVE.stable = key === LIVE.key ? LIVE.stable + 1 : 0; LIVE.key = key;
     const ready = (res.fields.name || res.fields.roaster) && n >= 3; if (shot) shot.classList.toggle('ready', !!ready);
-    setMsg(!n ? 'מחפש טקסט… קרבו את השקית' : ready ? (LIVE.stable >= 1 ? 'זוהה! מצלם…' : 'מזהה… החזיקו יציב') : 'זוהו ' + n + ' פרטים, המשיכו לסרוק');
-    if (ready && LIVE.stable >= 1 && !LIVE.auto) { LIVE.auto = true; const fl = $('#cam'); if (fl) fl.classList.add('flash'); try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) { /* ignore */ } setTimeout(() => { if (CAM.open) ACT['cam-shot'](); }, 350); break; }
+    const nl = (data.lines || []).filter((l) => l.confidence >= 50 && normT(l.text).length >= 3).length; const nowT = Date.now();
+    if (n >= 2 || nl >= 4) { if (!LIVE.t1) LIVE.t1 = nowT; } else if (n === 0 && nl < 2) LIVE.t1 = 0;
+    const since = LIVE.t1 ? nowT - LIVE.t1 : 0;
+    const go = (ready && (LIVE.stable >= 1 || since > 2200)) || (LIVE.t1 && since > 4500);
+    setMsg(!LIVE.t1 ? 'מחפש טקסט… קרבו את השקית' : go ? 'זוהה! מצלם…' : 'מזהה… החזיקו יציב');
+    if (go && !LIVE.auto) { LIVE.auto = true; const fl = $('#cam'); if (fl) fl.classList.add('flash'); try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) { /* ignore */ } setTimeout(() => { if (CAM.open) ACT['cam-shot'](); }, 350); break; }
     await new Promise((r) => setTimeout(r, 250));
   }
 }
-function liveStart() { LIVE.run = true; LIVE.acc = new Map(); LIVE.last = null; LIVE.stable = 0; LIVE.key = ''; LIVE.auto = false; liveLoop(); }
+function liveStart() { LIVE.run = true; LIVE.acc = new Map(); LIVE.last = null; LIVE.stable = 0; LIVE.key = ''; LIVE.auto = false; LIVE.t1 = 0; liveLoop(); }
 function liveStop() { LIVE.run = false; }
 function liveUse() {
   const v = $('#cam_v'); let thumb = ''; try { if (v && v.videoWidth) { const c = document.createElement('canvas'); const s = Math.min(1, 480 / v.videoWidth); c.width = v.videoWidth * s; c.height = v.videoHeight * s; c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); thumb = c.toDataURL('image/jpeg', 0.6); } } catch (e) { /* ignore */ }
