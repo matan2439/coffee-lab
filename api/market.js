@@ -58,7 +58,9 @@ async function wooDetails(site, ids) {
     await Promise.all(vars.map(async (v) => {
       const at = (v.attributes || []).find((a) => SIZE_ATTR.test(a.name || '') || (sizeName && a.name === sizeName)); if (!at) return;
       let label = ent(at.value || ''); try { label = decodeURIComponent(label); } catch (e) { /* keep */ }
-      if (byLabel[label]) return; byLabel[label] = { label, grams: grams(label), price: null, available: true, variantId: v.id };
+      if (byLabel[label]) return;
+      const params = (v.attributes || []).filter((x) => x.value).map((x) => { const pa = (pj.attributes || []).find((y) => y.name === x.name || y.taxonomy === x.name); const key = pa && pa.taxonomy ? pa.taxonomy : String(x.name || '').trim().toLowerCase().replace(/\s+/g, '-'); return ['attribute_' + key, x.value]; });
+      byLabel[label] = { label, grams: grams(label), price: null, available: true, variantId: v.id, params };
       const d = await J(site + '/wp-json/wc/store/v1/products/' + v.id, 8000); if (d && d.j.prices) { byLabel[label].price = wooMoney(d.j.prices, d.j.prices.price); byLabel[label].available = d.j.is_in_stock !== false; }
     }));
     // map slug-style labels back to the readable term names
