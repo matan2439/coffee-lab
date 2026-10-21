@@ -920,6 +920,17 @@ body.froth-on { overflow: hidden; }
 .steps { padding-inline-start: 20px; display: grid; gap: 8px; }
 #cam.flash::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; animation: camflash .35s ease-out; pointer-events: none; z-index: 5; }
 @keyframes camflash { 0% { opacity: .0; } 30% { opacity: .85; } 100% { opacity: 0; } }
+.cam-stat { position: absolute; inset-inline: 16px; bottom: calc(env(safe-area-inset-bottom, 0px) + 128px); display: flex; flex-direction: column; align-items: center; gap: 8px; text-align: center; }
+.cam-stat p { margin: 0; color: #fff; font-weight: 700; font-size: 1.05rem; text-shadow: 0 1px 6px #000; }
+.cam-stat small { color: rgba(255,255,255,.8); text-shadow: 0 1px 4px #000; }
+.cam-prog { display: block; width: min(260px, 70%); height: 6px; border-radius: 4px; background: rgba(255,255,255,.28); overflow: hidden; }
+.cam-prog b { display: block; height: 100%; width: 0; background: var(--accent, #d9a66b); border-radius: 4px; transition: width .35s ease; }
+.scan-steps { list-style: none; margin: 4px 0 0; padding: 0; width: 100%; display: flex; flex-direction: column; gap: 8px; text-align: start; }
+.scan-steps li { display: flex; align-items: center; gap: 10px; color: var(--muted); font-weight: 600; }
+.scan-steps li::before { content: ""; width: 16px; height: 16px; border-radius: 50%; border: 2px solid var(--line); flex: none; }
+.scan-steps li.on { color: var(--fg); } .scan-steps li.on::before { border-color: var(--accent); border-top-color: transparent; animation: spin .8s linear infinite; }
+.scan-steps li.done { color: var(--fg); } .scan-steps li.done::before { content: "\2713"; border: 0; background: var(--good, #4d7a58); color: #fff; font-size: 11px; line-height: 16px; text-align: center; }
+@keyframes spin { to { transform: rotate(360deg); } }
 
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
@@ -2585,9 +2596,10 @@ function scanMap(r) {
 }
 async function srvEnrich(known, signal) { const r = await fetch('api/enrich', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(known), signal }); if (!r.ok) throw new Error('enrich'); return r.json(); }
 const ENR_LABEL = { name: 'שם', roaster: 'קלייה', originCountry: 'מקור', region: 'אזור', producer: 'יצרן', variety: 'זן', process: 'עיבוד', roastLevel: 'רמת קלייה', elevation: 'גובה', weight: 'משקל', roasterNotesText: 'תווים' };
+function setStep(n) { for (let k = 1; k <= 3; k++) { const e = $('#ss' + k); if (e) e.className = k < n ? 'done' : k === n ? 'on' : ''; } }
 async function enrichBean(pre, ctl) {
-  if (!(_srv === true) || !(pre.name || pre.roaster)) return;
-  const st = $('.scan-st'); if (st) st.innerHTML = '<span style="opacity:1;animation:none">מחפש באינטרנט את עמוד המוצר ומשלים פרטים…</span>';
+  if (!(_srv === true) || !(pre.name || pre.roaster)) { const e = $('#ss2'); if (e) e.remove(); return; }
+  setStep(2);
   const c2 = new AbortController(); ctl.signal.addEventListener('abort', () => c2.abort()); const t = setTimeout(() => c2.abort(), 55000);
   try {
     const known = {}; ['name', 'roaster', 'originCountry', 'region', 'producer', 'variety', 'process', 'roastLevel', 'elevation', 'weight'].forEach((k) => { if (pre[k] != null) known[k] = pre[k]; });
@@ -2595,7 +2607,7 @@ async function enrichBean(pre, ctl) {
     const add = scanMap(e); if (typeof e.notes === 'string' || Array.isArray(e.notes)) { /* handled in scanMap */ }
     const filled = []; Object.keys(add).forEach((k) => { if (k === 'roastDate' || k === 'weight') return; if (pre[k] == null || pre[k] === '') { pre[k] = add[k]; filled.push(k); } });
     pre.uncertain = (pre.uncertain || []).concat(filled.filter((k) => k !== 'roasterNotesText' || true));
-    const bits = []; if (filled.length) bits.push('הושלמו מהאינטרנט: ' + filled.map((k) => ENR_LABEL[k] || k).join(', ') + '. כדאי לוודא.');
+    const bits = []; if (!e.sourceUrl) bits.push(e.pagesRead ? 'לא נמצא עמוד מוצר מתאים.' : 'לא נמצא עמוד מוצר באינטרנט.'); if (filled.length) bits.push('הושלמו מהאינטרנט: ' + filled.map((k) => ENR_LABEL[k] || k).join(', ') + '. כדאי לוודא.');
     if (typeof e.info === 'string' && e.info.trim()) bits.push(e.info.trim());
     if (typeof e.sourceUrl === 'string' && /^https?:\/\//.test(e.sourceUrl)) bits.push('מקור: ' + e.sourceUrl);
     if (bits.length) pre._note = (pre._note ? pre._note + ' ' : '') + bits.join(' ');
@@ -2604,7 +2616,7 @@ async function enrichBean(pre, ctl) {
 async function runScan(file) {
   let small, thumb; try { small = await downscale(file, 1600, 0.85); thumb = await downscale(file, 480, 0.6); } catch (e) { toast('לא ניתן לקרוא את התמונה'); return; }
   const ctl = new AbortController();
-  openModal({ title: 'קורא את השקית…', noFocus: true, body: '<div class="scan-w"><div class="scan-box"><img alt="" src="' + thumb.dataUrl + '"><i class="laser"></i><i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i></div><p class="scan-st"><span>קורא את הטקסט על השקית…</span><span>מזהה מקור ומקלה…</span><span>מחפש תהליך וגובה…</span></p></div>', actions: [{ label: 'ביטול', run: () => { ctl.abort(); } }] });
+  openModal({ title: 'קורא את השקית…', noFocus: true, body: '<div class="scan-w"><div class="scan-box"><img alt="" src="' + thumb.dataUrl + '"><i class="laser"></i><i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i></div><ol class="scan-steps"><li id="ss1" class="on">קורא את השקית</li><li id="ss2">מחפש את עמוד המוצר באינטרנט</li><li id="ss3">מכין את הטופס</li></ol></div>', actions: [{ label: 'ביטול', run: () => { ctl.abort(); } }] });
   await Promise.race([CAPS.readyP, new Promise((r) => setTimeout(r, 5000))]);
   if ((!CAPS.sample || !CAPS.images) && !(await srvOk())) { const why = CAPS.why || 'הסריקה לא זמינה כאן'; beanForm(null, { _thumb: thumb.dataUrl, _note: why + '. התמונה נשמרה, מלאו את הפרטים ידנית.' }); return; }
   try {
@@ -2613,7 +2625,7 @@ async function runScan(file) {
     const pre = scanMap(r);
     pre.uncertain = Array.isArray(r.uncertain) ? r.uncertain.map((k) => (k === 'notes' ? 'roasterNotesText' : k)) : []; pre._thumb = thumb.dataUrl;
     if (!pre.name && !pre.roaster) pre._note = 'לא זוהו פרטים מהתמונה. נסו צילום קרוב וחד, או מלאו ידנית.';
-    await enrichBean(pre, ctl); if (ctl.signal.aborted) return;
+    await enrichBean(pre, ctl); if (ctl.signal.aborted) return; setStep(3);
     beanForm(null, pre);
   } catch (e) {
     const c2 = e && e.code; if (c2 === 'cancelled') return;
@@ -3042,7 +3054,7 @@ ACT['cam-open'] = async () => {
   let st; try { st = await navigator.mediaDevices.getUserMedia({ video: { facingMode: { ideal: 'environment' }, width: { ideal: 1920 } }, audio: false }); } catch (e) { why((e && e.name) || 'שגיאה'); return; }
   CAM.stream = st; CAM.open = true; let el = $('#cam'); if (!el) { el = document.createElement('div'); el.id = 'cam'; document.body.appendChild(el); }
   el.hidden = false; document.body.classList.add('froth-on');
-  el.innerHTML = '<video id="cam_v" autoplay playsinline muted></video><canvas id="cam_o"></canvas><div class="cam-frame"><i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i><i class="laser"></i></div><p class="cam-hint" id="lv_s">כוונו אל השקית כך שהטקסט ברור</p><div class="lv-chips" id="lv_c"></div><div class="cam-bar"><button type="button" class="btn ghost" data-act="cam-close">ביטול</button><button type="button" class="cam-shot" data-act="cam-shot" aria-label="צילום"></button><span></span></div>';
+  el.innerHTML = '<video id="cam_v" autoplay playsinline muted></video><div class="cam-frame"><i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i><i class="laser"></i></div><div class="cam-stat"><p id="lv_s">כוונו את השקית אל המסגרת</p><i class="cam-prog"><b id="lv_p"></b></i><small>הצילום מתבצע אוטומטית כשהטקסט ברור</small></div><div class="cam-bar"><button type="button" class="btn ghost" data-act="cam-close">ביטול</button><button type="button" class="cam-shot" data-act="cam-shot" aria-label="צילום"></button><span></span></div>';
   const v = $('#cam_v'); v.srcObject = st; try { await v.play(); } catch (e) { /* autoplay handled by attribute */ }
   try { liveStart(); } catch (e) { console.error(e); }
 };
@@ -3107,8 +3119,8 @@ function liveAggregate() { const lines = []; LIVE.acc.forEach((v) => { if (v.see
 async function liveLoop() {
   const v = $('#cam_v'); const cv = $('#cam_o'); const stat = $('#lv_s'); const chips = $('#lv_c'); const shot = $('.cam-shot');
   const setMsg = (t) => { if (stat) stat.textContent = t; };
-  if (!LIVE.worker) { try { await liveInit(setMsg); } catch (e) { setMsg('זיהוי חי לא זמין (אין חיבור). אפשר לצלם ולמלא ידנית'); LIVE.run = false; return; } }
-  setMsg('מחפש טקסט… קרבו את השקית');
+  if (!LIVE.worker) { try { await liveInit(setMsg); } catch (e) { setMsg('הזיהוי האוטומטי לא נטען. לחצו על העיגול כדי לצלם'); LIVE.run = false; return; } }
+  setMsg('כוונו את השקית אל המסגרת');
   const work = document.createElement('canvas');
   while (LIVE.run && CAM.open) {
     if (!v || !v.videoWidth) { await new Promise((r) => setTimeout(r, 200)); continue; }
@@ -3127,7 +3139,7 @@ async function liveLoop() {
     if (n >= 2 || nl >= 4) { if (!LIVE.t1) LIVE.t1 = nowT; } else if (n === 0 && nl < 2) LIVE.t1 = 0;
     const since = LIVE.t1 ? nowT - LIVE.t1 : 0;
     const go = (ready && (LIVE.stable >= 1 || since > 2200)) || (LIVE.t1 && since > 4500);
-    setMsg(!LIVE.t1 ? 'מחפש טקסט… קרבו את השקית' : go ? 'זוהה! מצלם…' : 'מזהה… החזיקו יציב');
+    setMsg(!LIVE.t1 ? 'כוונו את השקית אל המסגרת' : go ? 'מצלם…' : 'מזהה… החזיקו יציב'); const pb = $('#lv_p'); if (pb) pb.style.width = (!LIVE.t1 ? 0 : go ? 100 : Math.min(92, Math.round(since / 2200 * 100))) + '%';
     if (go && !LIVE.auto) { LIVE.auto = true; const fl = $('#cam'); if (fl) fl.classList.add('flash'); try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) { /* ignore */ } setTimeout(() => { if (CAM.open) ACT['cam-shot'](); }, 350); break; }
     await new Promise((r) => setTimeout(r, 250));
   }
