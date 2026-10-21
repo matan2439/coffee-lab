@@ -918,6 +918,8 @@ body.froth-on { overflow: hidden; }
 .menu-b b { display: block; } .menu-b small { color: var(--muted); display: block; margin-top: 2px; }
 .menu-i { font-size: 24px; }
 .steps { padding-inline-start: 20px; display: grid; gap: 8px; }
+#cam.flash::after { content: ""; position: absolute; inset: 0; background: #fff; opacity: 0; animation: camflash .35s ease-out; pointer-events: none; z-index: 5; }
+@keyframes camflash { 0% { opacity: .0; } 30% { opacity: .85; } 100% { opacity: 0; } }
 
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
@@ -2045,6 +2047,7 @@ const ICON = {
   beans: '<path d="M12 3c4 0 7 3.5 7 8s-3 10-7 10-7-5.5-7-10 3-8 7-8z"/><path d="M12 3c-2 4 2 6 0 9s2 5 0 9"/>',
   log: '<path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/>',
   settings: '<circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M5 5l2 2M17 17l2 2M19 5l-2 2M7 17l-2 2"/>',
+  plus: '<path d="M12 5v14M5 12h14"/>',
   camera: '<path d="M4 8h3l2-3h6l2 3h3v11H4z"/><circle cx="12" cy="13" r="3.5"/>',
   play: '<path d="M8 5v14l11-7z"/>',
 };
@@ -2197,7 +2200,7 @@ RENDER.brew = function () {
   if (!p) return '<div class="page narrow">' + head('מה מכינים?') + '<div class="card">' + emptyBox('אין פריסטים', 'פריסט = שיטה + ציוד + הערכים הקבועים שלכם.', '<button class="btn pri" data-act="preset-new">+ פריסט</button>') + '</div></div>';
   const M = METHODS[p.method]; const params = fullParams(); const bags = activeBags();
   const pchips = ps.map((x) => '<button type="button" class="pchip' + (x.id === p.id ? ' on' : '') + '" style="--m:' + METHODS[x.method].color + '" data-act="pick-preset" data-id="' + x.id + '"><i></i>' + esc(x.name) + '</button>').join('') + '<button type="button" class="pchip add" data-act="preset-new" aria-label="פריסט חדש">+</button>';
-  const bchips = '<button type="button" class="bchip' + (!b.bagId ? ' on' : '') + '" data-act="pick-bag" data-id=""><b>ללא</b></button>' + bags.map((g) => { const bi = bagInfo(g); return '<button type="button" class="bchip' + (g.id === b.bagId ? ' on' : '') + '" data-act="pick-bag" data-id="' + g.id + '"><b>' + esc(beanName(g.beanId)) + '</b><small>' + [freshDays(g), fmtN(bi.remaining, 0) + ' g'].filter(Boolean).join(' · ') + '</small></button>'; }).join('') + '<button type="button" class="bchip add" data-act="beans-menu" aria-label="סריקת שקית">' + svgI('camera') + '</button>';
+  const bchips = '<button type="button" class="bchip' + (!b.bagId ? ' on' : '') + '" data-act="pick-bag" data-id=""><b>ללא</b></button>' + bags.map((g) => { const bi = bagInfo(g); return '<button type="button" class="bchip' + (g.id === b.bagId ? ' on' : '') + '" data-act="pick-bag" data-id="' + g.id + '"><b>' + esc(beanName(g.beanId)) + '</b><small>' + [freshDays(g), fmtN(bi.remaining, 0) + ' g'].filter(Boolean).join(' · ') + '</small></button>'; }).join('') + '<button type="button" class="bchip add" data-act="beans-menu" aria-label="הוספת שקית">' + svgI('plus') + '</button>';
   const vary = (p.vary || []).filter((k) => fieldDef(p.method, k));
   const steppers = vary.map((k) => { const f = fieldDef(p.method, k); const v = b.vals[k]; const isT = k === 'time' || k === 'steep' || k === 'drawdown' || k === 'duration';
     return '<div class="stp"><span class="stp-l">' + esc(shortLabel(f)) + '</span><div class="stp-c"><button type="button" class="stp-b" data-act="vstep" data-k="' + k + '" data-dir="-1" aria-label="פחות">−</button>' + (f.t === 'number' ? '<input class="stp-v" type="number" inputmode="decimal" step="any" data-on="vset" data-k="' + k + '" value="' + (isNum(v) ? v : '') + '" placeholder="—" aria-label="' + esc(f.l) + '">' : '<span class="stp-v">' + esc(v || '—') + '</span>') + '<button type="button" class="stp-b" data-act="vstep" data-k="' + k + '" data-dir="1" aria-label="יותר">+</button></div><span class="stp-u">' + (isT && isNum(v) ? fmtTime(v) : esc(f.u || '')) + '</span></div>'; }).join('');
@@ -2572,6 +2575,32 @@ ON['scan-file'] = (v, el) => { const f = el.files && el.files[0]; try { el.value
 let _srv = null;
 async function srvOk() { if (_srv !== null) return _srv; try { const r = await fetch('api/scan', { method: 'GET' }); const j = await r.json(); _srv = !!(j && j.ok); } catch (e) { _srv = false; } return _srv; }
 async function srvScan(blob, signal) { const r = await fetch('api/scan', { method: 'POST', headers: { 'content-type': 'image/jpeg' }, body: blob, signal }); if (!r.ok) throw { code: r.status === 429 ? 'rate_limited' : 'invalid_json' }; return r.json(); }
+function scanMap(r) {
+  const pre = {}; ['name', 'roaster', 'originCountry', 'region', 'producer', 'variety', 'process', 'roastLevel', 'roastDate'].forEach((k) => { if (typeof r[k] === 'string' && r[k].trim()) pre[k] = r[k].trim(); });
+  const el = String(r.elevation == null ? '' : r.elevation).match(/\d{3,4}/g); if (el) { const e = mean(el.map(Number)); if (e > 0 && e < 3000) pre.elevation = Math.round(e); }
+  if (isNum(Number(r.weight)) && Number(r.weight) > 0 && Number(r.weight) < 20000) pre.weight = Number(r.weight);
+  if (pre.roastDate && !/^\d{4}-\d{2}-\d{2}$/.test(pre.roastDate)) delete pre.roastDate; if (pre.roastLevel && !ROAST_LEVELS.some((x) => x[0] === pre.roastLevel)) delete pre.roastLevel;
+  if (typeof r.notes === 'string' && r.notes.trim()) pre.roasterNotesText = r.notes.trim(); else if (Array.isArray(r.notes)) pre.roasterNotesText = r.notes.join(', ');
+  return pre;
+}
+async function srvEnrich(known, signal) { const r = await fetch('api/enrich', { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(known), signal }); if (!r.ok) throw new Error('enrich'); return r.json(); }
+const ENR_LABEL = { name: 'שם', roaster: 'קלייה', originCountry: 'מקור', region: 'אזור', producer: 'יצרן', variety: 'זן', process: 'עיבוד', roastLevel: 'רמת קלייה', elevation: 'גובה', weight: 'משקל', roasterNotesText: 'תווים' };
+async function enrichBean(pre, ctl) {
+  if (!(_srv === true) || !(pre.name || pre.roaster)) return;
+  const st = $('.scan-st'); if (st) st.innerHTML = '<span style="opacity:1;animation:none">מחפש באינטרנט את עמוד המוצר ומשלים פרטים…</span>';
+  const c2 = new AbortController(); ctl.signal.addEventListener('abort', () => c2.abort()); const t = setTimeout(() => c2.abort(), 55000);
+  try {
+    const known = {}; ['name', 'roaster', 'originCountry', 'region', 'producer', 'variety', 'process', 'roastLevel', 'elevation', 'weight'].forEach((k) => { if (pre[k] != null) known[k] = pre[k]; });
+    const e = await srvEnrich(known, c2.signal); if (!e || typeof e !== 'object') return;
+    const add = scanMap(e); if (typeof e.notes === 'string' || Array.isArray(e.notes)) { /* handled in scanMap */ }
+    const filled = []; Object.keys(add).forEach((k) => { if (k === 'roastDate' || k === 'weight') return; if (pre[k] == null || pre[k] === '') { pre[k] = add[k]; filled.push(k); } });
+    pre.uncertain = (pre.uncertain || []).concat(filled.filter((k) => k !== 'roasterNotesText' || true));
+    const bits = []; if (filled.length) bits.push('הושלמו מהאינטרנט: ' + filled.map((k) => ENR_LABEL[k] || k).join(', ') + '. כדאי לוודא.');
+    if (typeof e.info === 'string' && e.info.trim()) bits.push(e.info.trim());
+    if (typeof e.sourceUrl === 'string' && /^https?:\/\//.test(e.sourceUrl)) bits.push('מקור: ' + e.sourceUrl);
+    if (bits.length) pre._note = (pre._note ? pre._note + ' ' : '') + bits.join(' ');
+  } catch (err) { /* enrichment is best-effort */ } finally { clearTimeout(t); }
+}
 async function runScan(file) {
   let small, thumb; try { small = await downscale(file, 1600, 0.85); thumb = await downscale(file, 480, 0.6); } catch (e) { toast('לא ניתן לקרוא את התמונה'); return; }
   const ctl = new AbortController();
@@ -2581,13 +2610,10 @@ async function runScan(file) {
   try {
     const r = (CAPS.sample && CAPS.images) ? await CAPS.sample.json(SCAN_PROMPT, { images: [small.blob], signal: ctl.signal, modelTier: 'default' }) : await srvScan(small.blob, ctl.signal);
     if (!r || typeof r !== 'object') throw { code: 'invalid_json' };
-    const pre = {}; ['name', 'roaster', 'originCountry', 'region', 'producer', 'variety', 'process', 'roastLevel', 'roastDate'].forEach((k) => { if (typeof r[k] === 'string' && r[k].trim()) pre[k] = r[k].trim(); });
-    const el = String(r.elevation == null ? '' : r.elevation).match(/\d{3,4}/g); if (el) { const e = mean(el.map(Number)); if (e > 0 && e < 3000) pre.elevation = Math.round(e); }
-    if (isNum(Number(r.weight)) && Number(r.weight) > 0 && Number(r.weight) < 20000) pre.weight = Number(r.weight);
-    if (pre.roastDate && !/^\d{4}-\d{2}-\d{2}$/.test(pre.roastDate)) delete pre.roastDate; if (pre.roastLevel && !ROAST_LEVELS.some((x) => x[0] === pre.roastLevel)) delete pre.roastLevel;
-    if (typeof r.notes === 'string' && r.notes.trim()) pre.roasterNotesText = r.notes.trim(); else if (Array.isArray(r.notes)) pre.roasterNotesText = r.notes.join(', ');
+    const pre = scanMap(r);
     pre.uncertain = Array.isArray(r.uncertain) ? r.uncertain.map((k) => (k === 'notes' ? 'roasterNotesText' : k)) : []; pre._thumb = thumb.dataUrl;
     if (!pre.name && !pre.roaster) pre._note = 'לא זוהו פרטים מהתמונה. נסו צילום קרוב וחד, או מלאו ידנית.';
+    await enrichBean(pre, ctl); if (ctl.signal.aborted) return;
     beanForm(null, pre);
   } catch (e) {
     const c2 = e && e.code; if (c2 === 'cancelled') return;
@@ -3025,7 +3051,7 @@ ACT['cam-shot'] = () => {
   const v = $('#cam_v'); if (!v || !v.videoWidth) { toast('המצלמה עוד נטענת'); return; }
   if (LIVE.last && Object.keys(LIVE.last.fields).length && !(CAPS.sample && CAPS.images) && _srv !== true) { const pre = liveUse(); camStop(); beanForm(null, pre); return; }
   const c = document.createElement('canvas'); c.width = v.videoWidth; c.height = v.videoHeight; c.getContext('2d').drawImage(v, 0, 0);
-  c.toBlob((b) => { camStop(); if (b) runScan(b); else toast('הצילום נכשל'); }, 'image/jpeg', 0.9);
+  c.toBlob((b) => { camStop(); const cc = $('#cam'); if (cc) cc.classList.remove('flash'); if (b) runScan(b); else toast('הצילום נכשל'); }, 'image/jpeg', 0.9);
 };
 
 if (location.protocol === 'https:' || location.hostname === 'localhost') srvOk();
@@ -3097,11 +3123,12 @@ async function liveLoop() {
       (data.words || []).forEach((w) => { if (w.confidence < 55 || !w.text || w.text.trim().length < 2) return; const b = w.bbox; const x = b.x0 / sx * sc + ox, y = b.y0 / sx * sc + oy, ww = (b.x1 - b.x0) / sx * sc, hh = (b.y1 - b.y0) / sx * sc; const hit = [...res.used].some((u) => u.toLowerCase().includes(w.text.toLowerCase())); g.lineWidth = hit ? 2.5 : 1.2; g.strokeStyle = hit ? '#5ee08a' : 'rgba(255,255,255,.7)'; g.fillStyle = hit ? 'rgba(94,224,138,.22)' : 'rgba(255,255,255,.08)'; g.beginPath(); g.roundRect ? g.roundRect(x - 2, y - 2, ww + 4, hh + 4, 5) : g.rect(x - 2, y - 2, ww + 4, hh + 4); g.fill(); g.stroke(); }); }
     const key = JSON.stringify(res.fields); LIVE.stable = key === LIVE.key ? LIVE.stable + 1 : 0; LIVE.key = key;
     const ready = (res.fields.name || res.fields.roaster) && n >= 3; if (shot) shot.classList.toggle('ready', !!ready);
-    setMsg(!n ? 'מחפש טקסט… קרבו את השקית' : ready ? (LIVE.stable >= 2 ? 'זוהה! לחצו על העיגול' : 'מזהה… החזיקו יציב') : 'זוהו ' + n + ' פרטים, המשיכו לסרוק');
+    setMsg(!n ? 'מחפש טקסט… קרבו את השקית' : ready ? (LIVE.stable >= 1 ? 'זוהה! מצלם…' : 'מזהה… החזיקו יציב') : 'זוהו ' + n + ' פרטים, המשיכו לסרוק');
+    if (ready && LIVE.stable >= 1 && !LIVE.auto) { LIVE.auto = true; const fl = $('#cam'); if (fl) fl.classList.add('flash'); try { if (navigator.vibrate) navigator.vibrate(40); } catch (e) { /* ignore */ } setTimeout(() => { if (CAM.open) ACT['cam-shot'](); }, 350); break; }
     await new Promise((r) => setTimeout(r, 250));
   }
 }
-function liveStart() { LIVE.run = true; LIVE.acc = new Map(); LIVE.last = null; LIVE.stable = 0; LIVE.key = ''; liveLoop(); }
+function liveStart() { LIVE.run = true; LIVE.acc = new Map(); LIVE.last = null; LIVE.stable = 0; LIVE.key = ''; LIVE.auto = false; liveLoop(); }
 function liveStop() { LIVE.run = false; }
 function liveUse() {
   const v = $('#cam_v'); let thumb = ''; try { if (v && v.videoWidth) { const c = document.createElement('canvas'); const s = Math.min(1, 480 / v.videoWidth); c.width = v.videoWidth * s; c.height = v.videoHeight * s; c.getContext('2d').drawImage(v, 0, 0, c.width, c.height); thumb = c.toDataURL('image/jpeg', 0.6); } } catch (e) { /* ignore */ }
@@ -3117,28 +3144,13 @@ const SCAN_URL = ''; // set when the live scanner page is hosted
 ACT['beans-menu'] = () => {
   const row = (act, ico, t, s) => '<button type="button" class="menu-b" data-act="' + act + '"><span class="menu-i">' + ico + '</span><span><b>' + t + '</b><small>' + s + '</small></span></button>';
   openModal({ title: 'הוספת פולים', body: '<div class="menu-l">' +
-    (_srv === true ? '' : row('scan-live-help', '🔴', 'סריקה חיה', 'מצלמה עם זיהוי טקסט בזמן אמת, ואז הדבקה כאן')) +
-    row('scan-paste', '📋', 'הדבקת סריקה', 'הדביקו את הקוד שהסורק העתיק') +
-    '<label class="menu-b filebtn2"><span class="menu-i">🖼️</span><span><b>תמונה</b><small>צילום או בחירה מהגלריה, Claude קורא את השקית</small></span><input type="file" accept="image/*" class="fover" data-on="scan-file" aria-label="תמונה של שקית"></label>' +
-    row('cam-open', '📷', 'מצלמה בדף', 'עובד רק אם המכשיר מאפשר מצלמה בתוך הדף') +
+    '<label class="menu-b filebtn2"><span class="menu-i">🖼️</span><span><b>תמונה</b><small>בחירה מהגלריה או צילום, הפרטים נקראים ומושלמים אוטומטית</small></span><input type="file" accept="image/*" class="fover" data-on="scan-file" aria-label="תמונה של שקית"></label>' +
+    row('cam-open', '📷', 'סריקה בצילום', 'המצלמה מזהה ומצלמת לבד, ואז משלימה פרטים מהאינטרנט') +
     row('bean-add', '✍️', 'ידני', 'מילוי הפרטים בעצמכם') + '</div>', actions: [{ label: 'סגירה', run: () => true }] });
 };
 const closeThen = (fn) => { closeModal(); setTimeout(fn, 30); };
 const _camOpen0 = ACT['cam-open']; ACT['cam-open'] = (...a) => { closeModal(); return _camOpen0(...a); };
 const _beanAdd0 = ACT['bean-add']; ACT['bean-add'] = (...a) => { closeModal(); return _beanAdd0(...a); };
-ACT['scan-live-help'] = () => closeThen(() => openModal({ title: 'סריקה חיה', body: '<ol class="plain steps"><li>' + (SCAN_URL ? 'פתחו את <a href="' + SCAN_URL + '" target="_blank" rel="noopener">דף הסורק</a>' : 'פתחו את קובץ הסורק (scan.html) בדפדפן של הטלפון') + ' ואשרו מצלמה.</li><li>כוונו אל השקית: הטקסט מזוהה בזמן אמת ומסומן במסגרות.</li><li>כשהעיגול ירוק לחצו עליו, ואז "העתקה".</li><li>חזרו לכאן ולחצו "הדבקת סריקה".</li></ol><small class="muted">הזיהוי רץ על הטלפון, בלי לשלוח את התמונה לשום מקום.</small>', actions: [{ label: 'הדבקת סריקה', cls: 'pri', run: () => { setTimeout(() => ACT['scan-paste'](), 30); return true; } }, { label: 'סגירה', run: () => true }] }));
-ACT['scan-paste'] = () => closeThen(() => openModal({ title: 'הדבקת סריקה', noFocus: true, body: '<p class="muted">הדביקו כאן את הקוד שהעתקתם מהסורק (מתחיל ב-CILBEAN).</p><textarea id="scan_code" rows="4" data-on="scan-code" dir="ltr" placeholder="CILBEAN:…" style="width:100%"></textarea><p id="scan_msg" class="muted" aria-live="polite"></p>', actions: [{ label: 'סגירה', run: () => true }] }));
-function decodeScan(txt) {
-  const m = String(txt || '').trim().match(/CILBEAN:([A-Za-z0-9_-]+)/); if (!m) return null;
-  try { const b = m[1].replace(/-/g, '+').replace(/_/g, '/'); const bin = atob(b + '==='.slice((b.length + 3) % 4)); const u = new Uint8Array(bin.length); for (let i = 0; i < bin.length; i++) u[i] = bin.charCodeAt(i); const j = JSON.parse(new TextDecoder().decode(u)); return j && j.f ? j : null; } catch (e) { return null; }
-}
-ON['scan-code'] = (v) => {
-  const msg = $('#scan_msg'); if (!v || !v.trim()) { if (msg) msg.textContent = ''; return; }
-  const j = decodeScan(v); if (!j) { if (msg) msg.textContent = 'הקוד לא נקרא. העתיקו שוב מהסורק.'; return; }
-  const pre = Object.assign({}, j.f); pre.uncertain = Array.isArray(j.u) ? j.u.map((k) => (k === 'notes' ? 'roasterNotesText' : k)) : []; if (j.t) pre._thumb = j.t;
-  if (!Object.keys(j.f).length) pre._note = 'הסורק לא זיהה טקסט. מלאו ידנית.';
-  closeModal(); setTimeout(() => beanForm(null, pre), 30);
-};
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
