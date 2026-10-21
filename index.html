@@ -984,6 +984,18 @@ body.froth-on { overflow: hidden; }
 .mk-card b { font-size: 13px; line-height: 1.3; overflow-wrap: anywhere; } .mk-card small { color: var(--muted); } .mk-card.off { opacity: .6; }
 .mk-add { margin-top: 12px; }
 
+/* market tiles */
+.mk-list { display: grid; gap: 10px; }
+.mk-tile { display: grid; grid-template-columns: 96px 1fr; gap: 12px; padding: 10px; border: 1px solid color-mix(in srgb, var(--bc) 40%, var(--line)); border-inline-start: 6px solid var(--bc); border-radius: 16px; background: linear-gradient(100deg, color-mix(in srgb, var(--bc) 18%, var(--surface)), color-mix(in srgb, var(--bc2) 8%, var(--surface))); box-shadow: var(--shadow); }
+.mk-im { width: 96px; height: 96px; border-radius: 12px; overflow: hidden; background: var(--bc); display: grid; place-items: center; color: #fff; font-family: var(--f-display); font-size: 34px; }
+.mk-im img { width: 100%; height: 100%; object-fit: cover; }
+.mk-bd { display: grid; gap: 5px; min-width: 0; align-content: start; }
+.mk-t { display: flex; gap: 6px; align-items: baseline; } .mk-t b { font-family: var(--f-display); font-size: 16px; overflow-wrap: anywhere; } .mk-fv { color: var(--accent); font-style: normal; }
+.mk-pr { display: flex; gap: 6px; align-items: baseline; flex-wrap: wrap; } .mk-pr b { font-size: 17px; } .mk-pr small { color: var(--muted); }
+.mk-tag.off { font-size: 11px; padding: 1px 7px; border-radius: 99px; background: var(--surface2); color: var(--muted); }
+.mk-stk { font-size: 12.5px; color: var(--muted); } .mk-stk.lo { color: var(--warn, #b8741a); font-weight: 600; } .mk-stk.z { color: var(--bad, #b5483a); font-weight: 600; }
+.mk-bt { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 2px; } .mk-bt a.btn { text-decoration: none; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -2619,11 +2631,12 @@ function beanForm(id, pre) {
     const errs = {}; needStr(errs, v, 'name', 'יש להזין שם'); numRange(errs, v, 'elevation', 0, 3000, 'גובה'); if (!id && v.addBag) { if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; }
     if (!showErrors(form, errs)) return false;
     const rec = { name: v.name, roaster: v.roaster,  originCountry: v.originCountry, process: v.process, roastLevel: v.roastLevel, region: v.region, variety: v.variety, producer: v.producer, elevation: v.elevation, roasterNotesText: v.roasterNotesText };
-    if (pre && pre._src) rec.productUrl = pre._src; if (pre && pre.site) rec.site = pre.site; if (pre && pre._list) rec.listPrice = pre._list; if (pre && pre._harvest) rec.harvest = pre._harvest;
+    if (pre && pre._src) rec.productUrl = pre._src; if (pre && pre.site) rec.site = pre.site; if (pre && pre._list) rec.listPrice = Object.assign({}, pre._list, pre.weight ? { weight: pre.weight } : {}); if (pre && pre._harvest) rec.harvest = pre._harvest;
     ensureCompany(v.roaster, 'roaster');
     let bean; if (id) bean = patch('beans', id, rec); else { bean = insert('beans', Object.assign({ roasterNotes: [], profile: {}, createdAt: nowISO() }, rec), 'bean'); if (v.addBag) insert('bags', { beanId: bean.id, weight: v.weight, price: v.price, purchaseDate: toDateInput(), roastDate: v.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag'); }
     if (pre && pre._thumb) { colorFrom(pre._thumb).then((c) => { if (c) { patch('beans', bean.id, { color: c.c1, color2: c.c2 }); save(); render(); } }); }
     if (pre && pre._thumb) { state.photos = state.photos.filter((p) => !(p.beanId === bean.id && p.kind === 'pack')); state.photos.push({ id: uid('ph'), beanId: bean.id, kind: 'pack', data: pre._thumb }); }
+    if (pre && pre._img) adoptSiteImage(bean.id, pre._img);
     save(); toast(id ? 'עודכן' : '"' + v.name + '" נוסף'); render();
   } }] });
 }
@@ -2670,6 +2683,7 @@ async function enrichBean(pre, ctl) {
     const bits = []; if (!e.sourceUrl) bits.push(e.pagesRead ? 'לא נמצא עמוד מוצר מתאים.' : 'לא נמצא עמוד מוצר באינטרנט.'); if (filled.length) bits.push('הושלמו מהאינטרנט: ' + filled.map((k) => ENR_LABEL[k] || k).join(', ') + '. כדאי לוודא.'); if (pre._list && !(pre.price != null && /^(ILS|NIS|₪)$/.test(pre._list.currency))) bits.push('מחיר באתר: ' + pre._list.amount + ' ' + pre._list.currency + (pre.weight ? ' ל-' + pre.weight + ' g' : '') + '.');
     if (typeof e.info === 'string' && e.info.trim()) bits.push(e.info.trim());
     if (typeof e.sourceUrl === 'string' && /^https?:\/\//.test(e.sourceUrl)) pre._src = e.sourceUrl;
+    if (typeof e.image === 'string' && /^https:\/\//.test(e.image)) pre._img = e.image;
     if (bits.length) pre._note = (pre._note ? pre._note + ' ' : '') + bits.join(' ');
   } catch (err) { /* enrichment is best-effort */ } finally { clearTimeout(t); }
 }
@@ -3317,19 +3331,59 @@ async function colorizeBeans() {
 }
 AFTER.beans = (function (prev) { return function () { if (prev) prev.apply(this, arguments); colorizeBeans(); }; })(AFTER.beans);
 
-/* ---------- market ---------- */
+
+/* site product image -> library photo + colours */
+async function siteImgData(url) {
+  try {
+    const r = await fetch('api/img?u=' + encodeURIComponent(url)); if (!r.ok) return null; const bl = await r.blob();
+    return await new Promise((res) => { const fr = new FileReader(); fr.onload = () => { const im = new Image(); im.onload = () => { const k = Math.min(1, 420 / Math.max(im.width, im.height)); const c = document.createElement('canvas'); c.width = Math.max(1, Math.round(im.width * k)); c.height = Math.max(1, Math.round(im.height * k)); c.getContext('2d').drawImage(im, 0, 0, c.width, c.height); res(c.toDataURL('image/jpeg', 0.82)); }; im.onerror = () => res(null); im.src = fr.result; }; fr.onerror = () => res(null); fr.readAsDataURL(bl); });
+  } catch (e) { return null; }
+}
+const _adopting = new Set();
+async function adoptSiteImage(beanId, url) {
+  const key = beanId + '|' + url; if (_adopting.has(key)) return false; _adopting.add(key);
+  const d = await siteImgData(url); if (!d) return false; const b = state.beans.find((x) => x.id === beanId); if (!b) return false;
+  const c = await colorFrom(d); b.siteImage = url; if (c) { b.color = c.c1; b.color2 = c.c2; }
+  const old = state.photos.find((p) => p.beanId === beanId && p.kind === 'pack'); if (old && !state.photos.some((p) => p.beanId === beanId && p.kind === 'scan')) state.photos.push({ id: uid('ph'), beanId, kind: 'scan', data: old.data });
+  state.photos = state.photos.filter((p) => !(p.beanId === beanId && p.kind === 'pack')); state.photos.push({ id: uid('ph'), beanId, kind: 'pack', data: d });
+  save(); render(); if (typeof mkRender === 'function' && $('#mk_body')) mkRender(); return true;
+}
+
+/* ---------- market: buy again from the roaster's own shop ---------- */
 const MK = { roaster: '', cache: {}, busy: false };
 const MK_OTHER = /cold ?brew|matcha|מאצ|tea\b|תה|drip bag|capsule|קפסול|concentrate|syrup|סירופ|mug|כוס|grinder|מטחנ|dripper|filter paper|פילטר|kettle|קומקום|gift|מתנה|subscription|מנוי|chocolate|שוקולד|merch|t-?shirt|bottle|בקבוק/i;
+const MK_JUNK = /\btest\b|gift card|כרטיס מתנה|\bsample\b|wholesale|\b(1|2|5) ?kg\b/i;
 const CUR_SYM = { ILS: '₪', USD: '$', EUR: '€', GBP: '£', NOK: 'kr', SEK: 'kr', DKK: 'kr', CAD: 'C$', AUD: 'A$' };
 function mkRoasters() {
   const m = new Map(); state.beans.forEach((b) => { const r = (b.roaster || '').trim(); if (!r) return; const o = m.get(coKey(r)) || { name: r, site: '', beans: [] }; if (!o.site && b.site) o.site = b.site; o.beans.push(b); m.set(coKey(r), o); });
   ((prefs().marketRoasters) || []).forEach((x) => { const k = coKey(x.name); if (!m.has(k)) m.set(k, { name: x.name, site: x.site || '', beans: [] }); else if (x.site && !m.get(k).site) m.get(k).site = x.site; });
   return Array.from(m.values());
 }
-function mkFav(r) {
-  return r.beans.map((b) => { const bags = state.bags.filter((g) => g.beanId === b.id); const sc = dataset().filter((x) => x.beanId === b.id && isNum(x.overall)).map((x) => x.overall); return { b, n: bags.length, avg: sc.length ? mean(sc) : null }; }).filter((x) => x.n >= 2 || (x.avg != null && x.avg >= 8)).sort((a, c) => c.n - a.n || (c.avg || 0) - (a.avg || 0));
+function mkMoney(amount, cur) { if (!isNum(amount)) return ''; const s = CUR_SYM[cur] || cur || ''; const n = fmtN(amount, amount % 1 ? 2 : 0); return s.length === 1 || s === 'C$' || s === 'A$' ? s + n : n + (s ? ' ' + s : ''); }
+function mkPrice(p, cur) { return mkMoney(p.price, cur); }
+function mkMatch(b, prods) {
+  const u = (b.productUrl || '').split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase(); const byUrl = u && prods.find((p) => p.url.toLowerCase() === u); if (byUrl) return byUrl;
+  const n = coKey(b.name); if (!n) return null; return prods.find((p) => { const t = coKey(p.title); return t === n || t.includes(n) || n.includes(t); }) || null;
 }
-function mkPrice(p, cur) { if (!isNum(p.price)) return ''; const s = CUR_SYM[cur] || cur || ''; return (s.length === 1 ? s : '') + fmtN(p.price, p.price % 1 ? 2 : 0) + (s.length > 1 ? ' ' + s : ''); }
+function mkStats(b) {
+  const bags = state.bags.filter((g) => g.beanId === b.id); const act = bags.filter((g) => activeBags().includes(g)); const rem = Math.round(sum(act.map(bagRemaining)));
+  const sc = dataset().filter((x) => x.beanId === b.id && isNum(x.overall)).map((x) => x.overall); const paid = bags.filter((g) => isNum(g.price) && g.price > 0).sort((a, c) => (c.purchaseDate || '') < (a.purchaseDate || '') ? -1 : 1)[0];
+  return { bags, act, rem, n: bags.length, avg: sc.length ? mean(sc) : null, paid, cups: sc.length };
+}
+function mkTile(b, m, data) {
+  const st = mkStats(b); const img = photoOf(b.id, 'pack') || ''; const link = (m && m.url) || b.productUrl || (data.site ? data.site + '/search?q=' + encodeURIComponent(b.name) : '');
+  const cur = (m && isNum(m.price)) ? data.currency : (b.listPrice && b.listPrice.currency); const amt = (m && isNum(m.price)) ? m.price : (b.listPrice && b.listPrice.amount); const w = (m && m.grams) || (b.listPrice && b.listPrice.weight) || (st.bags[0] && st.bags[0].weight) || null;
+  const price = isNum(amt) ? mkMoney(amt, cur) : '';
+  const out = m && !m.available; const low = st.rem > 0 && st.rem < 80; const stock = st.rem > 0 ? 'במלאי ' + st.rem + ' g' + (st.act.length > 1 ? ' · ' + st.act.length + ' שקיות' : '') : 'אין במלאי';
+  const paid = st.paid ? 'שילמת ' + mkMoney(st.paid.price, 'ILS') : '';
+  const fav = st.n >= 2 || (st.avg != null && st.avg >= 8);
+  return '<div class="mk-tile' + (b.color ? '' : ' nc') + '" style="--bc:' + esc(b.color || 'var(--accent)') + ';--bc2:' + esc(b.color2 || b.color || 'var(--accent)') + '">' +
+    '<div class="mk-im">' + (img ? '<img alt="" loading="lazy" src="' + esc(img) + '">' : '<span>' + esc((b.name || '?').trim().charAt(0)) + '</span>') + '</div>' +
+    '<div class="mk-bd"><div class="mk-t"><b>' + esc(b.name) + '</b>' + (fav ? '<i class="mk-fv" title="חביב / חוזר">★</i>' : '') + '</div>' +
+    '<div class="mk-pr">' + (price ? '<b>' + esc(price) + '</b>' + (w ? '<small> · ' + w + ' g</small>' : '') : '<small class="muted">מחיר לא ידוע</small>') + (out ? '<span class="mk-tag off">אזל באתר</span>' : '') + '</div>' +
+    '<div class="mk-stk' + (st.rem === 0 ? ' z' : low ? ' lo' : '') + '">' + stock + (st.avg != null ? ' · ציון ' + fmtN(st.avg, 1) : '') + (paid ? ' · ' + paid : '') + '</div>' +
+    '<div class="mk-bt">' + (link ? '<a class="btn pri sm" href="' + esc(link) + '" target="_blank" rel="noopener">הזמנה באתר ↗</a>' : '') + '<button type="button" class="btn sm" data-act="mk-manage" data-id="' + esc(b.id) + '">ניהול</button></div></div></div>';
+}
 function mkCard(p, cur) { return '<a class="mk-card' + (p.available ? '' : ' off') + '" href="' + esc(p.url) + '" target="_blank" rel="noopener">' + (p.image ? '<img alt="" loading="lazy" src="' + esc(p.image) + '">' : '<span class="mk-ph">☕</span>') + '<b>' + esc(p.title) + '</b><small>' + esc(mkPrice(p, cur)) + (p.available ? '' : ' · אזל') + '</small></a>'; }
 function mkRender() {
   const host = $('#mk_body'); if (!host) return; const rs = mkRoasters(); const cur = rs.find((r) => coKey(r.name) === coKey(MK.roaster)) || rs[0];
@@ -3341,15 +3395,16 @@ function mkRender() {
     if (!data) body = '<p class="muted s">טוען מהאתר של ' + esc(cur.name) + '…</p>';
     else if (!data.site) body = '<p class="muted">לא מצאתי אתר רשמי עבור ' + esc(cur.name) + '. אפשר להזין כתובת אתר למטה.</p>';
     else {
-      const favs = mkFav(cur); const prods = (data.products || []).filter((p) => !/gift card|כרטיס מתנה/i.test(p.title));
+      const prods = (data.products || []).filter((p) => !MK_JUNK.test(p.title));
       const other = prods.filter((p) => MK_OTHER.test(p.title + ' ' + p.type + ' ' + (p.tags || []).join(' '))); const coffee = prods.filter((p) => !other.includes(p)).sort((a, b) => (a.available === b.available ? (a.updated < b.updated ? 1 : -1) : a.available ? -1 : 1));
-      const own = new Set(cur.beans.map((b) => coKey(b.name)));
-      const link = (b) => { const m = prods.find((p) => coKey(p.title).includes(coKey(b.name)) || coKey(b.name).includes(coKey(p.title))); return (m && m.url) || b.productUrl || (data.site + '/search?q=' + encodeURIComponent(b.name)); };
-      body = '<div class="mk-site"><a href="' + esc(data.site) + '" target="_blank" rel="noopener">האתר הרשמי ↗</a>' + (data.shopify === false ? ' <small class="muted">הקטלוג לא נטען אוטומטית מהאתר הזה</small>' : '') + '</div>' +
-        (favs.length ? '<div class="blk-h">החביבים שלך · קנייה חוזרת</div><div class="mk-fav">' + favs.map((f) => '<a class="mk-row" href="' + esc(link(f.b)) + '" target="_blank" rel="noopener"><span class="mk-dot" style="background:' + esc(f.b.color || 'var(--accent)') + '"></span><span class="grow"><b>' + esc(f.b.name) + '</b><small>' + f.n + ' שקיות' + (f.avg != null ? ' · ציון ' + fmtN(f.avg, 1) : '') + '</small></span><span class="mk-go">קנייה ↗</span></a>').join('') + '</div>' : '') +
-        (coffee.length ? '<div class="blk-h">חדש באתר · פולי קפה</div><div class="mk-grid">' + coffee.filter((p) => !Array.from(own).some((n) => n && (coKey(p.title).includes(n) || n.includes(coKey(p.title))))).slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '') +
-        (other.length ? '<div class="blk-h">עוד מוצרי קפה</div><div class="mk-grid">' + other.slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '') +
-        (!coffee.length && !other.length ? '<p class="muted">אין קטלוג זמין. אפשר להמשיך לאתר הרשמי.</p>' : '');
+      const mine = cur.beans.map((b) => ({ b, m: mkMatch(b, prods) })).sort((a, c) => { const A = mkStats(a.b), C = mkStats(c.b); return (C.rem > 0) - (A.rem > 0) || C.n - A.n; });
+      const matched = new Set(mine.map((x) => x.m && x.m.url).filter(Boolean));
+      mine.forEach((x) => { if (x.m && x.m.image && x.b.siteImage !== x.m.image) adoptSiteImage(x.b.id, x.m.image); });
+      const fresh = coffee.filter((p) => !matched.has(p.url));
+      body = '<div class="mk-site"><a href="' + esc(data.site) + '" target="_blank" rel="noopener">האתר הרשמי ↗</a>' + (data.shopify === false ? ' <small class="muted">הקטלוג לא נטען אוטומטית מהאתר הזה, הקישורים מובילים לעמודי המוצר שנשמרו</small>' : '') + '</div>' +
+        (mine.length ? '<div class="blk-h">הקפה שלך · הזמנה חוזרת</div><div class="mk-list">' + mine.map((x) => mkTile(x.b, x.m, data)).join('') + '</div>' : '<p class="muted">עוד אין פולים של הקלייה הזו בספרייה.</p>') +
+        (fresh.length ? '<div class="blk-h">חדש באתר · פולי קפה</div><div class="mk-grid">' + fresh.slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '') +
+        (other.length ? '<div class="blk-h">עוד מוצרי קפה</div><div class="mk-grid">' + other.slice(0, 12).map((p) => mkCard(p, data.currency)).join('') + '</div>' : '');
     }
   }
   host.innerHTML = '<div class="chips-row">' + chips + '</div>' + body + '<div class="row wrap mk-add"><input type="text" id="mk_new" placeholder="שם קלייה או כתובת אתר" aria-label="קלייה חדשה" style="max-width:240px"><button class="btn sm" data-act="mk-add">+ הוספת קלייה</button></div>';
@@ -3371,6 +3426,8 @@ ACT['mk-add'] = () => {
   try { if (/^(https?:\/\/)?[\w-]+(\.[\w-]+)+/.test(v)) { const u = new URL(/^https?:/.test(v) ? v : 'https://' + v); site = u.origin; name = u.hostname.replace(/^www\./, '').split('.')[0]; } } catch (e) { /* name only */ }
   if (!pr.marketRoasters.some((x) => coKey(x.name) === coKey(name))) pr.marketRoasters.push({ name, site }); save(); MK.roaster = name; mkRender(); const r = mkRoasters().find((x) => coKey(x.name) === coKey(name)); if (r) mkLoad(r);
 };
+
+ACT['mk-manage'] = (d) => { closeModal(); UI.bean.id = d.id; UI.tab.bean = 'overview'; go('beans'); };
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
