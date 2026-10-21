@@ -16,7 +16,9 @@ async function blog(site) {
   return [];
 }
 
+let DG_ERR = '';
 async function digest(q) {
+  DG_ERR = '';
   if (!KEY) return [];
   const today = new Date().toISOString().slice(0, 10);
   const prompt = 'Today is ' + today + '. You write a short personal newsletter for a home specialty-coffee enthusiast who lives in ' + (q.loc || 'Israel') + '.\n' +
@@ -29,10 +31,10 @@ async function digest(q) {
     'Only include items you found in search results. Each url MUST be the specific page of that item (the article, the workshop page, the event page), never a homepage, a category or a /news listing page, and never the same url twice. Prefer items dated within the last 2 months or upcoming. 6 to 12 items.\n' +
     'Reply with ONLY JSON {"items":[{"kind":"workshop"|"event"|"news"|"release","title": Hebrew title,"summary": 1-2 Hebrew sentences why it is relevant to them,"date":"YYYY-MM-DD" or null (event/publish date),"where": city name or null,"url":"https://...","source": site name}]}';
   const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 3500, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }], messages: [{ role: 'user', content: prompt }] }) });
-  if (!r.ok) return [];
+  if (!r.ok) { DG_ERR = 'http ' + r.status; return []; }
   const j = await r.json(); const t = (j.content || []).filter((x) => x.type === 'text').map((x) => x.text).join('\n');
   const seen = new Set(); (j.content || []).forEach((b) => { if (b.type === 'web_search_tool_result' && Array.isArray(b.content)) b.content.forEach((x) => { if (x && x.url) seen.add(x.url.split('#')[0]); }); });
-  const a = t.indexOf('{'), b = t.lastIndexOf('}'); let o = {}; try { o = JSON.parse(t.slice(a, b + 1)); } catch (e) { return []; }
+  const a = t.indexOf('{'), b = t.lastIndexOf('}'); let o = {}; try { o = JSON.parse(t.slice(a, b + 1)); } catch (e) { DG_ERR = 'parse ' + t.slice(0, 120); return []; }
   const used = new Set();
   return (Array.isArray(o.items) ? o.items : []).filter((x) => { if (!x || !x.title || !/^https?:\/\//.test(x.url || '')) return false; let u; try { u = new URL(x.url); } catch (e) { return false; } const path = u.pathname.replace(/\/+$/, ''); if (!path || /^\/(news|blog|blogs|events?|workshops?|courses?|he|en|articles?|category\/[^/]+)$/i.test(path)) return false; const k = u.host + path; if (used.has(k)) return false; used.add(k); return true; }).map((x) => ({ kind: /^(workshop|event|news|release)$/.test(x.kind) ? x.kind : 'news', title: String(x.title).slice(0, 160), summary: String(x.summary || '').slice(0, 400), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where && !/^(online|אונליין|מקוון|null)$/i.test(String(x.where).trim()) ? String(x.where).slice(0, 60) : null, url: x.url, source: String(x.source || '').slice(0, 60), verified: seen.has(String(x.url).split('#')[0]) })).slice(0, 16);
 }
@@ -73,8 +75,9 @@ module.exports = async (req, res) => {
     const q = {}; const sp = new URL(req.url, 'http://x').searchParams; ['roasters', 'origins', 'methods', 'loc'].forEach((k) => { q[k] = (sp.get(k) || '').slice(0, 300); });
     const sites = (sp.get('sites') || '').split(',').map((s) => s.trim().toLowerCase()).filter((s) => /^[a-z0-9.-]+\.[a-z]{2,}$/.test(s)).slice(0, 8).map((h) => 'https://' + h);
     const t0 = Date.now();
-    const [posts, items, world] = await Promise.all([Promise.all(sites.map((s) => blog(s).catch(() => []))).then((a) => [].concat(...a)), sp.get('ai') === '0' ? Promise.resolve([]) : digest(q).catch(() => []), rss().then(toHebrew).catch(() => [])]);
+    const [posts, items, world] = await Promise.all([Promise.all(sites.map((s) => blog(s).catch(() => []))).then((a) => [].concat(...a)), sp.get('ai') === '0' ? Promise.resolve([]) : digest(q).catch((e) => { DG_ERR = 'exc ' + String(e).slice(0, 80); return []; }), rss().then(toHebrew).catch(() => [])]);
     const left = 52000 - (Date.now() - t0); if (left > 2500) await ogImages(items.concat(world), Math.min(4000, left - 1500));
-    send(200, { at: new Date().toISOString(), posts: posts.filter((p) => p.title && p.url), items: items.concat(world) }, true);
+    const good = items.length >= 3; if (!good) res.setHeader('x-digest', 'short');
+    send(200, { at: new Date().toISOString(), posts: posts.filter((p) => p.title && p.url), items: items.concat(world), dg: items.length, dge: DG_ERR }, good);
   } catch (e) { send(502, { error: 'fail' }); }
 };
