@@ -1134,6 +1134,79 @@ body.froth-on { overflow: hidden; }
 .sp-h { flex-wrap: wrap; }
 .nw-chips { flex-wrap: wrap; overflow: visible; }
 
+/* ============ frothing v4 ============ */
+.pitch.v4 { --milk: #f3ebdd; --milk2: #e6dac6; --foamc: #fffaf2; --fdot: #e9dfcf; }
+.pitch.v4 .mg0 { stop-color: var(--milk); } .pitch.v4 .mg1 { stop-color: var(--milk2); }
+.pitch.v4 .milkfill { opacity: 1; fill: url(#mgl); }
+.pitch.v4 .foam { opacity: 1; transform: none; transform-box: fill-box; transform-origin: 50% 0; }
+.pitch.v4 .fm-bg { fill: var(--foamc); } .pitch.v4 .fm-d { fill: var(--fdot); }
+.pitch.v4 .pbody { stroke-width: 3.5; fill: none; } .pitch.v4 .phandle { fill: none; stroke: var(--fg); stroke-width: 6; stroke-linecap: round; }
+.pitch.v4 .wd { stroke: color-mix(in srgb, var(--fg) 70%, transparent); stroke-width: 7; stroke-linecap: round; fill: none; }
+.pitch.v4 .wtip { fill: var(--accent); } .pitch.v4 .wand { animation: none; transform: none; transition: transform .6s ease, opacity .4s; }
+.pitch.v4 .hiss path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; opacity: 0; }
+.pitch.v4 .air circle { fill: var(--foamc); stroke: var(--muted); stroke-width: 1; opacity: 0; }
+.pitch.v4 .gloss { fill: none; stroke: #fff; stroke-width: 2.5; stroke-linecap: round; opacity: 0; }
+.pitch.v4 .vortex { opacity: 0; transition: opacity .4s; } .pitch.v4 .vx { fill: none; stroke: color-mix(in srgb, var(--accent) 70%, transparent); stroke-width: 2.2; stroke-dasharray: 10 8; }
+.pitch.v4 .vx.v2 { stroke-width: 1.6; opacity: .7; } .pitch.v4 .vxa { fill: none; stroke: var(--accent); stroke-width: 2.4; }
+.pitch.v4 .surf { stroke-dasharray: 4 3; } .pitch.v4 .sl { text-anchor: end; }
+.pitch.v4 .depth line { stroke: var(--accent); stroke-width: 2; } .pitch.v4 .depth .lab { font-size: 10.5px; }
+.pitch.v4 .lower { opacity: 0; } .pitch.v4 .lower path { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; }
+.pitch.v4 .tvc { fill: color-mix(in srgb, var(--milk) 70%, transparent); stroke: var(--fg); stroke-width: 2.5; } .pitch.v4 .tvs { fill: none; stroke: var(--fg); stroke-width: 2.5; stroke-linejoin: round; }
+.pitch.v4 .tk { stroke: var(--muted); stroke-width: 2; } .pitch.v4 .tvn12 { text-anchor: middle; font-size: 9.5px; } .pitch.v4 .topv .lab { text-anchor: middle; }
+.pitch.v4 .tvt { fill: var(--accent); stroke: var(--surface); stroke-width: 2; }
+.pitch.v4 .tvsw { opacity: 0; transform-origin: 270px 206px; } .pitch.v4 .tvsw path { fill: none; stroke: var(--accent); stroke-width: 2.4; stroke-linecap: round; }
+.pitch.v4 .thermo .th-tube { fill: var(--surface); stroke: var(--line); stroke-width: 1.5; } .pitch.v4 .th-fill { fill: #d79a5a; transition: height .3s, y .3s; } .pitch.v4 .th-fill.hot { fill: #c0552e; }
+.pitch.v4 .th-bulb { fill: #c0552e; } .pitch.v4 .th-tgt { stroke: var(--fg); stroke-width: 2; stroke-dasharray: 3 2; } .pitch.v4 .th-t { font-size: 10px; fill: var(--fg); }
+.pitch.v4 .tap { opacity: 0; } .pitch.v4 .tap path { stroke: var(--muted); stroke-width: 2; stroke-dasharray: 3 3; } .pitch.v4 .tap .lab { text-anchor: middle; }
+.pitch.v4 .pg, .pitch.v4 .milkg { animation: none; transform: none; transition: transform .7s ease; transform-origin: 132px 236px; }
+/* phase 0: setup */
+.fr-art[data-ph="0"] .pitch.v4 .hiss path { opacity: .35; }
+/* phase 1: stretching — milk grows, pitcher goes down, tip stays at the surface */
+.fr-art[data-ph="1"] .pitch.v4 .pg { animation: v4drop var(--st, 4s) ease-out forwards; }
+.fr-art[data-ph="1"] .pitch.v4 .milkg { animation: v4rise var(--st, 4s) ease-out forwards; }
+.fr-art[data-ph="1"] .pitch.v4 .foam { animation: v4foam var(--st, 4s) ease-out forwards; }
+.fr-art[data-ph="1"] .pitch.v4 .air circle { animation: v4air .9s ease-out infinite; }
+.fr-art[data-ph="1"] .pitch.v4 .air circle:nth-child(2) { animation-delay: .18s; } .fr-art[data-ph="1"] .pitch.v4 .air circle:nth-child(3) { animation-delay: .36s; } .fr-art[data-ph="1"] .pitch.v4 .air circle:nth-child(4) { animation-delay: .54s; } .fr-art[data-ph="1"] .pitch.v4 .air circle:nth-child(5) { animation-delay: .72s; }
+.fr-art[data-ph="1"] .pitch.v4 .hiss path { animation: v4hiss .5s ease-in-out infinite alternate; } .fr-art[data-ph="1"] .pitch.v4 .hiss path:nth-child(2) { animation-delay: .25s; }
+.fr-art[data-ph="1"] .pitch.v4 .lower { opacity: 1; animation: nudge 1.2s ease-in-out infinite; }
+.fr-art[data-ph="1"] .pitch.v4 .d1 { opacity: 1; }
+/* phase 2: texturing — pitcher raised a little and tilted, tip deeper, vortex */
+.fr-art[data-ph="2"] .pitch.v4 .pg { transform: translateY(calc(var(--grow) - 15px)) rotate(-3deg); }
+.fr-art[data-ph="2"] .pitch.v4 .milkg { transform: translateY(calc(-1 * var(--grow))); }
+.fr-art[data-ph="2"] .pitch.v4 .vortex { opacity: 1; } .fr-art[data-ph="2"] .pitch.v4 .vx { animation: v4spin 1.1s linear infinite; } .fr-art[data-ph="2"] .pitch.v4 .vx.v2 { animation-duration: .8s; }
+.fr-art[data-ph="2"] .pitch.v4 .tvsw { opacity: 1; animation: v4rot 1.2s linear infinite; }
+.fr-art[data-ph="2"] .pitch.v4 .gloss { opacity: .7; } .fr-art[data-ph="2"] .pitch.v4 .d2 { opacity: 1; } .fr-art[data-ph="2"] .pitch.v4 .d1 { opacity: 0; }
+.fr-art[data-ph="2"] .pitch.v4 .steam path { animation: stm 1.8s ease-in-out infinite; }
+/* phase 4: finish — wand away, tap, swirl until glossy */
+.fr-art[data-ph="4"] .pitch.v4 .wand { opacity: 0; transform: translate(30px, -40px); }
+.fr-art[data-ph="4"] .pitch.v4 .milkg { transform: translateY(calc(-1 * var(--grow))); }
+.fr-art[data-ph="4"] .pitch.v4 .pg { animation: v4fin 3.4s ease-in-out infinite; }
+.fr-art[data-ph="4"] .pitch.v4 .gloss { animation: v4gloss 1.7s ease-in-out infinite; } .fr-art[data-ph="4"] .pitch.v4 .tap { animation: v4tap 3.4s ease-in-out infinite; }
+.fr-art[data-ph="4"] .pitch.v4 .surf, .fr-art[data-ph="4"] .pitch.v4 .sl { opacity: .35; }
+@keyframes v4drop { from { transform: translateY(0); } to { transform: translateY(var(--grow)); } }
+@keyframes v4rise { from { transform: translateY(0); } to { transform: translateY(calc(-1 * var(--grow))); } }
+@keyframes v4foam { from { transform: scaleY(.12); } to { transform: scaleY(1); } }
+@keyframes v4air { 0% { opacity: 0; transform: translate(0, -2px); } 25% { opacity: 1; } 100% { opacity: 0; transform: translate(-10px, 16px); } }
+@keyframes v4hiss { from { opacity: .15; } to { opacity: 1; } }
+@keyframes v4spin { to { stroke-dashoffset: -36; } }
+@keyframes v4rot { to { transform: rotate(360deg); } }
+@keyframes v4fin { 0%, 6%, 14% { transform: translateY(calc(var(--grow) * 0)); } 3%, 10% { transform: translateY(6px); } 30% { transform: rotate(-4deg); } 45% { transform: rotate(4deg); } 60% { transform: rotate(-4deg); } 75% { transform: rotate(4deg); } 90%, 100% { transform: none; } }
+@keyframes v4gloss { 0%, 100% { opacity: .2; } 50% { opacity: .95; } }
+@keyframes v4tap { 0%, 18% { opacity: 1; } 24%, 100% { opacity: 0; } }
+:root[data-theme="dark"] .pitch.v4 { --milk: #e8dfd0; --milk2: #d4c7b2; --foamc: #f7f1e6; --fdot: #ddd1bd; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .pitch.v4 { --milk: #e8dfd0; --milk2: #d4c7b2; --foamc: #f7f1e6; --fdot: #ddd1bd; } }
+.pitch.v4 text { direction: rtl; } .pitch.v4 .foam { fill: url(#mfoam); } .pitch.v4 .sl { text-anchor: start; font-size: 10px; }
+.pitch.v4 .th-t { text-anchor: end; } .pitch.v4 .depth path { fill: none; stroke: var(--accent); stroke-width: 2; stroke-linecap: round; }
+.pitch.v4 .depth .lab { font-size: 10px; paint-order: stroke; stroke: var(--milk); stroke-width: 3px; }
+.pitch.v4 .depth line { display: none; }
+.fr-art[data-ph="4"] .pitch.v4 .depth, .fr-art[data-ph="0"] .pitch.v4 .d2 { opacity: 0; } .fr-art[data-ph="0"] .pitch.v4 .d1 { opacity: 1; }
+.fr-art[data-ph="2"] .pitch.v4 .surf, .fr-art[data-ph="2"] .pitch.v4 .sl { opacity: 0; }
+.fr-do.hot { background: var(--accent); color: var(--accent-fg, #fff); border-color: var(--accent); animation: cuepulse 1s ease-in-out infinite alternate; }
+@keyframes cuepulse { from { transform: scale(1); } to { transform: scale(1.025); } }
+.pitch.v4 .depth .lab { font-size: 11px; font-weight: 800; }
+.fr-art[data-ph="4"] .pitch.v4 .surf, .fr-art[data-ph="4"] .pitch.v4 .sl, .fr-art[data-ph="4"] .pitch.v4 .tvt { opacity: 0; }
+.fr-art[data-ph="4"] .pitch.v4 .tvsw { opacity: 1; animation: v4rot 2.4s linear infinite; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -3516,7 +3589,7 @@ ICON.stats = '<path d="M4 16a8 8 0 1 1 16 0"/><path d="M12 16l4.5-5"/><path d="M
 (function () { const v = { brew: VIEWS.brew, beans: VIEWS.beans, shop: { he: 'חנות' }, stats: { he: 'מצב' }, log: VIEWS.log, settings: VIEWS.settings }; Object.keys(VIEWS).forEach((k) => delete VIEWS[k]); Object.assign(VIEWS, v); })();
 
 const SHOP = { cats: {}, busy: {}, det: {}, q: '', cat: 'all', store: '', page: 'store', k: '', pid: '', size: {}, qty: {} };
-const SHOP_LS = 'cl_shop_v2';
+const SHOP_LS = 'cl_shop_v3';
 try { const c = JSON.parse(localStorage.getItem(SHOP_LS) || '{}'); if (c && typeof c === 'object') SHOP.cats = c; } catch (e) { /* no storage */ }
 function shopPersist() { try { localStorage.setItem(SHOP_LS, JSON.stringify(SHOP.cats)); } catch (e) { /* full or blocked */ } }
 const SHOP_JUNK = /\btest\b|gift ?card|giftcard|כרטיס מתנה|\bsample\b|wholesale|סיטונא|auto-draft/i;
@@ -3558,6 +3631,7 @@ function allProducts() {
 function ownerOf(p) { return p.g.beans.find((b) => b.shopPid === p.id) || null; }
 function beanStock(b) { const act = state.bags.filter((g) => g.beanId === b.id && activeBags().includes(g)); return { rem: Math.round(sum(act.map(bagRemaining))), n: act.length }; }
 function pcat(p) {
+  if (p.kind && /^(beans|blend|drinks|gear|bundle|workshop|other)$/.test(p.kind)) return p.kind === 'other' ? 'gear' : p.kind;
   const s = (p.title + ' ' + (p.cats || []).join(' ') + ' ' + (p.slug || '')).toLowerCase();
   if (/סדנ|workshop|course|קורס|cupping|קאפינג|\bclass\b|masterclass|שיעור|הדרכ|אירוע|ערב טעימות|barista training|סיור|\btour\b/.test(s)) return 'workshop';
   if (/gift|מתנה|bundle|מארז|trio|שלישיי|variety|subscription|מנוי/.test(s)) return 'bundle';
@@ -3932,13 +4006,13 @@ statsTips = (function (prev) { return function (D) { const t = prev(D); t.forEac
 
 /* ============ newsletter ============ */
 const NEWS = { data: null, busy: false, err: '', f: 'all' };
-const NEWS_LS = 'cl_news_v2';
+const NEWS_LS = 'cl_news_v3';
 try { const o = JSON.parse(localStorage.getItem(NEWS_LS) || 'null'); if (o && o.data) NEWS.data = o.data; } catch (e) { /* none */ }
 function newsQuery() {
   const gs = shopGroups().filter((g) => g.mine && g.host); const ds = dataset().slice(-60);
   const top = (arr) => Object.entries(arr.reduce((m, x) => { if (x) m[x] = (m[x] || 0) + 1; return m; }, {})).sort((a, b) => b[1] - a[1]).slice(0, 4).map((x) => x[0]);
   const q = { sites: gs.map((g) => g.host).slice(0, 6).sort().join(','), roasters: gs.map((g) => g.name).slice(0, 5).join(', '), origins: top(state.beans.map((b) => b.originCountry)).join(', '), methods: top(ds.map((r) => methodHe(r.method))).join(', '), loc: 'Israel' };
-  return Object.keys(q).map((k) => k + '=' + encodeURIComponent(q[k])).join('&');
+  return 'v=4&' + Object.keys(q).map((k) => k + '=' + encodeURIComponent(q[k])).join('&');
 }
 async function newsLoad(force) {
   if (NEWS.busy) return; const fresh = NEWS.data && NEWS.data.at && Date.now() - new Date(NEWS.data.at).getTime() < 12 * 3600e3;
@@ -3957,12 +4031,12 @@ RENDER.news = function () {
   const D = NEWS.data || { posts: [], items: [] };
   const shopW = allProducts().filter((p) => pcat(p) === 'workshop').map((p) => ({ kind: 'workshop', title: spSplit(p.title)[0], summary: (p.desc || '').slice(0, 180), url: p.url, image: p.thumb || p.image, source: p.g.name, price: p.price }));
   const all = (D.items || []).concat(shopW, (D.posts || []));
-  const groups = [['learn', 'סדנאות ואירועים', all.filter((x) => x.kind === 'workshop' || x.kind === 'event')], ['mine', 'מהקליות שלך', all.filter((x) => x.kind === 'blog' || x.kind === 'release')], ['world', 'חדשות מעולם הקפה', all.filter((x) => x.kind === 'news')]];
+  const groups = [['learn', 'סדנאות ואירועים', all.filter((x) => x.kind === 'workshop' || x.kind === 'event')], ['mine', 'מהקליות שלך', all.filter((x) => x.kind === 'blog' || x.kind === 'release')], ['world', 'גילויים וחידושים מהעולם', all.filter((x) => x.kind === 'news')]];
   const chips = '<div class="chips-row wrap nw-chips">' + [['all', 'הכל']].concat(groups.map((g) => [g[0], g[1]])).map((c) => '<button type="button" class="tchip' + (NEWS.f === c[0] ? ' on' : '') + '" data-act="nw-f" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
   const when = D.at ? new Date(D.at).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
   const body = groups.filter((g) => NEWS.f === 'all' || NEWS.f === g[0]).map((g) => '<section class="nw-sec"><h2>' + g[1] + '</h2>' + (g[2].length ? '<div class="nw-list">' + g[2].sort(g[0] === 'learn' ? (a, b) => String(a.date || '9999').localeCompare(String(b.date || '9999')) : (a, b) => String(b.date || '').localeCompare(String(a.date || ''))).map(newsCard).join('') + '</div>' : '<p class="muted s">' + (NEWS.busy ? 'מחפש…' : 'אין כרגע פריטים.') + '</p>') + '</section>').join('');
   return '<div class="page narrow nw">' + head('חדשות', '<button class="btn" data-act="nw-refresh"' + (NEWS.busy ? ' disabled' : '') + '>' + (NEWS.busy ? 'מעדכן…' : 'רענון') + '</button>') +
-    '<p class="muted s">ניוזלטר אישי: סדנאות ואירועי קפה בישראל, מה חדש אצל הקליות שלך וחדשות מעולם הספשיאלטי, לפי הפולים ושיטות ההכנה שלך.' + (when ? ' עודכן ' + when + '.' : '') + '</p>' + (NEWS.err ? '<div class="note warn">' + NEWS.err + '</div>' : '') + chips +
+    '<p class="muted s">ניוזלטר אישי: סדנאות ואירועי קפה בארץ, מה חדש אצל הקליות שלך, וחדשות קלילות על גילויים וחידושים בעולם הקפה.' + (when ? ' עודכן ' + when + '.' : '') + '</p>' + (NEWS.err ? '<div class="note warn">' + NEWS.err + '</div>' : '') + chips +
     (!NEWS.data && NEWS.busy ? '<div class="nw-load"><i></i><span>מחפש סדנאות, אירועים וחדשות… זה לוקח כחצי דקה בפעם הראשונה.</span></div>' : body) + '</div>';
 };
 AFTER.news = () => { newsLoad(false); shopAuto(); };
@@ -4149,6 +4223,65 @@ newsCard = (function (prev) { return function (it) { if (it.where && /^(online|�
 
 /* ---------- toasts: no stacking of the same message ---------- */
 function toast(msg) { const w = $('#toasts'); if (!w) return; Array.from(w.children).forEach((c, i, all) => { if (c.textContent === msg || all.length - i > 1) c.remove(); }); const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg; w.appendChild(t); setTimeout(() => t.remove(), 3200); }
+
+/* ============================================================
+   V4d — frothing animation, redrawn to show the real technique:
+   side view (tip at the surface while the pitcher is lowered as the milk
+   grows, then deeper for the vortex), top view at 4 o'clock, live thermometer
+   ============================================================ */
+const FOAM_PX = { latte: 9, flatwhite: 5, cortado: 5, cappuccino: 16, macchiato: 14 };
+function pitcherSVG() {
+  const dk = FR.drink || 'latte'; const foam = FOAM_PX[dk] || 9; const grow = Math.round(foam * 1.4 + 6);
+  const body = 'M66 62 L198 62 L188 222 Q186 236 172 236 L92 236 Q78 236 76 222 Z';
+  const ticks = [0, 90, 180, 270].map((a) => { const r = a * Math.PI / 180; return '<line class="tk" x1="' + (270 + Math.cos(r) * 30).toFixed(1) + '" y1="' + (206 + Math.sin(r) * 30).toFixed(1) + '" x2="' + (270 + Math.cos(r) * 35).toFixed(1) + '" y2="' + (206 + Math.sin(r) * 35).toFixed(1) + '"/>'; }).join('');
+  const tipX = (270 + Math.cos(30 * Math.PI / 180) * 21).toFixed(1), tipY = (206 + Math.sin(30 * Math.PI / 180) * 21).toFixed(1);
+  return '<svg viewBox="0 0 344 262" class="pitch v4" aria-hidden="true" style="--grow:' + grow + 'px;--foamh:' + foam + 'px">' +
+    '<defs><clipPath id="pcl"><path d="' + body + '"/></clipPath>' +
+    '<pattern id="mfoam" width="6" height="6" patternUnits="userSpaceOnUse"><rect width="6" height="6" class="fm-bg"/><circle cx="1.5" cy="1.5" r="1" class="fm-d"/><circle cx="4.5" cy="4" r=".8" class="fm-d"/></pattern>' +
+    '<linearGradient id="mgl" x1="0" x2="0" y1="0" y2="1"><stop offset="0" class="mg0"/><stop offset="1" class="mg1"/></linearGradient>' +
+    '<marker id="ah" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" class="arrf"/></marker></defs>' +
+    /* thermometer */
+    '<g class="thermo"><rect class="th-tube" x="12" y="70" width="12" height="150" rx="6"/><rect class="th-fill" x="15" y="73" width="6" height="144" rx="3"/><circle class="th-bulb" cx="18" cy="228" r="10"/><line class="th-tgt" x1="8" x2="30" y1="0" y2="0"/><text class="lab th-t" x="31" y="0">יעד</text></g><g transform="translate(22 0)">' +
+    /* pitcher (moves) */
+    '<g class="pg"><g clip-path="url(#pcl)"><g class="milkg">' +
+      '<rect class="milkfill" x="60" y="150" width="150" height="100" fill="url(#mgl)"/>' +
+      '<rect class="foam" x="60" y="150" width="150" height="' + foam + '" fill="url(#mfoam)"/>' +
+      '<path class="gloss" d="M92 154 Q128 149 170 154"/>' +
+      '<g class="vortex"><ellipse class="vx" cx="132" cy="196" rx="44" ry="11"/><ellipse class="vx v2" cx="132" cy="214" rx="30" ry="7"/><path class="vxa" d="M100 202 Q132 214 166 200" marker-end="url(#ah)"/></g>' +
+    '</g>' +
+    '<g class="air"><circle cx="146" cy="156" r="2.4"/><circle cx="140" cy="160" r="1.8"/><circle cx="152" cy="161" r="2"/><circle cx="135" cy="157" r="1.4"/><circle cx="157" cy="157" r="1.6"/></g></g>' +
+    '<path class="pbody" d="' + body + '"/><path class="pbody" d="M198 62 L214 54"/><path class="phandle" d="M68 82 Q36 86 40 126 Q42 160 74 168"/></g>' +
+    /* surface reference */
+    '<line class="surf" x1="78" y1="150" x2="128" y2="150"/><text class="lab sl" x="126" y="144">פני החלב</text>' +
+    /* wand (fixed) */
+    '<g class="wand"><path class="wd" d="M304 4 L156 147"/><circle class="wtip" cx="155" cy="148" r="4.5"/><g class="hiss"><path d="M164 138 q6 4 0 9"/><path d="M170 134 q9 7 0 16"/></g></g>' +
+    /* depth bracket */
+    '<g class="depth d1"><path d="M146 150 v4 m-4 0 h8"/><text class="lab hot" x="140" y="165">2–3 מ״מ</text></g>' +
+    '<g class="depth d2"><path d="M146 150 v15 m-4 0 h8"/><text class="lab hot" x="140" y="170">~1.5 ס״מ</text></g>' +
+    /* lower-the-pitcher hint */
+    '<g class="lower"><path d="M226 118 v30 m-8 -10 l8 10 8 -10"/><text class="lab hot" x="318" y="100">מורידים את הכד</text><text class="lab" x="318" y="113">לאט, כשהחלב עולה</text></g>' +
+    /* top view */
+    '<g class="topv"><circle class="tvc" cx="270" cy="206" r="35"/><path class="tvs" d="M302 196 L314 206 L302 216"/>' + ticks + '<text class="lab tvn12" x="270" y="164">12</text><text class="lab" x="270" y="257">מבט מלמעלה · שעה 4</text>' +
+      '<g class="tvsw"><path d="M270 186 a20 20 0 1 1 -19 14" marker-end="url(#ah)"/></g><circle class="tvt" cx="' + tipX + '" cy="' + tipY + '" r="4.5"/></g>' +
+    /* steam + tap marks */
+    '<g class="steam"><path d="M100 44 q-6 -10 0 -18"/><path d="M132 40 q-6 -10 0 -18"/><path d="M164 44 q-6 -10 0 -18"/></g>' +
+    '<g class="tap"><path d="M70 246 h120"/><text class="lab" x="130" y="258">טוק! טוק!</text></g>' +
+    '</g></svg>' +
+    '<div class="snd" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><span class="snd-l"></span></div>';
+}
+/* live thermometer: estimated temperature (from your last good run) or a time-based guide */
+frothPaint = (function (prev) {
+  return function () {
+    prev(); const art = $('.fr-art'); if (!art || !FR.open) return; const svg = art.querySelector('svg.v4'); if (!svg) return;
+    const { T, dk } = frothMilkObj(); const m = T.milk; const t = frothT(); const plan = frothPlan(m); const tgt = stretchOf(m, dk.id);
+    const total = plan ? plan.total : Math.max(tgt * 3.2, tgt + 14) * Math.max(0.6, (m.g || 200) / 200);
+    const est = plan ? plan.est(t) : Math.min(80, 5 + (m.tempC - 5) * (t / total));
+    const fr = clamp((est - 0) / 80, 0, 1); const tg = clamp((m.tempC || 60) / 80, 0, 1);
+    const fill = svg.querySelector('.th-fill'); if (fill) { fill.setAttribute('height', (144 * fr).toFixed(1)); fill.setAttribute('y', (73 + 144 * (1 - fr)).toFixed(1)); fill.classList.toggle('hot', est >= (m.tempC || 60) - 6); }
+    const ty = (73 + 144 * (1 - tg)).toFixed(1); svg.querySelectorAll('.th-tgt').forEach((l) => { l.setAttribute('y1', ty); l.setAttribute('y2', ty); }); const tt = svg.querySelector('.th-t'); if (tt) { tt.setAttribute('y', +ty + 4); tt.textContent = (m.tempC || 60) + '°'; }
+  };
+})(frothPaint);
+frothRender = (function (prev) { return function () { prev(); if (FR.open && (FR.ph === 0 || FR.ph === 4)) { const svg = $('.fr-art svg.v4'); if (svg) { const m = frothMilkObj().T.milk; const tg = clamp((m.tempC || 60) / 80, 0, 1); const ty = (73 + 144 * (1 - tg)).toFixed(1); svg.querySelectorAll('.th-tgt').forEach((l) => { l.setAttribute('y1', ty); l.setAttribute('y2', ty); }); const tt = svg.querySelector('.th-t'); if (tt) { tt.setAttribute('y', +ty + 4); tt.textContent = (m.tempC || 60) + '°'; } if (FR.ph === 4) { const f = svg.querySelector('.th-fill'); if (f) { const fr = clamp((m.tempC || 60) / 80, 0, 1); f.setAttribute('height', (144 * fr).toFixed(1)); f.setAttribute('y', (73 + 144 * (1 - fr)).toFixed(1)); f.classList.add('hot'); } } } } }; })(frothRender);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
