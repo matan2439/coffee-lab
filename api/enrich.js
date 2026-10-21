@@ -33,6 +33,9 @@ module.exports = async (req, res) => {
     if (first.sourceUrl) cand.push({ url: first.sourceUrl, title: '' });
     const rt = toks(known.roaster), nt = toks(known.name);
     const score = (c) => { let h = ''; try { h = new URL(c.url).hostname; } catch (e) { return -99; } if (BAD.test(h + '.')) return -50; const hay = (c.url + ' ' + c.title).toLowerCase(); let s = 0; rt.forEach((w) => { if (h.toLowerCase().includes(w)) s += 4; else if (hay.includes(w)) s += 1; }); nt.forEach((w) => { if (hay.includes(w)) s += 2; }); if (/\/(products?|shop|coffee|collections)\//.test(c.url)) s += 2; return s; };
+    const hosts = []; cand.forEach((c) => { try { const u = new URL(c.url); if (!BAD.test(u.hostname + '.') && rt.some((w) => u.hostname.toLowerCase().includes(w)) && !hosts.includes(u.origin)) hosts.push(u.origin); } catch (e) { /* skip */ } });
+    const q = encodeURIComponent([known.name, known.producer].filter(Boolean).join(' ').slice(0, 80));
+    await Promise.all(hosts.slice(0, 2).map(async (o) => { const c = new AbortController(); const t = setTimeout(() => c.abort(), 6000); try { const r = await fetch(o + '/search/suggest.json?q=' + q + '&resources[type]=product&resources[limit]=5', { signal: c.signal, headers: { 'user-agent': 'Mozilla/5.0 (compatible; CoffeeLabBot/1.0)' } }); if (!r.ok) return; const j = await r.json(); (((j.resources || {}).results || {}).products || []).forEach((p) => { if (p.url) cand.push({ url: o + p.url.split('?')[0], title: p.title || '' }); }); } catch (e) { /* not shopify */ } finally { clearTimeout(t); } }));
     const seen = new Set(); const top = cand.filter((c) => { if (seen.has(c.url)) return false; seen.add(c.url); return true; }).map((c) => ({ c, s: score(c) })).filter((x) => x.s > -10).sort((a, b) => b.s - a.s).slice(0, 3).map((x) => x.c.url);
     const pages = (await Promise.all(top.map(getPage))).filter(Boolean);
     let out = first;
