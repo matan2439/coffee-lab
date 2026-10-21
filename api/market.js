@@ -8,7 +8,7 @@ const J = async (u, ms) => { const c = new AbortController(); const t = setTimeo
 const clean = (s) => String(s || '').replace(/\/\/(business|wholesale|b2b|pro|trade)\./i, '//');
 const ent = (s) => String(s || '').replace(/&#(\d+);/g, (m, n) => String.fromCharCode(+n)).replace(/&#x([0-9a-f]+);/gi, (m, n) => String.fromCharCode(parseInt(n, 16))).replace(/&amp;/g, '&').replace(/&quot;/g, '"').replace(/&#039;|&apos;/g, "'").replace(/&nbsp;/g, ' ').replace(/&lt;/g, '<').replace(/&gt;/g, '>');
 const txt = (h) => ent(String(h || '').replace(/<style[\s\S]*?<\/style>|<script[\s\S]*?<\/script>/gi, ' ').replace(/<br\s*\/?>|<\/p>|<\/li>/gi, '\n').replace(/<[^>]+>/g, ' ')).replace(/[ \t]+/g, ' ').replace(/\n\s*\n+/g, '\n').trim();
-const grams = (s) => { const t = String(s || '').toLowerCase().replace(/,/g, '.'); let m = t.match(/(\d+(?:\.\d+)?)\s*(kg|ק"ג|ק״ג|קג|קילו)/); if (m) return Math.round(parseFloat(m[1]) * 1000); m = t.match(/(\d+(?:\.\d+)?)\s*(g|gr|gram|grams|גרם|ג'|ג)\b/); if (m) return Math.round(parseFloat(m[1])); m = t.match(/(\d+(?:\.\d+)?)\s*(oz)\b/); if (m) return Math.round(parseFloat(m[1]) * 28.35); return null; };
+const grams = (s) => { const t = String(s || '').toLowerCase().replace(/,/g, '.'); let m = t.match(/(\d+(?:\.\d+)?)\s*(kg|ק"ג|ק״ג|קג|קילו)/); if (m) return Math.round(parseFloat(m[1]) * 1000); m = t.match(/(\d+(?:\.\d+)?)\s*(grams|gram|gr|g|גרם|ג'|ג)(?![a-z\u0590-\u05ff])/); if (m) return Math.round(parseFloat(m[1])); m = t.match(/(\d+(?:\.\d+)?)\s*(oz)(?![a-z])/); if (m) return Math.round(parseFloat(m[1]) * 28.35); return null; };
 const SIZE_ATTR = /גודל|משקל|כמות|size|weight|amount|vekt|størrelse|gewicht/i;
 
 async function findSite(roaster) {
@@ -63,7 +63,7 @@ async function wooDetails(site, ids) {
     }));
     // map slug-style labels back to the readable term names
     const terms = (((pj.attributes || []).find((a) => SIZE_ATTR.test(a.name || '')) || {}).terms || []);
-    const sizes = Object.values(byLabel).map((s) => { const t = terms.find((x) => x.slug === s.label || ent(x.name) === s.label); if (t) { s.label = ent(t.name); s.grams = s.grams || grams(t.name); } return s; }).sort((a, b) => (a.grams || 0) - (b.grams || 0));
+    const sizes = Object.values(byLabel).map((s) => { const t = terms.find((x) => { let sl = x.slug || ''; try { sl = decodeURIComponent(sl); } catch (e) { /* keep */ } return sl === s.label || ent(x.name) === s.label; }); if (t) { s.label = ent(t.name); s.grams = grams(t.name) || s.grams; } else { s.label = s.label.replace(/-/g, ' '); s.grams = s.grams || grams(s.label.replace(/קג$/, 'ק"ג')); } return s; }).sort((a, b) => (a.grams || 0) - (b.grams || 0));
     out[id] = { sizes };
   }));
   return out;
