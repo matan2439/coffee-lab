@@ -1,19 +1,29 @@
-{
-  "name": "state.js",
-  "path": "api/state.js",
-  "sha": "afb6645ca3719692ae1bc31de05019fd6eac2ef7",
-  "size": 1946,
-  "url": "https://api.github.com/repos/matan2439/coffee-lab/contents/api/state.js?ref=main",
-  "html_url": "https://github.com/matan2439/coffee-lab/blob/main/api/state.js",
-  "git_url": "https://api.github.com/repos/matan2439/coffee-lab/git/blobs/afb6645ca3719692ae1bc31de05019fd6eac2ef7",
-  "download_url": "https://raw.githubusercontent.com/matan2439/coffee-lab/main/api/state.js",
-  "type": "file",
-  "content": "Y29uc3QgY3J5cHRvID0gcmVxdWlyZSgnY3J5cHRvJyk7CmNvbnN0IERCID0g\ncHJvY2Vzcy5lbnYuY29mZmVlX2xhYl9kYl91cmwgfHwgcHJvY2Vzcy5lbnYu\nREFUQUJBU0VfVVJMOwpjb25zdCBzcWwgPSBhc3luYyAocXVlcnksIHBhcmFt\ncykgPT4gewogIGNvbnN0IGhvc3QgPSBuZXcgVVJMKERCKS5ob3N0OwogIGNv\nbnN0IHIgPSBhd2FpdCBmZXRjaCgnaHR0cHM6Ly8nICsgaG9zdCArICcvc3Fs\nJywgeyBtZXRob2Q6ICdQT1NUJywgaGVhZGVyczogeyAnY29udGVudC10eXBl\nJzogJ2FwcGxpY2F0aW9uL2pzb24nLCAnTmVvbi1Db25uZWN0aW9uLVN0cmlu\nZyc6IERCIH0sIGJvZHk6IEpTT04uc3RyaW5naWZ5KHsgcXVlcnksIHBhcmFt\ncyB9KSB9KTsKICBpZiAoIXIub2spIHRocm93IG5ldyBFcnJvcignZGIgJyAr\nIHIuc3RhdHVzKTsKICByZXR1cm4gKGF3YWl0IHIuanNvbigpKS5yb3dzIHx8\nIFtdOwp9Owptb2R1bGUuZXhwb3J0cyA9IGFzeW5jIChyZXEsIHJlcykgPT4g\newogIGNvbnN0IHNlbmQgPSAoYywgbykgPT4geyByZXMuc3RhdHVzQ29kZSA9\nIGM7IHJlcy5zZXRIZWFkZXIoJ2NvbnRlbnQtdHlwZScsICdhcHBsaWNhdGlv\nbi9qc29uJyk7IHJlcy5zZXRIZWFkZXIoJ2NhY2hlLWNvbnRyb2wnLCAnbm8t\nc3RvcmUnKTsgcmVzLmVuZChKU09OLnN0cmluZ2lmeShvKSk7IH07CiAgaWYg\nKCFEQikgcmV0dXJuIHNlbmQoNTAzLCB7IGVycm9yOiAnbm8gZGInIH0pOwog\nIGNvbnN0IGNvZGUgPSBTdHJpbmcocmVxLmhlYWRlcnNbJ3gtc3luYyddIHx8\nICcnKTsgaWYgKGNvZGUubGVuZ3RoIDwgOCB8fCBjb2RlLmxlbmd0aCA+IDgw\nKSByZXR1cm4gc2VuZCg0MDAsIHsgZXJyb3I6ICdjb2RlJyB9KTsKICBjb25z\ndCBpZCA9IGNyeXB0by5jcmVhdGVIYXNoKCdzaGEyNTYnKS51cGRhdGUoJ2Ns\nMTonICsgY29kZSkuZGlnZXN0KCdoZXgnKTsKICB0cnkgewogICAgaWYgKHJl\ncS5tZXRob2QgPT09ICdHRVQnKSB7CiAgICAgIGNvbnN0IHJvd3MgPSBhd2Fp\ndCBzcWwoJ3NlbGVjdCBkYXRhLCB1cGRhdGVkX2F0IGZyb20gY29mZmVlX2xh\nYl9zdGF0ZSB3aGVyZSBpZCA9ICQxJywgW2lkXSk7CiAgICAgIHJldHVybiBz\nZW5kKDIwMCwgcm93cy5sZW5ndGggPyB7IHVwZGF0ZWRBdDogcm93c1swXS51\ncGRhdGVkX2F0LCBkYXRhOiByb3dzWzBdLmRhdGEgfSA6IHsgZW1wdHk6IHRy\ndWUgfSk7CiAgICB9CiAgICBpZiAocmVxLm1ldGhvZCA9PT0gJ1BVVCcpIHsK\nICAgICAgY29uc3QgcGFydHMgPSBbXTsgbGV0IG4gPSAwOyBmb3IgYXdhaXQg\nKGNvbnN0IGQgb2YgcmVxKSB7IG4gKz0gZC5sZW5ndGg7IGlmIChuID4gNGU2\nKSByZXR1cm4gc2VuZCg0MTMsIHsgZXJyb3I6ICdiaWcnIH0pOyBwYXJ0cy5w\ndXNoKGQpOyB9CiAgICAgIGNvbnN0IGIgPSBKU09OLnBhcnNlKEJ1ZmZlci5j\nb25jYXQocGFydHMpLnRvU3RyaW5nKCd1dGY4JykpOwogICAgICBpZiAodHlw\nZW9mIGIuZGF0YSAhPT0gJ3N0cmluZycgfHwgdHlwZW9mIGIudXBkYXRlZEF0\nICE9PSAnc3RyaW5nJykgcmV0dXJuIHNlbmQoNDAwLCB7IGVycm9yOiAnYmFk\nJyB9KTsKICAgICAgYXdhaXQgc3FsKCdpbnNlcnQgaW50byBjb2ZmZWVfbGFi\nX3N0YXRlIChpZCwgZGF0YSwgdXBkYXRlZF9hdCkgdmFsdWVzICgkMSwgJDIs\nICQzKSBvbiBjb25mbGljdCAoaWQpIGRvIHVwZGF0ZSBzZXQgZGF0YSA9IGV4\nY2x1ZGVkLmRhdGEsIHVwZGF0ZWRfYXQgPSBleGNsdWRlZC51cGRhdGVkX2F0\nLCBzYXZlZF9hdCA9IG5vdygpJywgW2lkLCBiLmRhdGEsIGIudXBkYXRlZEF0\nXSk7CiAgICAgIHJldHVybiBzZW5kKDIwMCwgeyBvazogdHJ1ZSB9KTsKICAg\nIH0KICAgIHNlbmQoNDA1LCB7IGVycm9yOiAnbWV0aG9kJyB9KTsKICB9IGNh\ndGNoIChlKSB7IHNlbmQoNTAyLCB7IGVycm9yOiAnZmFpbCcgfSk7IH0KfTsK\nbW9kdWxlLmV4cG9ydHMuY29uZmlnID0geyBhcGk6IHsgYm9keVBhcnNlcjog\nZmFsc2UgfSB9Owo=\n",
-  "encoding": "base64",
-  "_links": {
-    "self": "https://api.github.com/repos/matan2439/coffee-lab/contents/api/state.js?ref=main",
-    "git": "https://api.github.com/repos/matan2439/coffee-lab/git/blobs/afb6645ca3719692ae1bc31de05019fd6eac2ef7",
-    "html": "https://github.com/matan2439/coffee-lab/blob/main/api/state.js"
-  }
-}
-// redeploy with db env
+const crypto = require('crypto');
+const DB = process.env.coffee_lab_db_url || process.env.DATABASE_URL;
+const sql = async (query, params) => {
+  const host = new URL(DB).host;
+  const r = await fetch('https://' + host + '/sql', { method: 'POST', headers: { 'content-type': 'application/json', 'Neon-Connection-String': DB }, body: JSON.stringify({ query, params }) });
+  if (!r.ok) throw new Error('db ' + r.status);
+  return (await r.json()).rows || [];
+};
+module.exports = async (req, res) => {
+  const send = (c, o) => { res.statusCode = c; res.setHeader('content-type', 'application/json'); res.setHeader('cache-control', 'no-store'); res.end(JSON.stringify(o)); };
+  if (!DB) return send(503, { error: 'no db' });
+  const code = String(req.headers['x-sync'] || ''); if (code.length < 8 || code.length > 80) return send(400, { error: 'code' });
+  const id = crypto.createHash('sha256').update('cl1:' + code).digest('hex');
+  try {
+    if (req.method === 'GET') {
+      const rows = await sql('select data, updated_at from coffee_lab_state where id = $1', [id]);
+      return send(200, rows.length ? { updatedAt: rows[0].updated_at, data: rows[0].data } : { empty: true });
+    }
+    if (req.method === 'PUT') {
+      const parts = []; let n = 0; for await (const d of req) { n += d.length; if (n > 4e6) return send(413, { error: 'big' }); parts.push(d); }
+      const b = JSON.parse(Buffer.concat(parts).toString('utf8'));
+      if (typeof b.data !== 'string' || typeof b.updatedAt !== 'string') return send(400, { error: 'bad' });
+      await sql('insert into coffee_lab_state (id, data, updated_at) values ($1, $2, $3) on conflict (id) do update set data = excluded.data, updated_at = excluded.updated_at, saved_at = now()', [id, b.data, b.updatedAt]);
+      return send(200, { ok: true });
+    }
+    send(405, { error: 'method' });
+  } catch (e) { send(502, { error: 'fail' }); }
+};
+module.exports.config = { api: { bodyParser: false } };
