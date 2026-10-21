@@ -938,6 +938,7 @@ body.froth-on { overflow: hidden; }
 .modal-b { min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain; }
 @media (max-width: 920px) { .overlay { align-items: flex-end; } }
 .note a.srcl { font-weight: 600; word-break: break-all; }
+.nodata { font-size: 11px; font-weight: 600; color: var(--muted); border: 1px dashed var(--line); border-radius: 99px; padding: 0 7px; margin-inline-start: 4px; white-space: nowrap; }
 
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
@@ -2559,7 +2560,8 @@ ACT['bag-add'] = (d) => {
 ACT['bean-add'] = () => beanForm(null);
 function beanForm(id, pre) {
   const b = id ? byId('beans', id) : Object.assign({}, pre || {}); const scanned = !!pre && Object.keys(pre).some((k) => k[0] !== '_' && k !== 'uncertain'); const unsure = new Set((pre && pre.uncertain) || []);
-  const mark = (k) => (scanned && b[k] ? (unsure.has(k) ? ' <span class="unsure">לבדוק</span>' : ' <span class="fromscan">📷</span>') : '');
+  const MISS = ['originCountry', 'process', 'roastLevel', 'region', 'variety', 'producer', 'elevation', 'roasterNotesText'];
+  const mark = (k) => (scanned && b[k] ? (unsure.has(k) ? ' <span class="unsure">לבדוק</span>' : ' <span class="fromscan">📷</span>') : scanned && !id && MISS.includes(k) ? (pre._src ? ' <span class="nodata">אין נתונים באתר</span>' : ' <span class="nodata">לא זוהה</span>') : '');
   const L = (k, l) => l + mark(k);
   const procs = PROCESSES.slice(); if (b.process && !procs.includes(b.process)) procs.unshift(b.process);
   const q = encodeURIComponent([b.roaster, b.name, 'coffee'].filter(Boolean).join(' '));
@@ -2567,7 +2569,7 @@ function beanForm(id, pre) {
     '<div class="form-g">' + fldH('name', L('name', 'שם הקפה'), { v: b.name, cls: 'full' }) + fldH('roaster', L('roaster', 'בית קלייה'), { v: b.roaster, list: 'dl-co' }) + '<datalist id="dl-co">' + state.companies.filter((c) => c.kind !== 'equipment').map((c) => '<option value="' + esc(c.name) + '">').join('') + '</datalist>' +
     fldH('originCountry', L('originCountry', 'מקור'), { v: b.originCountry, list: 'dl-or' }) + '<datalist id="dl-or">' + ORIGINS.map((o) => '<option value="' + o + '">').join('') + '</datalist>' +
     fldH('process', L('process', 'עיבוד'), { type: 'select', v: b.process, opts: procs, blank: '—' }) + fldH('roastLevel', L('roastLevel', 'רמת קלייה'), { type: 'select', v: b.roastLevel, opts: ROAST_LEVELS, blank: '—' }) + '</div>' +
-    '<details class="sec"' + (scanned && (b.region || b.variety || b.elevation || b.roasterNotesText) ? ' open' : '') + '><summary>עוד פרטים</summary><div class="form-g">' + fldH('region', L('region', 'אזור'), { v: b.region }) + fldH('variety', L('variety', 'זן'), { v: b.variety }) + fldH('producer', L('producer', 'חווה / מגדל'), { v: b.producer }) + fldH('elevation', L('elevation', 'גובה (מ׳)'), { type: 'number', v: b.elevation }) + fldH('roasterNotesText', L('roasterNotesText', 'טעמים לפי האריזה'), { v: b.roasterNotesText, cls: 'full' }) + '</div></details>' +
+    '<details class="sec"' + (scanned ? ' open' : '') + '><summary>עוד פרטים</summary><div class="form-g">' + fldH('region', L('region', 'אזור'), { v: b.region }) + fldH('variety', L('variety', 'זן'), { v: b.variety }) + fldH('producer', L('producer', 'חווה / מגדל'), { v: b.producer }) + fldH('elevation', L('elevation', 'גובה (מ׳)'), { type: 'number', v: b.elevation }) + fldH('roasterNotesText', L('roasterNotesText', 'טעמים לפי האריזה'), { v: b.roasterNotesText, cls: 'full' }) + '</div></details>' +
     (!id ? '<div class="qbag"><div class="form-g">' + fld('addBag', 'יש לי שקית עכשיו', { type: 'check', v: true, cls: 'full' }) + fldH('weight', L('weight', 'משקל (g)'), { type: 'number', v: b.weight || 250 }) + fldH('roastDate', L('roastDate', 'תאריך קלייה'), { type: 'date', v: b.roastDate || '' }) + fld('price', 'מחיר (₪)', { type: 'number' }) + '</div></div>' : '');
   openModal({ title: id ? 'עריכת פולים' : scanned ? 'פולים מהסריקה' : 'פולים חדשים', body, actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
     const errs = {}; needStr(errs, v, 'name', 'יש להזין שם'); numRange(errs, v, 'elevation', 0, 3000, 'גובה'); if (!id && v.addBag) { if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; }
