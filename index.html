@@ -599,6 +599,36 @@ input:focus, select:focus, textarea:focus { border-color: var(--fg); box-shadow:
 @media (max-width: 700px) { h1, .home-h h1 { font-size: 25px; } .card { padding: 15px; } }
 @media (max-width: 920px) { .m-bar .btn { width: auto; min-width: 0; flex: 1 1 0; } .m-bar .btn.sec { flex: 0 0 auto; padding-inline: 14px; } }
 .home-h { align-items: center; }
+/* ===== Palette "Roast & Linen": #171615 #302E2C #625E59 #49372E #8C6956 #E9E2D8 ===== */
+:root {
+  --bg: #E9E2D8; --surface: #F4F0E9; --surface2: #DDD5C9; --fg: #171615; --muted: #625E59; --line: #CFC6B8;
+  --accent: #6F5242; --accent-fg: #F4F0E9; --accent-soft: #D9CCC0; --accent-deep: #8C6956;
+  --ink: #171615; --ink-fg: #E9E2D8;
+  --sage: #5d6f55; --sage-soft: #D9DDCD;
+  --h-dashboard: #6F5242; --h-brew: #6F5242; --h-beans: #6F5242; --h-recipes: #6F5242; --h-journal: #6F5242; --h-sensory: #6F5242;
+  --h-equipment: #6F5242; --h-experiments: #6F5242; --h-analytics: #6F5242; --h-academy: #6F5242; --h-settings: #6F5242;
+  --shadow: 0 1px 2px rgba(23, 22, 21, .06), 0 8px 24px rgba(23, 22, 21, .08);
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #171615; --surface: #242220; --surface2: #302E2C; --fg: #E9E2D8; --muted: #A8A199; --line: #3B3835;
+    --accent: #B08670; --accent-fg: #171615; --accent-soft: #49372E; --accent-deep: #8C6956;
+    --ink: #E9E2D8; --ink-fg: #171615;
+    --sage: #9fb586; --sage-soft: #2a2f27;
+    --h-dashboard: #B08670; --h-brew: #B08670; --h-beans: #B08670; --h-recipes: #B08670; --h-journal: #B08670; --h-sensory: #B08670;
+    --h-equipment: #B08670; --h-experiments: #B08670; --h-analytics: #B08670; --h-academy: #B08670; --h-settings: #B08670;
+    --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .3); color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #171615; --surface: #242220; --surface2: #302E2C; --fg: #E9E2D8; --muted: #A8A199; --line: #3B3835;
+  --accent: #B08670; --accent-fg: #171615; --accent-soft: #49372E; --accent-deep: #8C6956;
+  --ink: #E9E2D8; --ink-fg: #171615;
+  --sage: #9fb586; --sage-soft: #2a2f27;
+  --h-dashboard: #B08670; --h-brew: #B08670; --h-beans: #B08670; --h-recipes: #B08670; --h-journal: #B08670; --h-sensory: #B08670;
+  --h-equipment: #B08670; --h-experiments: #B08670; --h-analytics: #B08670; --h-academy: #B08670; --h-settings: #B08670;
+  --shadow: 0 1px 2px rgba(0, 0, 0, .35), 0 8px 24px rgba(0, 0, 0, .3); color-scheme: dark;
+}
 /* ===== V2 layout: brew-first, quiet, few words ===== */
 .page.narrow { max-width: 760px; gap: 16px; }
 .v-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; flex-wrap: wrap; }
