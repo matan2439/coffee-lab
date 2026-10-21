@@ -3649,7 +3649,7 @@ async function shopLoad(g, force) {
   if (c && !force && !c.err && Date.now() - (c.at || 0) < 6 * 3600e3) { await shopMatch(g); return; }
   SHOP.busy[g.key] = true;
   try {
-    const r = await fetch('api/market?roaster=' + encodeURIComponent(g.name || '') + (g.site ? '&site=' + encodeURIComponent(g.site) : ''));
+    const r = await fetch('api/market?v=5&roaster=' + encodeURIComponent(g.name || '') + (g.site ? '&site=' + encodeURIComponent(g.site) : ''));
     const j = await r.json();
     if (j && !j.error) {
       SHOP.cats[g.key] = Object.assign({ at: Date.now() }, j);
