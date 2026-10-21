@@ -15,7 +15,7 @@ async function getPage(u) {
     const ld = (h.match(/<script[^>]+ld\+json[^>]*>[\s\S]*?<\/script>/gi) || []).map((x) => x.replace(/<[^>]+>/g, ' ')).join(' ').slice(0, 3000);
     const title = ((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '').trim();
     const text = (ld + ' ' + strip(h)).slice(0, 9000);
-    return text.length > 200 ? { url: r.url || u, title, text } : null;
+    return text.length > 200 ? { url: u, title, text } : null;
   } catch (e) { return null; } finally { clearTimeout(t); }
 }
 module.exports = async (req, res) => {
@@ -44,7 +44,7 @@ module.exports = async (req, res) => {
       const j2 = await call({ max_tokens: 1500, messages: [{ role: 'user', content: p2 }] });
       const second = jsonOf(textOf(j2));
       out = Object.assign({}, first); Object.keys(second).forEach((k) => { if (second[k] != null && second[k] !== '') out[k] = second[k]; });
-      out.sourceUrl = pages.some((p) => p.url === second.sourceUrl || p.url === out.sourceUrl) ? (second.sourceUrl || out.sourceUrl) : null;
+      const nz = (x) => String(x || '').split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase(); const hit = pages.find((p) => nz(p.url) === nz(second.sourceUrl)) || (Object.keys(second).some((k) => k !== 'sourceUrl' && second[k] != null) && pages.length === 1 ? pages[0] : null); out.sourceUrl = hit ? hit.url : null;
     } else out.sourceUrl = null;
     out.pagesRead = pages.length;
     send(200, out);
