@@ -20,7 +20,7 @@ module.exports = async (req, res) => {
     if (!pj || !Array.isArray(pj.products)) return send(200, { site, currency: cur, products: [], shopify: false }, true);
     const products = pj.products.map((p) => {
       const v = (p.variants || []).slice().sort((a, b) => parseFloat(a.price) - parseFloat(b.price)); const av = v.some((x) => x.available !== false);
-      return { title: p.title, url: site + '/products/' + p.handle, price: v.length ? parseFloat(v[0].price) : null, image: (p.images && p.images[0] && p.images[0].src) || '', type: p.product_type || '', tags: Array.isArray(p.tags) ? p.tags.slice(0, 8) : String(p.tags || '').split(/,\s*/).slice(0, 8), available: av, updated: p.updated_at || p.published_at || '' };
+      return { title: p.title, url: site + '/products/' + p.handle, price: v.length ? parseFloat(v[0].price) : null, grams: v.length && v[0].grams ? Math.round(v[0].grams) : null, image: (p.images && p.images[0] && p.images[0].src) || '', type: p.product_type || '', tags: Array.isArray(p.tags) ? p.tags.slice(0, 8) : String(p.tags || '').split(/,\s*/).slice(0, 8), available: av, updated: p.updated_at || p.published_at || '' };
     }).filter((p) => p.title);
     send(200, { site, currency: cur, shopify: true, products }, true);
   } catch (e) { send(502, { error: 'fail' }); }

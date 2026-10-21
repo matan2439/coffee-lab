@@ -15,7 +15,10 @@ async function getPage(u) {
     const ld = (h.match(/<script[^>]+ld\+json[^>]*>[\s\S]*?<\/script>/gi) || []).map((x) => x.replace(/<[^>]+>/g, ' ')).filter((x) => /"Product"/.test(x)).join(' ').slice(0, 2500) + ' ' + (h.match(/<meta[^>]+(?:property="og:description"|name="description")[^>]*>/gi) || []).map((x) => (x.match(/content="([^"]*)"/i) || [])[1] || '').join(' ');
     const title = ((h.match(/<title[^>]*>([\s\S]*?)<\/title>/i) || [])[1] || '').trim();
     const text = (title + ' ' + ld + ' ' + strip(h.replace(/<(header|nav|footer|aside|form|dialog)[\s\S]*?<\/\1>/gi, ' '))).slice(0, 12000);
-    return text.length > 200 ? { url: u, title, text } : null;
+    let image = ((h.match(/<meta[^>]+property=["']og:image(?::secure_url)?["'][^>]*>/i) || [''])[0].match(/content=["']([^"']+)["']/i) || [])[1] || '';
+    if (!image) { const m = h.match(/"image"\s*:\s*\[?\s*"([^"]+)"/); image = m ? m[1] : ''; }
+    try { image = image ? new URL(image.replace(/&amp;/g, '&'), r.url || u).href : ''; } catch (e) { image = ''; }
+    return text.length > 200 ? { url: u, title, text, image } : null;
   } catch (e) { return null; } finally { clearTimeout(t); }
 }
 module.exports = async (req, res) => {
@@ -46,8 +49,8 @@ module.exports = async (req, res) => {
       const j2 = await call({ max_tokens: 1500, messages: [{ role: 'user', content: p2 }] });
       const second = jsonOf(textOf(j2));
       out = Object.assign({}, first); Object.keys(second).forEach((k) => { if (second[k] != null && second[k] !== '') out[k] = second[k]; });
-      const nz = (x) => String(x || '').split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase(); const hit = pages.find((p) => nz(p.url) === nz(second.sourceUrl)) || (Object.keys(second).some((k) => k !== 'sourceUrl' && second[k] != null) && pages.length === 1 ? pages[0] : null); out.sourceUrl = hit ? hit.url : null;
-    } else out.sourceUrl = null;
+      const nz = (x) => String(x || '').split(/[?#]/)[0].replace(/\/+$/, '').toLowerCase(); const hit = pages.find((p) => nz(p.url) === nz(second.sourceUrl)) || (Object.keys(second).some((k) => k !== 'sourceUrl' && second[k] != null) && pages.length === 1 ? pages[0] : null); out.sourceUrl = hit ? hit.url : null; out.image = hit && hit.image ? hit.image : null;
+    } else { out.sourceUrl = null; out.image = null; }
     out.pagesRead = pages.length; const sh = (out.sourceUrl ? [out.sourceUrl] : []).concat(hosts); try { const u = new URL(sh[0] || ''); out.site = u.origin.replace(/\/\/(business|wholesale|b2b|pro|trade)\./i, '//'); } catch (e) { /* none */ }
     send(200, out);
   } catch (e) { send(502, { error: 'fail' }); }
