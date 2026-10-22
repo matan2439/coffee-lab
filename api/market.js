@@ -22,16 +22,16 @@ async function shopify(site) {
   if (!pj || !Array.isArray(pj.j.products)) return null;
   const cur = (meta && (meta.j.currency || (meta.j.shop && meta.j.shop.currency))) || '';
   const products = pj.j.products.map((p) => {
-    const vs = (p.variants || []).map((v) => ({ label: v.title === 'Default Title' ? '' : v.title, grams: grams(v.title) || (v.grams ? Math.round(v.grams) : null), price: parseFloat(v.price), available: v.available !== false, variantId: v.id }));
+    const vs = (p.variants || []).map((v) => ({ label: v.title === 'Default Title' ? '' : v.title, grams: grams(v.title) || (v.grams ? Math.round(v.grams) : null), price: parseFloat(v.price) > 0 ? parseFloat(v.price) : null, available: v.available !== false, variantId: v.id }));
     const seen = new Set(); const sizes = vs.filter((v) => { const k = (v.label || '').split(' / ')[0]; if (seen.has(k)) return false; seen.add(k); return true; }).map((v) => Object.assign({}, v, { label: (v.label || '').split(' / ')[0] })).sort((a, b) => a.price - b.price);
-    const prices = vs.map((v) => v.price).filter((x) => x >= 0);
+    const prices = vs.map((v) => v.price).filter((x) => x > 0);
     const img = (p.images && p.images[0] && p.images[0].src) || '';
     return { id: String(p.id), title: ent(p.title), url: site + '/products/' + p.handle, price: prices.length ? Math.min(...prices) : null, priceMax: prices.length ? Math.max(...prices) : null, currency: cur, image: img, thumb: img ? img + (img.includes('?') ? '&' : '?') + 'width=480' : '', images: (p.images || []).slice(0, 5).map((i) => i.src), cats: [p.product_type].concat(Array.isArray(p.tags) ? p.tags : String(p.tags || '').split(/,\s*/)).filter(Boolean).slice(0, 10), sizes, available: vs.some((v) => v.available), updated: p.published_at || p.updated_at || '', desc: txt(p.body_html).slice(0, 700), slug: p.handle };
   }).filter((p) => p.title);
   return { platform: 'shopify', currency: cur, products };
 }
 
-function wooMoney(pr, v) { const u = Number(pr.currency_minor_unit || 0); const n = parseFloat(v); return isNaN(n) ? null : n / Math.pow(10, u); }
+function wooMoney(pr, v) { const u = Number(pr.currency_minor_unit || 0); const n = parseFloat(v); return isNaN(n) || n <= 0 ? null : n / Math.pow(10, u); }
 async function woo(site) {
   const first = await J(site + '/wp-json/wc/store/v1/products?per_page=100', 10000); if (!first || !Array.isArray(first.j)) return null;
   let all = first.j; const pages = parseInt(first.h.get('x-wp-totalpages') || '1', 10);
