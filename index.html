@@ -1207,6 +1207,14 @@ body.froth-on { overflow: hidden; }
 .fr-art[data-ph="4"] .pitch.v4 .surf, .fr-art[data-ph="4"] .pitch.v4 .sl, .fr-art[data-ph="4"] .pitch.v4 .tvt { opacity: 0; }
 .fr-art[data-ph="4"] .pitch.v4 .tvsw { opacity: 1; animation: v4rot 2.4s linear infinite; }
 
+/* next-brew coach */
+.coach .co-g { border-inline-start: 4px solid var(--m, var(--accent)); padding: 8px 12px; margin: 10px 0; background: color-mix(in srgb, var(--m, var(--accent)) 7%, transparent); border-radius: 10px; min-width: 0; }
+.coach .co-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; margin-bottom: 4px; }
+.coach .co-h b { font-size: 16px; } .coach .co-h small { color: var(--muted, #8a7d72); }
+.coach .co-t { display: grid; grid-template-columns: 28px minmax(0, 1fr); gap: 8px; align-items: start; padding: 6px 0; }
+.coach .co-t p { margin: 0; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.coach .co-chg { display: inline-block; font-style: normal; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: #fff; margin-inline-start: 4px; white-space: nowrap; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -4303,6 +4311,106 @@ frothPaint = (function (prev) {
   };
 })(frothPaint);
 frothRender = (function (prev) { return function () { prev(); if (FR.open && (FR.ph === 0 || FR.ph === 4)) { const svg = $('.fr-art svg.v4'); if (svg) { const m = frothMilkObj().T.milk; const tg = clamp((m.tempC || 60) / 80, 0, 1); const ty = (73 + 144 * (1 - tg)).toFixed(1); svg.querySelectorAll('.th-tgt').forEach((l) => { l.setAttribute('y1', ty); l.setAttribute('y2', ty); }); const tt = svg.querySelector('.th-t'); if (tt) { tt.setAttribute('y', +ty + 4); tt.textContent = (m.tempC || 60) + '°'; } if (FR.ph === 4) { const f = svg.querySelector('.th-fill'); if (f) { const fr = clamp((m.tempC || 60) / 80, 0, 1); f.setAttribute('height', (144 * fr).toFixed(1)); f.setAttribute('y', (73 + 144 * (1 - fr)).toFixed(1)); f.classList.add('hot'); } } } } }; })(frothRender);
+
+/* ============================================================
+   V4e — "next brew" coach: tips per drink type, from your last brew of that drink
+   (taste + score + the actual numbers), your best brew so far and your trend
+   ============================================================ */
+const COACH_ICON = { dial: '🎯', run: '⏱', best: '🏆', trend: '📈', down: '📉', age: '⏳', cons: '🔁', milk: '🥛', ok: '✅', ask: '👅', tip: '💡' };
+function coachKey(s) {
+  const rc = byId('recipes', s.recipeId); const nm = ((rc && rc.name) || '') + ' ' + (s.notes || '');
+  if (/cold ?brew|קולד|קר\b|cold-drip/i.test(nm)) return { k: 'cold', he: 'קולד ברו', m: s.method };
+  if (s.method === 'espresso') { const t = (s.drink && s.drink.type) || 'espresso'; const dk = DRINK_MAP[t] || DRINKS[0]; return { k: 'esp|' + dk.id, he: dk.he, m: 'espresso', dk }; }
+  const M = METHODS[s.method] || METHODS.custom; return { k: s.method, he: M.he, m: s.method };
+}
+const coachSec = (v) => (isNum(v) ? (v >= 7200 ? fmtN(v / 3600, 1) + ' שעות' : v + ' שנ׳') : '');
+function coachRows() {
+  const rows = dataset().slice().reverse(); const groups = {};
+  rows.forEach((r) => { const g = coachKey(r.s); (groups[g.k] = groups[g.k] || Object.assign({ rows: [] }, g)).rows.push(r); });
+  return Object.keys(groups).map((k) => groups[k]).sort((a, b) => (a.rows[0].t < b.rows[0].t ? 1 : -1));
+}
+function coachPlan(s) { return (s.planned && s.planned.params) || s.planned || {}; }
+function coachDial(g, last) {
+  const s = last.s; const params = coachPlan(s); const meas = measOf(s.id) || {};
+  const p = { method: METHODS[s.method] ? s.method : 'custom', grinderId: s.grinderId };
+  const taste = last.issue && last.issue !== 'none' ? last.issue : (isNum(last.overall) && last.overall >= 8 ? 'none' : null);
+  if (g.k === 'cold') {
+    const st = params.steep; const h = isNum(st) ? st / 3600 : null; const hh = (d) => (h != null ? ' (מ-' + fmtN(h, 0) + ' ל-' + fmtN(Math.max(4, h + d), 0) + ' שעות)' : '');
+    if (taste === 'sour' || taste === 'weak' || taste === 'flat') return { ic: 'dial', t: (taste === 'sour' ? 'חמוץ' : taste === 'weak' ? 'חלש' : 'שטוח') + ': הוסיפו 3–4 שעות השריה' + hh(4) + ', או טחינה עדינה קצת יותר. קולד ברו נוטה להיות תת-מזוקק כשהוא קצר או גס.' };
+    if (taste === 'bitter' || taste === 'astringent' || taste === 'harsh') return { ic: 'dial', t: 'מר או מייבש: קצרו ב-3–4 שעות' + hh(-4) + ' או טחינה גסה יותר. אחרי 18–20 שעות רוב הקפה מתחיל להיות עצי.' };
+    if (taste === 'strong') return { ic: 'dial', t: 'חזק מדי: אל תשנו את הנוסחה. פשוט דללו את הריכוז בשווה מים או קרח בהגשה, וכך תשמרו את הטעם.' };
+    if (taste === 'none') return { ic: 'ok', t: 'יצא מאוזן. שמרו אותו מתכון: אותה טחינה, יחס והשריה, ובקבוק מכוסה במקרר.' };
+    return null;
+  }
+  const sug = taste ? suggestNext(p, params, params, taste, last.overall, { time: meas.aTime, yield: meas.aYield }) : null;
+  if (sug && sug.change) return { ic: 'dial', t: sug.why + '.', chg: sug.change };
+  if (sug && sug.keep) return { ic: 'ok', t: 'הכוס הקודמת הייתה טובה (' + last.overall + '). שחזרו אותה בדיוק כדי לוודא שזה עקבי.' };
+  if (!taste) return { ic: 'ask', t: 'לא סימנתם איך הטעם יצא, ולכן אין הצעה מדויקת. בפעם הבאה סמנו חמוץ, מר, חלש או חזק.' };
+  return null;
+}
+function coachRun(g, last) {
+  if (g.m !== 'espresso') return null; const params = coachPlan(last.s); const e = last.e; const out = [];
+  if (isNum(params.time) && isNum(e.time) && Math.abs(e.time - params.time) >= 4) out.push(e.time < params.time ? 'הזרם ארך ' + fmtN(e.time, 0) + ' שנ׳ ביעד ' + params.time + ': מהר מדי. טחינה עדינה יותר או פאק אחיד יותר יאיטו.' : 'הזרם ארך ' + fmtN(e.time, 0) + ' שנ׳ ביעד ' + params.time + ': איטי. טחינה גסה יותר תקצר ותסיר מרירות.');
+  if (isNum(params.yield) && isNum(e.yield) && Math.abs(e.yield - params.yield) >= 3) out.push('המשקה יצא ' + fmtN(e.yield, 0) + ' g ביעד ' + params.yield + ' g. עצרו את המשקל מוקדם יותר, ובדקו שהספל עומד על המשקל מההתחלה.');
+  return out.length ? { ic: 'run', t: out.join(' ') } : null;
+}
+function coachBest(g, last) {
+  const rated = g.rows.filter((r) => isNum(r.overall)); if (rated.length < 2) return null;
+  const best = rated.slice().sort((a, b) => b.overall - a.overall || b.t - a.t)[0]; if (best.id === last.id || !isNum(last.overall) || best.overall - last.overall < 1) return null;
+  const bp = coachPlan(best.s), lp = coachPlan(last.s); const bits = [];
+  ['grind', 'temp', 'time', 'steep', 'dose', 'yield', 'water'].forEach((k) => { if (isNum(bp[k]) && isNum(lp[k]) && bp[k] !== lp[k]) { const f = (METHODS[g.m] || METHODS.custom).fields.find((x) => x.k === k); if (f) bits.push(shortLabel(f) + ' ' + fmtN(bp[k], 1) + ' במקום ' + fmtN(lp[k], 1)); } });
+  if (best.e.ratio && last.e.ratio && Math.abs(best.e.ratio - last.e.ratio) >= 0.15) bits.push('יחס ' + fmtRatio(best.e.ratio) + ' במקום ' + fmtRatio(last.e.ratio));
+  const bn = best.bean && best.bean.name ? ' עם ' + best.bean.name : '';
+  return { ic: 'best', t: 'הכוס הכי טובה שלך (' + best.overall + ', ' + fmtDate(best.date) + bn + ')' + (bits.length ? ' הייתה עם ' + bits.slice(0, 3).join(', ') : ' הייתה בהגדרות דומות') + '. כדאי לחזור לשם ולכוון משם.' };
+}
+function coachTrend(g) {
+  const r = g.rows.filter((x) => isNum(x.overall)).slice(0, 4); if (r.length < 3) return null;
+  const newer = mean(r.slice(0, 2).map((x) => x.overall)), older = mean(r.slice(2).map((x) => x.overall)); const d = newer - older;
+  if (d >= 0.8) return { ic: 'trend', t: 'המגמה עולה: הציונים האחרונים גבוהים ב-' + fmtN(d, 1) + ' מהקודמים. המשיכו לשנות משתנה אחד בכל פעם.' };
+  if (d <= -0.8) return { ic: 'down', t: 'המגמה יורדת: הציונים נמוכים ב-' + fmtN(-d, 1) + ' מהקודמים. בדקו אם התחלף שק, אם הפולים התיישנו או אם הטחינה זזה.' };
+  return null;
+}
+function coachAge(g, last) {
+  const a = last.roastAge; if (a == null) return null;
+  if (a < 5 && g.m === 'espresso') return { ic: 'age', t: 'הפולים בני ' + a + ' ימים מהקלייה, עדיין עמוסים בגזים: קרמה לא יציבה וחמיצות חריפה. לאספרסו חכו עד ימים 7–10, או הוסיפו פרה-אינפוזיה.' };
+  if (a < 4) return { ic: 'age', t: 'הפולים בני ' + a + ' ימים מהקלייה. לפילטר חכו לימים 5–7, ואז הטעם נפתח.' };
+  if (a > 35) return { ic: 'age', t: 'הפולים בני ' + a + ' ימים מהקלייה, ונחלשו. טחינה עדינה קצת יותר ומנה קטנה מעט גדולה יותר מפצות.' };
+  return null;
+}
+function coachCons(g) {
+  const same = g.rows.slice(0, 6); if (same.length < 4) return null;
+  if (g.m === 'espresso') { const ts = same.map((r) => r.e.time).filter(isNum); const s1 = ts.length >= 4 ? sd(ts) : null; if (s1 != null && s1 > 4) return { ic: 'cons', t: 'זמן המיצוי קופץ ב-±' + fmtN(s1, 0) + ' שנ׳ בין שוטים. הכנה אחידה לפאק (WDT, טמפינג ישר) וטחינה במשקל קבוע יחזירו עקביות.' }; }
+  const rs = same.map((r) => r.overall).filter(isNum); const s2 = rs.length >= 4 ? sd(rs) : null; if (s2 != null && s2 > 1.6) return { ic: 'cons', t: 'הציונים קופצים מכוס לכוס (פער של ±' + fmtN(s2, 1) + '). לפני שמשנים עוד, קבעו מתכון אחד והכינו אותו שלוש פעמים אותו הדבר.' };
+  return null;
+}
+function coachMilk(g, last) {
+  const d = last.s.drink; if (!d || !d.milk || d.milk.cold || !d.milkIssue || d.milkIssue === 'ok') return null; const ms = milkSuggest(d.milk, d.milkIssue);
+  return ms && ms.reason ? { ic: 'milk', t: 'החלב: ' + ms.reason + '.' } : null;
+}
+function coachTips(g) {
+  const last = g.rows[0]; const tips = [];
+  [coachDial(g, last), coachRun(g, last), coachMilk(g, last), coachBest(g, last), coachTrend(g), coachAge(g, last), coachCons(g)].forEach((t) => { if (t) tips.push(t); });
+  if (tips.length < 2) { const T = (TIPS[g.m] || []).concat(TIPS.general); if (T.length) tips.push({ ic: 'tip', t: T[(new Date().getDate() + g.rows.length) % T.length] }); }
+  return tips.slice(0, 4);
+}
+function coachCard() {
+  const gs = coachRows().slice(0, 6);
+  if (!gs.length) return '<section class="card st-card"><div class="st-h"><h2>טיפים לחליטה הבאה</h2></div><p class="muted">אחרי החליטה הראשונה שתרשמו עם ציון ותחושה, כאן יופיעו טיפים ספציפיים לכל משקה: אספרסו, קולד ברו, פילטר ועוד.</p></section>';
+  return '<section class="card st-card coach"><div class="st-h"><h2>טיפים לחליטה הבאה</h2><small>לפי החליטה האחרונה בכל משקה</small></div>' + gs.map((g) => {
+    const last = g.rows[0]; const tips = coachTips(g); const M = METHODS[g.m] || METHODS.custom;
+    const tasteL = last.issue && last.issue !== 'none' ? ISSUE_MAP[last.issue] : (last.issue === 'none' ? 'מאוזן' : '');
+    const bean = last.bean && last.bean.name ? ' · ' + last.bean.name : '';
+    return '<div class="co-g" style="--m:' + (M.color || 'var(--accent)') + '"><div class="co-h"><b>' + esc(g.he) + '</b><small>' + esc(fmtDate(last.date)) + esc(bean) + (isNum(last.overall) ? ' · ציון ' + last.overall : '') + (tasteL ? ' · ' + esc(tasteL) : '') + ' · ' + (g.rows.length === 1 ? 'חליטה אחת' : g.rows.length + ' חליטות') + '</small></div>' +
+      tips.map((t) => '<div class="co-t"><span class="st-tip-i">' + COACH_ICON[t.ic] + '</span><p>' + esc(t.t) + (t.chg ? ' <em class="co-chg">' + esc(t.chg.label) + ' ' + fmtN(t.chg.from, 1) + ' ← ' + fmtN(t.chg.to, 1) + '</em>' : '') + '</p></div>').join('') + '</div>';
+  }).join('') + '<div class="row" style="margin-top:10px"><button type="button" class="btn sm" data-act="nav" data-v="brew">להכנה הבאה</button><button type="button" class="btn ghost sm" data-act="nav" data-v="log">ליומן</button></div></section>';
+}
+RENDER.stats = (function (prev) {
+  return function () {
+    let h = prev(); let c = ''; try { c = coachCard(); } catch (e) { console.error(e); }
+    const tag = '<section class="card st-card"><div class="st-h"><h2>טיפים לשיפור</h2>';
+    return h.indexOf(tag) >= 0 ? h.replace(tag, c + '<section class="card st-card"><div class="st-h"><h2>תזכורות מלאי וקנייה</h2>') : h.replace('<div class="st-2">', c + '<div class="st-2">');
+  };
+})(RENDER.stats);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
