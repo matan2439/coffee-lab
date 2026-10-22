@@ -1215,6 +1215,20 @@ body.froth-on { overflow: hidden; }
 .coach .co-t p { margin: 0; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
 .coach .co-chg { display: inline-block; font-style: normal; font-weight: 700; padding: 1px 8px; border-radius: 999px; background: var(--accent); color: #fff; margin-inline-start: 4px; white-space: nowrap; }
 
+/* cold brew + grind advisor */
+:root { --m-coldbrew: #2f7a9a; }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) { --m-coldbrew: #7bbbd8; } }
+:root[data-theme="dark"] { --m-coldbrew: #7bbbd8; }
+.gadv { border-inline-start: 4px solid var(--accent); }
+.gadv .blk-h { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 10px; }
+.gadv .blk-h em { font-style: normal; font-size: 12px; font-weight: 500; opacity: .75; }
+.gadv .ga-main { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 6px 0 2px; }
+.gadv .ga-v { font-size: 34px; line-height: 1; } .gadv .ga-v small { font-size: 13px; font-weight: 500; }
+.gadv .ga-r { opacity: .8; } .gadv .ga-why, .gadv .ga-n { margin: 6px 0 0; font-size: 14px; line-height: 1.55; overflow-wrap: anywhere; }
+.gadv .ga-ok { color: var(--ok, #2f7d4f); display: block; } .gadv .ga-diff { display: block; opacity: .85; }
+.gadv .ga-dir { display: block; margin-top: 6px; }
+.ga-chip { text-align: center; margin: 6px 0; font-size: 14px; opacity: .9; }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -1417,6 +1431,13 @@ const METHODS = {
     act: [N('aYield', 'משקל משקה סופי', 'g', 0, 1200, 1), N('aTime', 'זמן כולל', 'שנ׳', 0, 1800, 1, { int: 1 })],
     ratioBase: 'water', timeKey: 'steep',
   },
+  coldbrew: {
+    he: 'קולד ברו', en: 'Cold Brew', color: 'var(--m-coldbrew)',
+    fields: [N('dose', 'מנת קפה', 'g', 5, 600, 0.1, { req: 1 }), N('water', 'משקל מים', 'g', 50, 6000, 1, { req: 1 }), GRIND, S('place', 'מקום ההשריה', ['מקרר', 'טמפרטורת החדר']),
+      N('steepH', 'זמן השריה', 'שעות', 4, 48, 1, { int: 1 }), S('filterC', 'סינון', ['נייר', 'בד', 'מתכת', 'שקית פילטר']), S('serve', 'הגשה', ['מרוכז: מדללים', 'מוכן לשתייה']), N('dilute', 'דילול בהגשה (מים/קרח)', 'g', 0, 3000, 1)],
+    act: [N('aYield', 'כמות סופית אחרי סינון', 'g', 0, 6000, 1)],
+    ratioBase: 'water', timeKey: 'steepSec', cold: true,
+  },
   chemex: { he: 'כמקס', en: 'Chemex', color: 'var(--m-chemex)', fields: null, act: null, ratioBase: 'water', timeKey: 'drawdown' },
   kalita: { he: 'קליטה ווייב', en: 'Kalita Wave', color: 'var(--m-kalita)', fields: null, act: null, ratioBase: 'water', timeKey: 'drawdown' },
   custom: {
@@ -1458,7 +1479,8 @@ function validateParams(method, p) {
   if (!Object.keys(errors).length) {
     const r = ratioOf(method, p);
     if (method === 'espresso' && r && (r < 1 || r > 4)) warnings.push('יחס אספרסו ' + fmtRatio(r) + ' חריג, בדקו שהנתונים נכונים.');
-    else if (method !== 'espresso' && method !== 'moka' && r && (r < 8 || r > 25)) warnings.push('יחס חליטה ' + fmtRatio(r) + ' חריג, בדקו שהנתונים נכונים.');
+    else if (method === 'coldbrew' && r && (r < 3 || r > 20)) warnings.push('יחס קולד ברו ' + fmtRatio(r) + ' חריג. מרוכז הוא בדרך כלל 1:5 עד 1:8, ומוכן לשתייה 1:12 עד 1:16.');
+    else if (method !== 'espresso' && method !== 'moka' && method !== 'coldbrew' && r && (r < 8 || r > 25)) warnings.push('יחס חליטה ' + fmtRatio(r) + ' חריג, בדקו שהנתונים נכונים.');
     if (method === 'v60' || method === 'chemex' || method === 'kalita') {
       if (isNum(p.bloomWater) && isNum(p.water) && p.bloomWater > p.water) errors.bloomWater = 'מי הבלום גדולים מסך המים';
     }
@@ -1494,6 +1516,12 @@ function autoSteps(method, p) {
     if (p.crust !== 'לא') add(Math.min(isNum(p.steep) ? p.steep : 240, 240), 'שברו את הקרום וצלחו את הקצף', null, 'stir');
     add(isNum(p.steep) ? p.steep : 240, 'לחצו את הבוכנה (' + (p.plunge || 'איטית') + ')', null, 'press');
     add((isNum(p.steep) ? p.steep : 240) + (isNum(p.settle) ? p.settle : 30), 'מזגו מיד כדי למנוע מיצוי יתר', null, 'end');
+  } else if (method === 'coldbrew') {
+    const h = isNum(p.steepH) ? p.steepH : 16; const sec = Math.round(h * 3600); const conc = p.serve !== 'מוכן לשתייה';
+    add(0, 'שפכו ' + w + ' g מים קרים על ' + d + ' g קפה גס, וערבבו עד שהכול רטוב', w, 'pour');
+    add(120, 'ערבבו שוב בעדינות, כסו, והניחו ' + (p.place === 'טמפרטורת החדר' ? 'בטמפרטורת החדר' : 'במקרר') + ' ל-' + h + ' שעות', null, 'wait');
+    add(sec, 'סננו (' + (p.filterC || 'נייר') + ') לאט, בלי ללחוץ על הקפה', null, 'step');
+    add(sec + 300, conc ? 'מרוכז מוכן. דללו' + (isNum(p.dilute) && p.dilute > 0 ? ' ב-' + p.dilute + ' g מים או קרח' : ' לפי הטעם (בערך שווה במשקל)') + ' והגישו מעל קרח' : 'מוכן לשתייה. הגישו מעל קרח', null, 'end');
   } else if (method === 'custom') {
     add(0, 'התחילו', null, 'start'); if (isNum(p.targetTime) && p.targetTime > 0) add(p.targetTime, 'זמן היעד הגיע', w, 'end');
   } else {
@@ -1515,7 +1543,7 @@ function autoSteps(method, p) {
 }
 
 /* which parameters usually change between brews, per method (preset default) */
-const DEFAULT_VARY = { espresso: ['dose', 'yield', 'grind', 'time'], aeropress: ['grind', 'temp'], v60: ['grind', 'temp'], chemex: ['grind', 'temp'], kalita: ['grind', 'temp'], moka: ['grind', 'dose'], french: ['grind', 'steep'], custom: ['grind'] };
+const DEFAULT_VARY = { espresso: ['dose', 'yield', 'grind', 'time'], aeropress: ['grind', 'temp'], v60: ['grind', 'temp'], chemex: ['grind', 'temp'], kalita: ['grind', 'temp'], moka: ['grind', 'dose'], french: ['grind', 'steep'], coldbrew: ['grind', 'steepH'], custom: ['grind'] };
 
 /* espresso-based drinks (typical amounts are editable starting points) */
 const DRINKS = [
@@ -2316,6 +2344,7 @@ const TIPS = {
   aeropress: ['משיכה קלה של הבוכנה אחרי המזיגה עוצרת טפטוף בזמן ההשריה.', 'לחצו לאט ועצרו כשנשמעת שסיסה.'],
   moka: ['התחילו עם מים חמים בבסיס: פחות זמן על האש, פחות טעם שרוף.', 'אל תדחסו את הקפה בסל.', 'כשהזרם מתבהר ומבעבע, הורידו מהאש וקררו את הבסיס.'],
   french: ['אחרי שבירת הקרום, אספו את הקצף מלמעלה והמתינו כמה דקות לשקיעה.', 'אין צורך ללחוץ את הבוכנה עד הסוף: היא משמשת כמסננת.'],
+  coldbrew: ['טחינה גסה ושימוש במים מסוננים נותנים כוס נקייה ומתוקה.', 'אחרי 18 עד 20 שעות הטעם נוטה להיות עצי. בדקו טעימה גם בשעה ה-12.', 'מרוכז שומרים במקרר עד שבוע, ומדללים רק בהגשה.', 'לסינון נקי: נייר אחרי בד, לאט.'],
   custom: ['תעדו את השלבים במתכון כדי שהטיימר ידריך אתכם.'],
 };
 const dayIdx = () => Math.floor(Date.now() / DAY);
@@ -4319,7 +4348,7 @@ frothRender = (function (prev) { return function () { prev(); if (FR.open && (FR
 const COACH_ICON = { dial: '🎯', run: '⏱', best: '🏆', trend: '📈', down: '📉', age: '⏳', cons: '🔁', milk: '🥛', ok: '✅', ask: '👅', tip: '💡' };
 function coachKey(s) {
   const rc = byId('recipes', s.recipeId); const nm = ((rc && rc.name) || '') + ' ' + (s.notes || '');
-  if (/cold ?brew|קולד|קר\b|cold-drip/i.test(nm)) return { k: 'cold', he: 'קולד ברו', m: s.method };
+  if (s.method === 'coldbrew' || /cold ?brew|קולד|קר\b|cold-drip/i.test(nm)) return { k: 'cold', he: 'קולד ברו', m: s.method };
   if (s.method === 'espresso') { const t = (s.drink && s.drink.type) || 'espresso'; const dk = DRINK_MAP[t] || DRINKS[0]; return { k: 'esp|' + dk.id, he: dk.he, m: 'espresso', dk }; }
   const M = METHODS[s.method] || METHODS.custom; return { k: s.method, he: M.he, m: s.method };
 }
@@ -4335,7 +4364,7 @@ function coachDial(g, last) {
   const p = { method: METHODS[s.method] ? s.method : 'custom', grinderId: s.grinderId };
   const taste = last.issue && last.issue !== 'none' ? last.issue : (isNum(last.overall) && last.overall >= 8 ? 'none' : null);
   if (g.k === 'cold') {
-    const st = params.steep; const h = isNum(st) ? st / 3600 : null; const hh = (d) => (h != null ? ' (מ-' + fmtN(h, 0) + ' ל-' + fmtN(Math.max(4, h + d), 0) + ' שעות)' : '');
+    const st = params.steep; const h = isNum(params.steepH) ? params.steepH : isNum(st) ? st / 3600 : null; const hh = (d) => (h != null ? ' (מ-' + fmtN(h, 0) + ' ל-' + fmtN(Math.max(4, h + d), 0) + ' שעות)' : '');
     if (taste === 'sour' || taste === 'weak' || taste === 'flat') return { ic: 'dial', t: (taste === 'sour' ? 'חמוץ' : taste === 'weak' ? 'חלש' : 'שטוח') + ': הוסיפו 3–4 שעות השריה' + hh(4) + ', או טחינה עדינה קצת יותר. קולד ברו נוטה להיות תת-מזוקק כשהוא קצר או גס.' };
     if (taste === 'bitter' || taste === 'astringent' || taste === 'harsh') return { ic: 'dial', t: 'מר או מייבש: קצרו ב-3–4 שעות' + hh(-4) + ' או טחינה גסה יותר. אחרי 18–20 שעות רוב הקפה מתחיל להיות עצי.' };
     if (taste === 'strong') return { ic: 'dial', t: 'חזק מדי: אל תשנו את הנוסחה. פשוט דללו את הריכוז בשווה מים או קרח בהגשה, וכך תשמרו את הטעם.' };
@@ -4411,6 +4440,135 @@ RENDER.stats = (function (prev) {
     return h.indexOf(tag) >= 0 ? h.replace(tag, c + '<section class="card st-card"><div class="st-h"><h2>תזכורות מלאי וקנייה</h2>') : h.replace('<div class="st-2">', c + '<div class="st-2">');
   };
 })(RENDER.stats);
+
+/* ============================================================
+   V4f — cold brew preset + grind recommendation while you set up the drink
+   (specific grinder model + your own previous brews on that grinder)
+   ============================================================ */
+
+/* ---------- grinder models: dial range ↔ particle size (µm). Linear estimate, refined by your own data ---------- */
+const GRINDER_DB = [
+  { re: /vs\s?-?3|varia/, name: 'Varia VS3', dial: [0, 19], um: [170, 1400], dec: 1, unit: '', espOk: true },
+  { re: /comandante|c40/, name: 'Comandante C40', dial: [0, 36], um: [0, 1090], dec: 0, unit: 'קליקים', espOk: true },
+  { re: /encore(?!.*esp)/, name: 'Baratza Encore', dial: [1, 40], um: [250, 1200], dec: 0, unit: '', espOk: false },
+];
+const UM_TARGET = { espresso: [200, 350, 280], moka: [330, 450, 390], aeropress: [400, 650, 520], v60: [550, 750, 650], kalita: [550, 750, 620], chemex: [700, 900, 780], french: [850, 1150, 1000], coldbrew: [1000, 1250, 1100] };
+const ROAST_UM = { light: 0.94, 'light-med': 0.97, medium: 1, 'med-dark': 1.04, dark: 1.08 };
+const grinderModel = (g) => { if (!g) return null; const t = ((g.name || '') + ' ' + (g.brand || '') + ' ' + (g.model || '')).toLowerCase(); return GRINDER_DB.find((e) => e.re.test(t)) || null; };
+const umToDial = (m, um) => m.dial[0] + (um - m.um[0]) * (m.dial[1] - m.dial[0]) / (m.um[1] - m.um[0]);
+const dialToUm = (m, d) => m.um[0] + (d - m.dial[0]) * (m.um[1] - m.um[0]) / (m.dial[1] - m.dial[0]);
+const GRIND_FINER = new Set(['sour']); const GRIND_COARSER = new Set(['bitter', 'astringent', 'harsh']);
+const wsd = (xs, ws) => { const W = sum(ws); if (!W) return 0; const m = sum(xs.map((x, i) => x * ws[i])) / W; return Math.sqrt(sum(xs.map((x, i) => ws[i] * (x - m) * (x - m))) / W); };
+
+function grindStats(g, method, beanId, forDate) {
+  const step = (g.details && num(g.details.grindStep)) || 0.1; const model = grinderModel(g);
+  const nudge = model ? Math.abs(model.dial[1] - model.dial[0]) / (model.um[1] - model.um[0]) * (method === 'espresso' ? 15 : 40) : step * 3;
+  const ss = doneSessions().filter((s) => s.grinderId === g.id && s.method === method).map((s) => { const pr = coachPlan(s); const e = evalOf(s.id); return { s, t: new Date(s.date).getTime(), grind: pr.grind, r: e && isNum(e.scores.overall) ? e.scores.overall : null, issue: e ? e.issue : 'none', bean: s.beanId, age: roastAgeAt(byId('bags', s.bagId), s.date) }; }).filter((x) => isNum(x.grind)).sort((a, b) => b.t - a.t);
+  if (!ss.length) return { n: 0, step, nudge, model, rows: [] };
+  const rows = ss.map((x, i) => { const imp = x.grind + (GRIND_FINER.has(x.issue) ? -nudge : GRIND_COARSER.has(x.issue) ? nudge : 0) * (isNum(x.r) && x.r >= 8 ? 0.3 : 1); const w = Math.pow(0.85, i) * (isNum(x.r) ? Math.max(0.08, Math.pow((x.r - 4) / 6, 2)) : 0.3) * (beanId && x.bean === beanId ? 1.6 : 1); return Object.assign({ imp, w }, x); });
+  const W = sum(rows.map((x) => x.w)); const center = sum(rows.map((x) => x.imp * x.w)) / W; const spread = wsd(rows.map((x) => x.imp), rows.map((x) => x.w));
+  const good = rows.filter((x) => isNum(x.r) && x.r >= 8); const rated = rows.filter((x) => isNum(x.r));
+  let ageAdj = 0, ageNote = '';
+  const aged = rows.filter((x) => x.age != null && isNum(x.r) && x.r >= 7);
+  if (aged.length >= 4 && forDate != null) { const ma = mean(aged.map((x) => x.age)), mg = mean(aged.map((x) => x.grind)); const vx = sum(aged.map((x) => (x.age - ma) * (x.age - ma))); if (vx > 0) { const slope = sum(aged.map((x) => (x.age - ma) * (x.grind - mg))) / vx; ageAdj = clamp(slope * (forDate - ma), -nudge * 1.5, nudge * 1.5); if (Math.abs(ageAdj) >= step) ageNote = 'לפי החליטות הטובות שלך, ככל שהפולים מתיישנים צריך ' + (ageAdj < 0 ? 'טחינה עדינה יותר' : 'טחינה גסה יותר') + ' (תיקון ' + fmtN(Math.abs(ageAdj), 1) + ').'; } }
+  return { n: rows.length, step, nudge, model, rows, center, spread, good, rated, ageAdj, ageNote, last: rows[0], meanRating: rated.length ? mean(rated.map((x) => x.r)) : null, best: rated.slice().sort((a, b) => b.r - a.r || b.t - a.t)[0] || null };
+}
+function grindAdvice(p, params, bag) {
+  const g = byId('equipment', p.grinderId); if (!g || !fieldDef(p.method, 'grind')) return null;
+  const model = grinderModel(g); const finerLower = !(g.details && g.details.finerLower === false);
+  const bean = bag ? byId('beans', bag.beanId) : null; const age = bag ? roastAgeAt(bag) : null;
+  const st = grindStats(g, p.method, bag ? bag.beanId : null, age); const step = st.step; const dec = model ? model.dec : (step < 1 ? 1 : 0);
+  const rnd = (v) => round(Math.round(v / step) * step, 2); const notes = [];
+  const out = { g, model, finerLower, st, step, dec, n: st.n };
+  if (st.n >= 1) {
+    let c = st.center + st.ageAdj; out.source = 'stats'; out.rec = rnd(c); const half = Math.max(step, st.spread * 0.7); out.lo = rnd(c - half); out.hi = rnd(c + half); out.conf = st.n >= 5 ? 'high' : st.n >= 3 ? 'mid' : 'low';
+    if (st.ageNote) notes.push(st.ageNote);
+    if (st.last && GRIND_FINER.has(st.last.issue)) notes.push('בפעם האחרונה (' + fmtN(st.last.grind, 1) + ') יצא חמוץ, לכן ההמלצה נוטה ' + (finerLower ? 'נמוך' : 'גבוה') + ' (עדין) יותר.');
+    else if (st.last && GRIND_COARSER.has(st.last.issue)) notes.push('בפעם האחרונה (' + fmtN(st.last.grind, 1) + ') יצא מר או מייבש, לכן ההמלצה נוטה ' + (finerLower ? 'גבוה' : 'נמוך') + ' (גס) יותר.');
+    if (st.best && st.best.r >= 8) notes.push('הכוס הכי טובה שלך בשיטה הזו: ציון ' + st.best.r + ' בהגדרה ' + fmtN(st.best.grind, 1) + '.');
+    if (st.meanRating != null) out.why = 'מבוסס על ' + (st.n === 1 ? 'חליטה אחת' : st.n + ' חליטות') + ' קודמות בטוחן הזה, ציון ממוצע ' + fmtN(st.meanRating, 1) + (bag && st.rows.some((x) => x.bean === bag.beanId) ? ', עם דגש על אותם פולים' : '') + '.'; else out.why = 'מבוסס על ' + (st.n === 1 ? 'חליטה אחת' : st.n + ' חליטות') + ' קודמות בטוחן הזה (בלי ציונים, ולכן משקל נמוך).';
+  } else if (model && UM_TARGET[p.method]) {
+    const t = UM_TARGET[p.method]; const rf = bean && ROAST_UM[bean.roastLevel] ? ROAST_UM[bean.roastLevel] : 1; const target = t[2] * rf; out.target = Math.round(target); out.range = [t[0], t[1]];
+    // anchor to a method you already dialled in on this grinder
+    let anchor = null;
+    METHOD_IDS.forEach((m2) => { if (m2 === p.method || !UM_TARGET[m2]) return; const s2 = grindStats(g, m2, null, null); if (s2.n >= 1) { const a = { m: m2, set: s2.center, n: s2.n, d: Math.abs(UM_TARGET[m2][2] - t[2]) }; if (!anchor || a.d < anchor.d) anchor = a; } });
+    if (!anchor) { const cal = state.calibrations.filter((c) => c.grinderId === g.id && isNum(c.preferred) && UM_TARGET[c.method] && c.method !== p.method).sort((a, b) => Math.abs(UM_TARGET[a.method][2] - t[2]) - Math.abs(UM_TARGET[b.method][2] - t[2]))[0]; if (cal) anchor = { m: cal.method, set: cal.preferred, n: 0, cal: true }; }
+    const slope = (model.dial[1] - model.dial[0]) / (model.um[1] - model.um[0]);
+    let v; if (anchor) { v = anchor.set + (target - UM_TARGET[anchor.m][2]) * slope; out.source = 'anchor'; out.why = 'לפי ' + (anchor.cal ? 'נקודת הפתיחה ששמרתם ל' : 'החליטות שלכם ב') + methodHe(anchor.m) + ' בטוחן הזה (' + fmtN(anchor.set, 1) + '), ומעבר לגודל החלקיק המתאים ל' + methodHe(p.method) + '.'; }
+    else { v = umToDial(model, target); out.source = 'model'; out.why = 'הערכה לפי טווח הטוחן (' + model.um[0] + '–' + model.um[1] + ' מיקרון) וגודל חלקיק טיפוסי ל' + methodHe(p.method) + ' (כ-' + Math.round(target) + ' מיקרון). עוד אין חליטות מתועדות, אז זו נקודת פתיחה.'; }
+    v = clamp(v, Math.min(model.dial[0], model.dial[1]), Math.max(model.dial[0], model.dial[1])); out.rec = rnd(v); const w = Math.abs(t[1] - t[0]) / 2 * slope * 0.6; out.lo = rnd(v - w); out.hi = rnd(v + w); out.conf = 'est';
+    if (rf !== 1) notes.push('הקלייה ' + (rf < 1 ? 'בהירה, ולכן כוונו עדין מעט' : 'כהה, ולכן כוונו גס מעט') + ' מהממוצע.');
+    if (p.method === 'espresso' && model.espOk === false) notes.push('הדגם הזה לא מיועד לאספרסו, ולכן הערך מקורב בלבד.');
+  } else return Object.assign(out, { source: 'none' });
+  if (age != null && age < 6 && p.method === 'espresso') notes.push('הפולים רק ' + age + ' ימים מהקלייה: גזים עודפים. אם הזרם מהיר או הקרמה רועשת, נסו עדין מעט.');
+  out.notes = notes; out.cur = isNum(params.grind) ? params.grind : null; out.age = age;
+  return out;
+}
+const gaFmt = (a, v) => fmtN(v, a.dec);
+function grindPanel(p, params) {
+  let a; try { a = grindAdvice(p, params, byId('bags', B().bagId)); } catch (e) { console.error(e); return ''; }
+  if (!p.grinderId) return fieldDef(p.method, 'grind') ? '<section class="card gadv"><div class="blk-h">🎯 המלצת טחינה</div><p class="muted">לא נבחר טוחן בפריסט. בחרו טוחן בעריכת הפריסט כדי לקבל המלצה לדגם שלכם.</p></section>' : '';
+  if (!a) return '';
+  const name = a.g.name || (a.model && a.model.name) || 'הטוחן';
+  if (a.source === 'none') return '<section class="card gadv"><div class="blk-h">🎯 המלצת טחינה · ' + esc(name) + '</div><p class="muted">אין עדיין חליטות בטוחן הזה בשיטה הזו, ולדגם אין נתוני טווח מובנים. אחרי החליטה הראשונה עם הגדרה ודירוג, תופיע כאן המלצה.</p></section>';
+  const near = a.cur != null && Math.abs(a.cur - a.rec) < a.step * 1.5; const dx = a.cur != null ? a.cur - a.rec : null;
+  const dirW = (d) => (d < 0 === a.finerLower ? 'עדין' : 'גס') + ' יותר';
+  const cur = a.cur == null ? '' : near ? '<small class="ga-ok">✓ הערך הנוכחי (' + gaFmt(a, a.cur) + ') קרוב להמלצה</small>' : '<small class="ga-diff">הערך הנוכחי ' + gaFmt(a, a.cur) + ': ' + gaFmt(a, Math.abs(dx)) + ' ' + dirW(dx) + ' מההמלצה</small>';
+  const conf = { high: 'ביטחון גבוה', mid: 'ביטחון בינוני', low: 'נקודת פתיחה, מעט נתונים', est: 'הערכה ראשונית' }[a.conf] || '';
+  return '<section class="card gadv" data-conf="' + a.conf + '"><div class="blk-h">🎯 המלצת טחינה · ' + esc(name) + '<em>' + conf + '</em></div>' +
+    '<div class="ga-main"><b class="ga-v num">' + gaFmt(a, a.rec) + (a.model && a.model.unit ? ' <small>' + a.model.unit + '</small>' : '') + '</b><span class="ga-r">טווח ' + gaFmt(a, a.lo) + '–' + gaFmt(a, a.hi) + '</span>' + (near ? '' : '<button type="button" class="btn sm" data-act="ga-apply" data-v="' + a.rec + '">החלה</button>') + '</div>' + cur +
+    '<p class="ga-why">' + esc(a.why || '') + '</p>' + (a.notes || []).map((n) => '<p class="ga-n">• ' + esc(n) + '</p>').join('') +
+    '<small class="ga-dir muted">' + (a.finerLower ? 'מספר נמוך יותר = טחינה עדינה יותר' : 'מספר גבוה יותר = טחינה עדינה יותר') + (a.target ? ' · גודל חלקיק יעד כ-' + a.target + ' מיקרון' : '') + '</small></section>';
+}
+ACT['ga-apply'] = (d) => { const b = B(); b.vals = b.vals || {}; b.vals.grind = +d.v; b.src = 'לפי המלצת הטחינה'; const p = presetOf(); if (p && !(p.vary || []).includes('grind')) { /* shown anyway through fixed params */ } render(); };
+
+/* make sure grind is adjustable in the setup card whenever a recommendation exists */
+const _rb = RENDER.brew;
+RENDER.brew = function () {
+  let h = _rb(); if (h.indexOf('class="card today"') < 0) return h;
+  const p = presetOf(); if (!p) return h; const params = fullParams(); const M = METHODS[p.method];
+  const panel = grindPanel(p, params);
+  const cold = p.method === 'coldbrew';
+  if (cold) {
+    const hrs = isNum(params.steepH) ? params.steepH : 16; const ready = new Date(Date.now() + hrs * 3600e3);
+    const rd = ready.toLocaleDateString('he-IL', { weekday: 'long' }) + ' ' + ready.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+    const go = '<div class="go-row"><button type="button" class="btn go" data-act="brew-skip">' + svgI('play') + 'הכנתי והנחתי להשריה</button></div><p class="tip-l">⏱ יהיה מוכן בערך ב' + esc(rd) + '. אחרי הטעימה דרגו אותו ביומן כדי לקבל טיפים לפעם הבאה.</p>';
+    h = h.replace(/<div class="go-row">[\s\S]*?<\/div>/, panel + go);
+  } else if (panel) h = h.replace('<div class="go-row">', panel + '<div class="go-row">');
+  return h;
+};
+const _bl = brewLive;
+brewLive = function () {
+  let h = _bl(); try { const { p, params } = B().run; if (!fieldDef(p.method, 'grind') || !isNum(params.grind)) return h; const a = grindAdvice(p, params, byId('bags', B().bagId)); const name = a && a.g ? a.g.name : ''; const chip = '<div class="ga-chip">🎯 טחינה <b class="num">' + fmtN(params.grind, a ? a.dec : 1) + '</b>' + (name ? ' · ' + esc(name) : '') + (a && a.rec != null && a.source !== 'none' && Math.abs(a.rec - params.grind) >= a.step * 1.5 ? ' · מומלץ ' + gaFmt(a, a.rec) : '') + '</div>'; return h.replace('<div class="timer" id="tm"', chip + '<div class="timer" id="tm"'); } catch (e) { return h; }
+};
+
+/* ---------- cold brew: dial-in hints in the "next time" suggestion ---------- */
+suggestNext = (function (prev) {
+  return function (p, vals, params, taste, rating, m) {
+    if (p.method !== 'coldbrew' || !isNum(params.steepH)) return prev(p, vals, params, taste, rating, m);
+    const f = fieldDef('coldbrew', 'steepH'); const h = params.steepH; const ch = (to, why) => ({ change: { k: 'steepH', from: h, to: clamp(to, f.min, f.max), label: 'השריה' }, why, short: why });
+    if (!taste || taste === 'none') return isNum(rating) && rating >= 8 ? { keep: true, why: 'כוס טובה. נשארים עם אותם ערכים.', short: 'אותם ערכים כמו בכוס הטובה (' + rating + ')' } : null;
+    if (taste === 'sour' || taste === 'flat' || taste === 'weak') return ch(h + 3, (taste === 'sour' ? 'חמוץ' : taste === 'weak' ? 'חלש' : 'שטוח') + ': עוד כמה שעות השריה מעלות מיצוי');
+    if (taste === 'bitter' || taste === 'astringent' || taste === 'harsh') return ch(h - 3, (taste === 'astringent' ? 'מייבש' : 'מר') + ': פחות שעות השריה');
+    if (taste === 'strong') return isNum(params.dilute) ? { change: { k: 'dilute', from: params.dilute, to: Math.round(params.dilute * 1.25), label: 'דילול' }, why: 'חזק מדי: דללו יותר בהגשה', short: 'חזק מדי: יותר דילול' } : null;
+    return prev(p, vals, params, taste, rating, m);
+  };
+})(suggestNext);
+
+/* ---------- seed a "קולד ברו" preset once, and activate the method ---------- */
+function seedColdBrew() {
+  try {
+    const pr = prefs(); if (!pr || pr.coldSeeded) return;
+    if (state.recipes.some((r) => r.method === 'coldbrew')) { pr.coldSeeded = true; return; }
+    const m = state.methods.find((x) => x.key === 'coldbrew'); if (m) m.active = true;
+    const g = state.equipment.find((e) => e.category === 'grinder' && !e.archived);
+    const params = { dose: 60, water: 480, place: 'מקרר', steepH: 16, filterC: 'נייר', serve: 'מרוכז: מדללים', dilute: 480 };
+    if (g) { const model = grinderModel(g); if (model) params.grind = round(umToDial(model, UM_TARGET.coldbrew[2]), model.dec); }
+    const r = createRecipe({ name: 'קולד ברו', method: 'coldbrew', grinderId: g ? g.id : null, params, steps: autoSteps('coldbrew', params), tags: ['נקודת פתיחה'], notes: 'נקודת פתיחה מקובלת: יחס 1:8 מרוכז, 16 שעות במקרר, ודילול שווה בשווה בהגשה. כוונו לפי הטעם.', note: 'גרסה ראשונה' });
+    r.vary = ['grind', 'steepH']; pr.coldSeeded = true; save();
+  } catch (e) { console.error(e); }
+}
+ensureBrew = (function (prev) { return function () { seedColdBrew(); return prev(); }; })(ensureBrew);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
