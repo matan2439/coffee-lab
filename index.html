@@ -4105,6 +4105,27 @@ function spMix(list) {
   }
   return out;
 }
+/* a visit = one shuffle: the order is frozen per filter while you browse; live catalog updates
+   only add new products at the end. Entering the shop from another view reshuffles. */
+SHOP.ord = {};
+function spStable(key, list) {
+  const c = SHOP.ord[key] = SHOP.ord[key] || []; const idOf = (p) => p.g.key + '|' + p.id;
+  const have = new Set(c); const fresh = list.filter((p) => !have.has(idOf(p)));
+  if (fresh.length) spMix(fresh).forEach((p) => c.push(idOf(p)));
+  const map = new Map(list.map((p) => [idOf(p), p])); const out = [];
+  c.forEach((i) => { if (map.has(i)) out.push(map.get(i)); });
+  return out;
+}
+go = (function (prev) { return function (view, extra) { if (view === 'shop' && UI.view !== 'shop') { SHOP.ord = {}; SHOP.lim = 60; } return prev(view, extra); }; })(go);
+
+/* a price of 0 means "unknown" (variable products, free placeholders), never "free" */
+const spPos = (x) => (isNum(x) && x > 0 ? x : null);
+allProducts = (function (prev) {
+  return function () { return prev().map((p) => ((p.price === 0 || p.priceMax === 0 || (p.sizes || []).some((s) => s.price === 0)) ? Object.assign({}, p, { price: spPos(p.price) != null ? p.price : spPos(p.priceMax), priceMax: spPos(p.priceMax), sizes: (p.sizes || []).map((s) => Object.assign({}, s, { price: spPos(s.price) })) }) : p)); };
+})(allProducts);
+sizesOf = (function (prev) { return function (p) { return prev(p).map((s) => (s.price === 0 ? Object.assign({}, s, { price: null }) : s)); }; })(sizesOf);
+priceLabel = (function (prev) { return function (p) { return spPos(p.price) == null ? '<small class="muted">מחיר באתר</small>' : prev(p); }; })(priceLabel);
+
 function spGridHTML(prods) {
   const q = spNorm(SHOP.q); let list = prods.filter((p) => spInStore(p) && pcat(p) !== 'workshop');
   if (SHOP.cat === 'mine') list = list.filter((p) => ownerOf(p)); else if (SHOP.cat !== 'all') list = list.filter((p) => pcat(p) === SHOP.cat);
@@ -4113,7 +4134,7 @@ function spGridHTML(prods) {
   let ordered;
   if (SHOP.cat === 'mine') ordered = onSale.concat(gone);
   else if (q) { const rank = (p) => (ownerOf(p) ? 8 : 0) + (p.g.mine ? 4 : 0) + (p.g.il ? 2 : 0); ordered = onSale.sort((a, c) => rank(c) - rank(a)).concat(gone); }
-  else ordered = spMix(onSale).concat(spMix(gone));
+  else { const k = SHOP.cat + '|' + (SHOP.store || ''); ordered = spStable(k + '|on', onSale).concat(spStable(k + '|off', gone)); }
   const extra = (SHOP.cat === 'mine' || SHOP.cat === 'all') && !q ? spUnmatched() : [];
   if (!ordered.length && !extra.length) return '<p class="muted sp-empty">' + (prods.length ? 'אין מוצרים שמתאימים לסינון.' : 'הקטלוגים נטענים מהאתרים הרשמיים…') + '</p>';
   const lim = SHOP.lim || 60; const more = ordered.length > lim;
