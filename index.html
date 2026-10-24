@@ -1296,6 +1296,19 @@ html[dir="rtl"] .tm-chip { background: linear-gradient(270deg, color-mix(in srgb
 @keyframes saSteam { 0% { opacity: 0; transform: translateY(4px); } 50% { opacity: .7; } 100% { opacity: 0; transform: translateY(-6px); } }
 @keyframes saTilt { from { transform: rotate(-4deg); } to { transform: rotate(-22deg); } }
 @media (prefers-reduced-motion: reduce) { .sa.run * { animation: none !important; } }
+.tm-adj { display: flex; flex-wrap: wrap; gap: 6px; margin: -2px 0 6px; padding-inline-start: 8px; }
+.tm-adj .tchip { padding: 4px 10px; font-size: 12.5px; }
+.tm-edit { gap: 6px; align-items: center; margin: 0 0 8px; padding-inline-start: 8px; }
+
+/* news: category tabs + area */
+.nw-tabs { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; padding: 4px; border-radius: 14px; background: color-mix(in srgb, var(--fg) 6%, transparent); margin: 6px 0 10px; }
+.nw-tab { border: 0; border-radius: 10px; padding: 9px 8px; background: none; color: var(--muted); font-weight: 600; font-size: 14px; cursor: pointer; }
+.nw-tab.on { background: var(--surface); color: var(--fg); box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+.nw-area { display: grid; gap: 6px; margin-bottom: 10px; min-width: 0; }
+.nw-areas { overflow-x: auto; flex-wrap: nowrap; scrollbar-width: none; padding-bottom: 2px; }
+.nw-areas .tchip { flex: 0 0 auto; }
+.nw-city { gap: 6px; align-items: center; }
+.nw-near { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); margin-inline-end: 6px; }
 
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
@@ -4823,10 +4836,20 @@ function tmResume(id) {
 
 /* ---------- long / custom timers ---------- */
 function tmAdd(o) {
-  const t = Object.assign({ id: tmUid(), kind: 'custom', created: Date.now(), start: Date.now() }, o); TM.list.push(t); tmSave();
-  pushAt(t.id, t.end, o.pushTitle || ('⏰ ' + t.label), o.pushBody || 'הטיימר הסתיים', t.id); tmAskOnce(); tmPaint(); return t;
+  const t = Object.assign({ id: tmUid(), kind: 'custom', created: Date.now(), start: Date.now() }, o); t.pushTitle = o.pushTitle || ('⏰ ' + t.label); t.pushBody = o.pushBody || 'הטיימר הסתיים'; TM.list.push(t); tmSave();
+  tmPushTimer(t); tmAskOnce(); tmPaint(); setTimeout(() => tmOngoing(t), 600); return t;
 }
-function tmRemove(id) { TM.list = TM.list.filter((x) => x.id !== id); tmSave(); pushCancel(id); tmPaint(); }
+function tmPushTimer(t) { pushAt(t.id, t.end, t.pushTitle, t.pushBody, t.id, t.end - t.start >= 3 * 60e3 ? { label: (t.kind === 'steep' ? '🧊 ' : '⏱ ') + t.label, start: t.start } : null); }
+function tmRemove(id) { TM.list = TM.list.filter((x) => x.id !== id); tmSave(); pushCancel(id); tmOngoingClose(id); tmPaint(); }
+/* change the time left on a running (or finished) timer */
+function tmSetEnd(id, end) {
+  const t = TM.list.find((x) => x.id === id); if (!t || t.kind === 'brew') return; const now = Date.now();
+  t.end = Math.max(now + 5000, Math.round(end)); if (t.end - t.start < 60e3) t.start = now; t.done = false; tmSave(); tmPushTimer(t); tmOngoing(t, true); tmPaint(); tmSheetRe();
+  toast('"' + t.label + '": נשארו ' + tmFmtLong((t.end - now) / 1000) + ' · מוכן ' + tmDay(t.end));
+}
+ACT['tm-adj'] = (d) => { const t = TM.list.find((x) => x.id === d.id); if (!t) return; const base = t.done ? Date.now() : t.end; tmSetEnd(d.id, base + (+d.m) * 60e3); };
+ACT['tm-edit'] = (d) => { TM.edit = TM.edit === d.id ? null : d.id; tmSheetRe(); const h = $('#tme_h'); if (h) h.focus(); };
+ACT['tm-edit-save'] = (d) => { const h = num(($('#tme_h') || {}).value) || 0; const m = num(($('#tme_m') || {}).value) || 0; const tot = h * 60 + m; if (!(tot > 0)) { toast('הזינו כמה זמן נשאר'); return; } TM.edit = null; tmSetEnd(d.id, Date.now() + tot * 60e3); };
 ACT['tm-del'] = (d) => { const t = TM.list.find((x) => x.id === d.id); if (!t) return; if (t.kind === 'custom' || t.done) { tmRemove(d.id); tmSheetRe(); return; } confirmDialog('לבטל את "' + t.label + '"?', () => { tmRemove(d.id); }, { yes: 'ביטול הטיימר' }); };
 ACT['tm-open'] = (d) => { const t = TM.list.find((x) => x.id === d.id); if (!t) { if (d.id === 'live') go('brew'); return; } if (t.kind === 'custom') { if (t.done) tmRemove(t.id); else tmSheet(); return; } if (t.kind === 'steep' && !t.done) { tmSheet(); return; } tmResume(d.id); };
 ACT['tm-finish'] = (d) => tmResume(d.id);
@@ -4863,19 +4886,32 @@ async function pushEnsure(ask) {
     return true;
   } catch (e) { console.warn('push', e); return false; }
 }
-function tmOwnerChanged() { lsSet('cl_push_reg', (lsGet('cl_push_reg') || '').replace(/^[^|]*/, 'x')); pushEnsure(false); TM.list.forEach((t) => { const e = t.kind === 'brew' ? liveEndAt(t.snap.live, t.snap.run) : t.end; if (e && !t.done && e - Date.now() > 50000) pushAt(t.id, e, '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); }); }
+function tmOwnerChanged() { lsSet('cl_push_reg', (lsGet('cl_push_reg') || '').replace(/^[^|]*/, 'x')); pushEnsure(false); TM.list.forEach((t) => { const e = t.kind === 'brew' ? liveEndAt(t.snap.live, t.snap.run) : t.end; if (e && !t.done && e - Date.now() > 50000) pushAt(t.id, e, '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id, t.kind !== 'brew' && t.end - t.start >= 3 * 60e3 ? { label: (t.kind === 'steep' ? '🧊 ' : '⏱ ') + t.label, start: t.start } : null); }); }
 let _tmAsked = false;
 function tmAskOnce() { if (_tmAsked || !pushOk()) return; _tmAsked = true; if (Notification.permission === 'default') { pushEnsure(true).then((ok) => { if (ok) toast('התראות הופעלו: תקבלו התראה גם כשהאפליקציה סגורה'); }); } else pushEnsure(false); }
-function pushAt(id, at, title, body, tag) {
+function pushAt(id, at, title, body, tag, ongoing) {
   if (!at) return; const own = tmOwner();
-  pushEnsure(false).then((ok) => { if (!ok) return; tmPost('/at', { owner: own, id: String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48), at: Math.round(at), title, body, tag: tag || id, url: './#tm=' + encodeURIComponent(id) }); });
+  pushEnsure(false).then((ok) => { if (!ok) return; tmPost('/at', { owner: own, id: String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48), at: Math.round(at), title, body, tag: tag || id, url: './#tm=' + encodeURIComponent(id), ongoing: ongoing || undefined, tz: -new Date().getTimezoneOffset() }); });
 }
+/* a quiet, sticky notification that shows the timer in the phone's notification shade (like the clock app's timer) */
+async function tmOngoing(t, force) {
+  try {
+    if (!t || t.kind === 'brew' || t.done || !pushOk() || Notification.permission !== 'granted') return; if (t.end - t.start < 3 * 60e3) return;
+    if (isIOS() && !force && t._shown) return; // iOS alerts on every update: show once, refresh only on edits
+    const reg = await navigator.serviceWorker.ready; const left = (t.end - Date.now()) / 1000; if (left <= 0) return;
+    reg.showNotification((t.kind === 'steep' ? '🧊 ' : '⏱ ') + t.label + ' · מוכן ' + tmDay(t.end), { body: 'נשארו ' + tmFmtLong(left) + (t.sub ? ' · ' + t.sub : ''), tag: 'run-' + t.id, silent: true, renotify: false, requireInteraction: true, timestamp: t.end, icon: 'icon-192.png', badge: 'badge-96.png', data: { url: './#tm=' + t.id, id: t.id } });
+    t._shown = true;
+  } catch (e) { /* ignore */ }
+}
+async function tmOngoingClose(id) { try { if (!pushOk()) return; const reg = await navigator.serviceWorker.ready; const ns = await reg.getNotifications({ tag: 'run-' + id }); ns.forEach((n) => n.close()); } catch (e) { /* ignore */ } }
+setInterval(() => { if (isIOS()) return; TM.list.forEach((t) => { if (t.kind !== 'brew' && !t.done) tmOngoing(t); }); }, 60000);
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden' && !isIOS()) TM.list.forEach((t) => { if (t.kind !== 'brew' && !t.done) tmOngoing(t); }); });
 function pushCancel(id) { if (!pushOk() || Notification.permission !== 'granted') return; tmPost('/cancel', { owner: tmOwner(), id: String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48) }); }
 ACT['tm-test'] = async () => { const ok = await pushEnsure(true); if (!ok) { toast(isIOS() && !isStandalone() ? 'באייפון: הוסיפו את האפליקציה למסך הבית ופתחו משם' : 'ההתראות חסומות. אפשרו אותן בהגדרות הדפדפן.'); return; } const r = await tmPost('/test', { owner: tmOwner(), body: 'ההתראות עובדות ☕ גם כשהאפליקציה סגורה' }); toast(r && r.sent ? 'נשלחה התראת בדיקה' : 'לא נשלחה התראה. נסו שוב בעוד רגע.'); };
 
 /* ---------- local alarm while the app is open ---------- */
 async function tmLocalNotify(title, body, tag) {
-  try { if (document.visibilityState === 'visible') return; if (!pushOk() || Notification.permission !== 'granted') return; const reg = await navigator.serviceWorker.ready; reg.showNotification(title, { body, tag, renotify: true, icon: 'icon-192.png', badge: 'icon-192.png', vibrate: [300, 150, 300, 150, 600], data: { url: './#tm=' + tag, id: tag } }); } catch (e) { /* ignore */ }
+  try { if (document.visibilityState === 'visible') return; if (!pushOk() || Notification.permission !== 'granted') return; const reg = await navigator.serviceWorker.ready; reg.showNotification(title, { body, tag, renotify: true, icon: 'icon-192.png', badge: 'badge-96.png', vibrate: [300, 150, 300, 150, 600], data: { url: './#tm=' + tag, id: tag } }); } catch (e) { /* ignore */ }
 }
 function tmAlarm(title, body, tag) { beep(3); setTimeout(() => beep(3), 900); try { if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 700]); } catch (e) { /* ignore */ } toast(title + (body ? ' · ' + body : '')); tmLocalNotify(title, body, tag); }
 function brewIdx(s, e) { let i = -1; (s.run.steps || []).forEach((st, k) => { if (e + 0.001 >= st.at) i = k; }); return s.live.started ? Math.max(i, s.live.manual == null ? -1 : s.live.manual) : -1; }
@@ -4887,7 +4923,7 @@ function tmTick() {
       const L = t.snap.live; if (!L || !L.started) return; const e = snapElapsed(L); const idx = brewIdx(t.snap, e);
       if (idx !== L.lastIdx) { if (idx >= 0 && L.lastIdx != null) { const st = t.snap.run.steps[idx]; tmAlarm(t.label + ': ' + (st ? st.label : 'שלב חדש'), '', t.id); if (!(idx in L.log)) L.log[idx] = Math.round(e * 10) / 10; } L.lastIdx = idx; dirty = true; }
       const end = brewTotal(t.snap.run); if (!t.done && e >= end) { t.done = true; dirty = true; }
-    } else if (!t.done && t.end && now >= t.end) { t.done = true; dirty = true; tmAlarm(t.kind === 'steep' ? '🧊 ' + t.label + ' מוכן' : '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); pushCancel(t.id); }
+    } else if (!t.done && t.end && now >= t.end) { t.done = true; dirty = true; tmOngoingClose(t.id); tmAlarm(t.kind === 'steep' ? '🧊 ' + t.label + ' מוכן' : '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); pushCancel(t.id); }
   });
   if (dirty) tmSave(); tmPaint();
 }
@@ -4898,7 +4934,7 @@ function tmItems() {
   if (b.stage === 'live' && b.run && UI.view !== 'brew') { const L = b.live; const e = lElapsed(); const tot = brewTotal(b.run); const idx = lIdx(); const st = b.run.steps[idx]; out.push({ id: 'live', act: 'tm-live', ic: '▶', label: b.run.p.name, txt: L.started ? tmFmt(e) : 'מוכן להתחלה', sub: st ? st.label : '', pct: L.started ? clamp(e / Math.max(1, tot), 0, 1) : 0, m: b.run.p.method }); }
   TM.list.forEach((t) => {
     if (t.kind === 'brew') { const L = t.snap.live; const e = snapElapsed(L); const tot = brewTotal(t.snap.run); const st = t.snap.run.steps[brewIdx(t.snap, e)]; out.push({ id: t.id, act: 'tm-open', ic: t.done ? '✓' : '▶', label: t.label, txt: tmFmt(e), sub: t.done ? 'הזמן נגמר: סיום ודירוג' : st ? st.label : '', pct: clamp(e / Math.max(1, tot), 0, 1), m: t.method, done: t.done }); }
-    else { const left = (t.end - Date.now()) / 1000; const tot = (t.end - t.start) / 1000; out.push({ id: t.id, act: 'tm-open', ic: t.kind === 'steep' ? '🧊' : '⏰', label: t.label, txt: t.done ? 'מוכן ✓' : (left > 3600 ? tmFmtLong(left) : tmFmt(left)), sub: t.done ? (t.kind === 'steep' ? 'לסנן, להוציא מהמקרר ולדרג' : 'נגמר') : 'עד ' + (t.end - Date.now() > 10 * 3600e3 ? tmDay(t.end) : tmClock(t.end)), pct: clamp(1 - left / Math.max(1, tot), 0, 1), m: t.method || 'custom', done: t.done }); }
+    else { const left = (t.end - Date.now()) / 1000; const tot = (t.end - t.start) / 1000; out.push({ id: t.id, act: 'tm-open', ic: t.kind === 'steep' ? '🧊' : '⏰', label: t.label, txt: t.done ? 'מוכן ✓' : (left > 3600 ? tmFmtLong(left) : tmFmt(left)), sub: t.done ? (t.kind === 'steep' ? 'לסנן, להוציא מהמקרר ולדרג' : 'נגמר') : 'עד ' + (t.end - Date.now() > 10 * 3600e3 ? tmDay(t.end) : tmClock(t.end)), pct: clamp(1 - left / Math.max(1, tot), 0, 1), m: t.method || 'custom', done: t.done, kind: t.kind }); }
   });
   return out;
 }
@@ -4916,13 +4952,19 @@ document.addEventListener('visibilitychange', () => { if (document.visibilitySta
 /* ---------- timers sheet ---------- */
 function tmSheetHTML() {
   const items = tmItems();
-  const list = items.length ? '<div class="tm-list">' + items.map((x) => '<div class="tm-row' + (x.done ? ' done' : '') + '" style="--m:' + ((METHODS[x.m] || METHODS.custom).color || 'var(--accent)') + ';--p:' + Math.round(x.pct * 100) + '%"><button type="button" class="tm-row-b" data-act="' + x.act + '" data-id="' + esc(x.id) + '"><b>' + x.ic + ' ' + esc(x.label) + '</b><small>' + esc(x.sub || '') + '</small><span class="tm-bar"><i></i></span></button><span class="num tm-t">' + esc(x.txt) + '</span>' + (x.id !== 'live' ? '<button type="button" class="btn ghost sm" data-act="tm-del" data-id="' + esc(x.id) + '" aria-label="מחיקה">✕</button>' : '') + '</div>').join('') + '</div>' : '<p class="muted">אין טיימרים פעילים.</p>';
+  const list = items.length ? '<div class="tm-list">' + items.map((x) => '<div class="tm-row' + (x.done ? ' done' : '') + '" style="--m:' + ((METHODS[x.m] || METHODS.custom).color || 'var(--accent)') + ';--p:' + Math.round(x.pct * 100) + '%"><button type="button" class="tm-row-b" data-act="' + x.act + '" data-id="' + esc(x.id) + '"><b>' + x.ic + ' ' + esc(x.label) + '</b><small>' + esc(x.sub || '') + '</small><span class="tm-bar"><i></i></span></button><span class="num tm-t">' + esc(x.txt) + '</span>' + (x.id !== 'live' ? '<button type="button" class="btn ghost sm" data-act="tm-del" data-id="' + esc(x.id) + '" aria-label="מחיקה">✕</button>' : '') + '</div>' + tmAdjHTML(x)).join('') + '</div>' : '<p class="muted">אין טיימרים פעילים.</p>';
   const pushTxt = !pushOk() ? (isIOS() && !isStandalone() ? 'באייפון, התראות כשהאפליקציה סגורה עובדות רק אחרי "הוספה למסך הבית" ופתיחה משם.' : 'הדפדפן הזה לא תומך בהתראות. הטיימרים יצלצלו רק כשהאפליקציה פתוחה.') : Notification.permission === 'granted' ? 'התראות פעילות: תקבלו התראה גם כשהאפליקציה סגורה.' : Notification.permission === 'denied' ? 'ההתראות חסומות. אפשרו אותן בהגדרות הדפדפן כדי לקבל התראה כשהאפליקציה סגורה.' : 'הפעילו התראות כדי לקבל התראה גם כשהאפליקציה סגורה.';
   return list +
     '<div class="blk-h" style="margin-top:14px">טיימר חדש</div><input type="text" id="tm_label" placeholder="שם (למשל: חימום מכונה)" aria-label="שם הטיימר" style="width:100%">' +
     '<div class="chips-row wrap" style="margin-top:8px">' + TM_QUICK.map(([m, l]) => '<button type="button" class="tchip" data-act="tm-quick" data-m="' + m + '" data-l="' + l + '">' + l + '</button>').join('') + '</div>' +
     '<div class="row wrap" style="margin-top:8px;align-items:center;gap:6px"><input type="number" inputmode="numeric" id="tm_hr" placeholder="שעות" aria-label="שעות" style="width:84px"><input type="number" inputmode="numeric" id="tm_min" placeholder="דקות" aria-label="דקות" style="width:84px"><button type="button" class="btn sm pri" data-act="tm-custom">הפעלה</button></div>' +
     '<p class="s muted" style="margin-top:12px">🔔 ' + esc(pushTxt) + '</p>' + (pushOk() ? '<button type="button" class="btn sm" data-act="tm-test">' + (Notification.permission === 'granted' ? 'בדיקת התראה' : 'הפעלת התראות') + '</button>' : '');
+}
+function tmAdjHTML(x) {
+  if (x.kind !== 'custom' && x.kind !== 'steep') return ''; const id = esc(x.id); const big = x.kind === 'steep' || (TM.list.find((t) => t.id === x.id) || {}).end - Date.now() > 90 * 60e3;
+  const steps = big ? [[-60, '−1 ש׳'], [-10, '−10 דק׳'], [10, '+10 דק׳'], [60, '+1 ש׳']] : [[-5, '−5 דק׳'], [-1, '−1 דק׳'], [1, '+1 דק׳'], [5, '+5 דק׳']];
+  return '<div class="tm-adj">' + steps.map(([m, l]) => '<button type="button" class="tchip" data-act="tm-adj" data-id="' + id + '" data-m="' + m + '">' + l + '</button>').join('') + '<button type="button" class="tchip" data-act="tm-edit" data-id="' + id + '">✎ כמה נשאר</button></div>' +
+    (TM.edit === x.id ? '<div class="tm-edit row wrap"><span class="s">נשארו</span><input type="number" inputmode="numeric" id="tme_h" min="0" placeholder="שעות" aria-label="שעות" style="width:76px"><span class="s">ש׳</span><input type="number" inputmode="numeric" id="tme_m" min="0" placeholder="דקות" aria-label="דקות" style="width:76px"><span class="s">דק׳</span><button type="button" class="btn sm pri" data-act="tm-edit-save" data-id="' + id + '">עדכון</button></div>' : '');
 }
 function tmSheet() { openModal({ title: 'טיימרים', body: '<div id="tmsheet">' + tmSheetHTML() + '</div>', actions: [{ label: 'סגירה', cls: 'pri' }], noFocus: true }); }
 function tmSheetRe() { const h = $('#tmsheet'); if (h) h.innerHTML = tmSheetHTML(); }
@@ -5073,6 +5115,91 @@ brewLive = (function (prev) {
 ACT['brew-go'] = (function (prev) {
   return function (d) { const p = presetOf(); if (p && p.method === 'espresso') return prev(d); const r = checkReady(); if (!r) return; Object.assign(B(), { stage: 'live', run: r, live: { running: false, started: false, t0: 0, base: 0, manual: -1, lastIdx: -1, log: {}, first: null } }); render(); liveSave(); window.scrollTo(0, 0); };
 })(ACT['brew-go']);
+
+/* ============================================================
+   V5d — news by area (Haifa, Karkur, Tel Aviv…) + a parallel "food & restaurants" feed
+   ============================================================ */
+const NEWS_AREAS = [
+  ['all', 'כל הארץ', 'Israel', ''],
+  ['tlv', 'תל אביב והמרכז', 'Tel Aviv and Gush Dan', 'תל אביב'],
+  ['haifa', 'חיפה והקריות', 'Haifa and the Krayot', 'חיפה'],
+  ['karkur', 'כרכור · פרדס חנה · חדרה', 'Karkur, Pardes Hanna, Hadera, Binyamina and Zichron Yaakov', 'כרכור'],
+  ['sharon', 'השרון', 'the Sharon (Netanya, Herzliya, Raanana, Kfar Saba)', 'השרון'],
+  ['jlm', 'ירושלים', 'Jerusalem', 'ירושלים'],
+  ['north', 'הגליל והצפון', 'the Galilee and northern Israel', 'הצפון'],
+  ['south', 'באר שבע והדרום', 'Beer Sheva and southern Israel', 'באר שבע'],
+];
+const NEWS_LS4 = 'cl_news_v4';
+const NW = { cache: {}, cat: 'coffee', food: {}, fbusy: false, ferr: '' };
+try { const o = JSON.parse(localStorage.getItem(NEWS_LS4) || 'null'); if (o) { NW.cache = o.c || {}; NW.food = o.f || {}; } } catch (e) { /* none */ }
+const nwSave = () => { try { localStorage.setItem(NEWS_LS4, JSON.stringify({ c: NW.cache, f: NW.food })); } catch (e) { /* full */ } };
+function nwArea() {
+  let pr = {}; try { pr = prefs() || {}; } catch (e) { pr = {}; } const k = pr.newsArea || 'all';
+  if (k === 'custom' && pr.newsCity) return { k: 'c:' + pr.newsCity, he: pr.newsCity, en: pr.newsCity, q: pr.newsCity };
+  const a = NEWS_AREAS.find((x) => x[0] === k) || NEWS_AREAS[0]; return { k: a[0], he: a[1], en: a[2], q: a[3] };
+}
+newsQuery = (function (prev) { return function () { const a = nwArea(); return prev().replace(/^v=4&/, 'v=5&') + '&area=' + encodeURIComponent(a.en) + '&areaHe=' + encodeURIComponent(a.q || a.he); }; })(newsQuery);
+/* coffee news: one cached result per area */
+setTimeout(() => { try { const a = nwArea(); if (NW.cache[a.k]) NEWS.data = NW.cache[a.k]; else if (a.k !== 'all') NEWS.data = null; } catch (e) { /* ignore */ } }, 0);
+newsLoad = async function (force) {
+  if (NEWS.busy) return; const a = nwArea(); const cur = NW.cache[a.k]; NEWS.data = cur || null;
+  const fresh = cur && cur.at && Date.now() - new Date(cur.at).getTime() < 12 * 3600e3; if (fresh && !force) return;
+  NEWS.busy = true; NEWS.err = ''; if (UI.view === 'news') render();
+  try { const r = await fetch('api/news?' + newsQuery() + (force ? '&t=' + Math.floor(Date.now() / 3600e3) : '')); const j = await r.json(); if (!r.ok || j.error) throw new Error('news'); NW.cache[a.k] = j; if (nwArea().k === a.k) NEWS.data = j; nwSave(); }
+  catch (e) { NEWS.err = 'לא הצלחתי לטעון חדשות עכשיו.'; }
+  NEWS.busy = false; if (UI.view === 'news') render();
+};
+/* food & restaurants */
+async function foodLoad(force) {
+  if (NW.fbusy) return; const a = nwArea(); const cur = NW.food[a.k]; const fresh = cur && cur.at && Date.now() - new Date(cur.at).getTime() < 24 * 3600e3; if (fresh && !force) return;
+  NW.fbusy = true; NW.ferr = ''; if (UI.view === 'news') render();
+  try { const r = await fetch('api/news?mode=food&v=1&area=' + encodeURIComponent(a.en) + '&areaHe=' + encodeURIComponent(a.q || a.he) + (force ? '&t=' + Math.floor(Date.now() / 3600e3) : '')); const j = await r.json(); if (!r.ok || j.error) throw new Error('food'); NW.food[a.k] = j; nwSave(); if (!(j.items || []).length) NW.ferr = 'לא נמצאו כרגע המלצות לאזור הזה. נסו "רענון" בעוד כמה דקות.'; }
+  catch (e) { NW.ferr = 'לא הצלחתי לטעון המלצות אוכל עכשיו.'; }
+  NW.fbusy = false; if (UI.view === 'news') render();
+}
+Object.assign(NEWS_KIND, { 'f-opening': ['נפתח לאחרונה', '🆕'], 'f-recommended': ['מומלץ', '⭐'], 'f-event': ['אירוע אוכל', '🎪'] });
+newsCard = (function (prev) {
+  return function (it) {
+    let h = prev(it);
+    if (it.cuisine) h = h.replace('</span><b>', ' · ' + esc(it.cuisine) + '</span><b>');
+    if (it.near && nwArea().k !== 'all') h = h.replace('<span class="nw-k">', '<span class="nw-near">📍 באזור שלך</span><span class="nw-k">');
+    return h;
+  };
+})(newsCard);
+function nwAreaBar() {
+  const pr = prefs(); const cur = pr.newsArea || 'all';
+  return '<div class="nw-area"><span class="s muted">אזור:</span><div class="chips-row nw-areas">' + NEWS_AREAS.map((a) => '<button type="button" class="tchip' + (cur === a[0] ? ' on' : '') + '" data-act="nw-area" data-v="' + a[0] + '">' + esc(a[1]) + '</button>').join('') +
+    '<button type="button" class="tchip' + (cur === 'custom' ? ' on' : '') + '" data-act="nw-area" data-v="custom">' + (cur === 'custom' && pr.newsCity ? '📍 ' + esc(pr.newsCity) : 'עיר אחרת…') + '</button></div>' +
+    (NW.cityEdit ? '<div class="row wrap nw-city"><input type="text" id="nw_city" placeholder="למשל: זכרון יעקב" aria-label="עיר" value="' + esc(pr.newsCity || '') + '" style="max-width:220px"><button type="button" class="btn sm pri" data-act="nw-city">שמירה</button></div>' : '') + '</div>';
+}
+ACT['nw-area'] = (d) => {
+  const pr = prefs(); if (d.v === 'custom') { if (pr.newsArea === 'custom' && pr.newsCity && !NW.cityEdit) { NW.cityEdit = true; render(); return; } NW.cityEdit = true; render(); const i = $('#nw_city'); if (i) i.focus(); return; }
+  NW.cityEdit = false; pr.newsArea = d.v; save(); NEWS.data = NW.cache[nwArea().k] || null; render(); if (NW.cat === 'food') foodLoad(false); else newsLoad(false);
+};
+ACT['nw-city'] = () => { const v = (($('#nw_city') || {}).value || '').trim(); if (v.length < 2) { toast('הקלידו שם עיר'); return; } const pr = prefs(); pr.newsCity = v.slice(0, 40); pr.newsArea = 'custom'; NW.cityEdit = false; save(); NEWS.data = NW.cache[nwArea().k] || null; render(); if (NW.cat === 'food') foodLoad(false); else newsLoad(false); };
+ACT['nw-cat'] = (d) => { NW.cat = d.v; render(); if (NW.cat === 'food') foodLoad(false); else newsLoad(false); };
+const nwTabs = () => '<div class="nw-tabs" role="tablist">' + [['coffee', '☕ קפה'], ['food', '🍽 אוכל ומסעדות']].map((c) => '<button type="button" role="tab" aria-selected="' + (NW.cat === c[0]) + '" class="nw-tab' + (NW.cat === c[0] ? ' on' : '') + '" data-act="nw-cat" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
+function foodView() {
+  const a = nwArea(); const D = NW.food[a.k]; const items = (D && D.items) || [];
+  const sort = (arr) => arr.slice().sort((x, y) => (y.near ? 1 : 0) - (x.near ? 1 : 0) || String(y.date || '').localeCompare(String(x.date || '')));
+  const groups = [['f-opening', 'נפתח לאחרונה'], ['f-recommended', 'מומלצים לנסות'], ['f-event', 'אירועי אוכל ושווקים']].map((g) => [g[0], g[1], sort(items.filter((x) => x.kind === g[0]))]);
+  const when = D && D.at ? new Date(D.at).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const body = !D && NW.fbusy ? '<div class="nw-load"><i></i><span>מחפש מסעדות חדשות, המלצות ואירועי אוכל ב' + esc(a.he) + '… זה לוקח כחצי דקה.</span></div>' :
+    groups.map((g) => '<section class="nw-sec"><h2>' + g[1] + '</h2>' + (g[2].length ? '<div class="nw-list">' + g[2].map(newsCard).join('') + '</div>' : '<p class="muted s">' + (NW.fbusy ? 'מחפש…' : 'אין כרגע פריטים.') + '</p>') + '</section>').join('');
+  return '<p class="muted s">מקומות חדשים ומומלצים לנסות ' + (a.k === 'all' ? 'בארץ' : 'ב' + esc(a.he) + ' ובסביבה') + ', לפי כתבות וביקורות עדכניות.' + (when ? ' עודכן ' + when + '.' : '') + '</p>' + (NW.ferr ? '<div class="note warn">' + esc(NW.ferr) + '</div>' : '') + body;
+}
+RENDER.news = (function (prev) {
+  return function () {
+    const top = nwTabs() + nwAreaBar();
+    if (NW.cat === 'food') {
+      return '<div class="page narrow nw">' + head('חדשות', '<button class="btn" data-act="nw-refresh"' + (NW.fbusy ? ' disabled' : '') + '>' + (NW.fbusy ? 'מעדכן…' : 'רענון') + '</button>') + top + foodView() + '</div>';
+    }
+    const h = prev(); const a = nwArea();
+    return h.replace('<p class="muted s">ניוזלטר אישי:', top + '<p class="muted s">' + (a.k !== 'all' ? '📍 סדנאות ואירועים ב' + esc(a.he) + ' ובסביבה קודם. ' : '') + 'ניוזלטר אישי:');
+  };
+})(RENDER.news);
+ACT['nw-refresh'] = () => (NW.cat === 'food' ? foodLoad(true) : newsLoad(true));
+AFTER.news = (function (prev) { return function () { try { const on = document.querySelector('.nw-areas .tchip.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* ignore */ } if (NW.cat === 'food') { foodLoad(false); shopAuto(); } else prev(); }; })(AFTER.news);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
