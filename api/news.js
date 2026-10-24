@@ -16,6 +16,16 @@ async function blog(site) {
   return [];
 }
 
+
+// model JSON can break on Hebrew abbreviations (ת"א) or be cut off: repair before giving up
+function parseItems(t) {
+  const a = t.indexOf('{'); if (a < 0) return null; const body = t.slice(a); const b = body.lastIndexOf('}'); const tries = [body.slice(0, b + 1)];
+  const heb = (x) => x.replace(/([֐-׿])"(?=[֐-׿])/g, '$1״');
+  tries.push(heb(tries[0]));
+  const cut = heb(body); const last = cut.lastIndexOf('},'); if (last > 0) tries.push(cut.slice(0, last + 1) + ']}');
+  for (const x of tries) { try { const o = JSON.parse(x); if (o && Array.isArray(o.items)) return o; } catch (e) { /* next */ } }
+  return null;
+}
 let DG_ERR = '';
 async function digest(q) {
   DG_ERR = '';
@@ -31,12 +41,12 @@ async function digest(q) {
     '3) new releases or news from their roasters;\n' +
     '4) a few light, fun world news about coffee discoveries and developments that a home brewer would enjoy: science and health research findings, new coffee varieties or processing methods, brewing innovations and new home gear, climate or harvest news that affects coffee taste or prices. NOT business deals, company earnings, café openings/closings abroad, design features, interviews or industry trade news.\n' +
     'Only include items you found in search results. Each url MUST be the specific page of that item (the article, the workshop page, the event page), never a homepage, a category or a /news listing page, and never the same url twice. Prefer items dated within the last 2 months or upcoming. 6 to 12 items.\n' +
-    'Reply with ONLY JSON {"items":[{"kind":"workshop"|"event"|"news"|"release","title": Hebrew title,"summary": 1-2 Hebrew sentences why it is relevant to them,"date":"YYYY-MM-DD" or null (event/publish date),"where": city name in Hebrew or null,"near": true|false,"url":"https://...","source": site name}]}';
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 3500, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }], messages: [{ role: 'user', content: prompt }] }) });
+    'In Hebrew text never use the ASCII double quote character (write abbreviations like ת״א with ״). Reply with ONLY JSON {"items":[{"kind":"workshop"|"event"|"news"|"release","title": Hebrew title,"summary": 1-2 Hebrew sentences why it is relevant to them,"date":"YYYY-MM-DD" or null (event/publish date),"where": city name in Hebrew or null,"near": true|false,"url":"https://...","source": site name}]}';
+  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 5000, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 5 }], messages: [{ role: 'user', content: prompt }] }) });
   if (!r.ok) { DG_ERR = 'http ' + r.status; return []; }
   const j = await r.json(); const t = (j.content || []).filter((x) => x.type === 'text').map((x) => x.text).join('\n');
   const seen = new Set(); (j.content || []).forEach((b) => { if (b.type === 'web_search_tool_result' && Array.isArray(b.content)) b.content.forEach((x) => { if (x && x.url) seen.add(x.url.split('#')[0]); }); });
-  const a = t.indexOf('{'), b = t.lastIndexOf('}'); let o = {}; try { o = JSON.parse(t.slice(a, b + 1)); } catch (e) { DG_ERR = 'parse ' + t.slice(0, 120); return []; }
+  const o = parseItems(t); if (!o) { DG_ERR = 'parse ' + t.slice(0, 120) + ' … ' + t.slice(-80); return []; }
   const used = new Set();
   return (Array.isArray(o.items) ? o.items : []).filter((x) => { if (!x || !x.title || !/^https?:\/\//.test(x.url || '')) return false; let u; try { u = new URL(x.url); } catch (e) { return false; } const path = u.pathname.replace(/\/+$/, ''); if (!path || /^\/(news|blog|blogs|events?|workshops?|courses?|he|en|articles?|category\/[^/]+)$/i.test(path)) return false; const k = u.host + path; if (used.has(k)) return false; used.add(k); return true; }).map((x) => ({ kind: /^(workshop|event|news|release)$/.test(x.kind) ? x.kind : 'news', title: String(x.title).slice(0, 160), summary: String(x.summary || '').slice(0, 400), date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where && !/^(online|אונליין|מקוון|null)$/i.test(String(x.where).trim()) ? String(x.where).slice(0, 60) : null, url: x.url, source: String(x.source || '').slice(0, 60), near: x.near === true, verified: seen.has(String(x.url).split('#')[0]) })).slice(0, 16);
 }
@@ -51,11 +61,11 @@ async function foodDigest(q) {
     '2) highly recommended places in or near the area from recent reviews or "best of" lists (any cuisine; mix price levels; include at least one bakery/coffee-and-pastry spot and one casual cheap eat);\n' +
     '3) upcoming food events: food festivals, markets, chef pop-ups, tasting evenings, special menus, in or near the area.\n' +
     'Prefer places within ~30 km of the area. Only include items you found in search results. The url MUST be the specific article/review/event page (never a homepage, category or listing page), never the same url twice. 8 to 12 items.\n' +
-    'Reply with ONLY JSON {"items":[{"kind":"opening"|"recommended"|"event","title": Hebrew name of the place or event,"summary": 1-2 friendly Hebrew sentences: what it is, what to order or why it is worth trying, price level if known,"cuisine": short Hebrew cuisine label or null,"date":"YYYY-MM-DD" or null (event date or article date),"where": town/neighbourhood in Hebrew or null,"near": true|false (in or near the area),"url":"https://...","source": site name}]}';
-  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 3500, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 6 }], messages: [{ role: 'user', content: prompt }] }) });
+    'In Hebrew text never use the ASCII double quote character (write abbreviations like ת״א with ״). Reply with ONLY JSON {"items":[{"kind":"opening"|"recommended"|"event","title": Hebrew name of the place or event,"summary": 1-2 friendly Hebrew sentences: what it is, what to order or why it is worth trying, price level if known,"cuisine": short Hebrew cuisine label or null,"date":"YYYY-MM-DD" or null (event date or article date),"where": town/neighbourhood in Hebrew or null,"near": true|false (in or near the area),"url":"https://...","source": site name}]}';
+  const r = await fetch('https://api.anthropic.com/v1/messages', { method: 'POST', headers: { 'content-type': 'application/json', 'x-api-key': KEY, 'anthropic-version': '2023-06-01' }, body: JSON.stringify({ model: MODEL, max_tokens: 6000, tools: [{ type: 'web_search_20250305', name: 'web_search', max_uses: 6 }], messages: [{ role: 'user', content: prompt }] }) });
   if (!r.ok) { DG_ERR = 'http ' + r.status; return []; }
   const j = await r.json(); const t = (j.content || []).filter((x) => x.type === 'text').map((x) => x.text).join('\n');
-  const a = t.indexOf('{'), b = t.lastIndexOf('}'); let o = {}; try { o = JSON.parse(t.slice(a, b + 1)); } catch (e) { DG_ERR = 'parse ' + t.slice(0, 120); return []; }
+  const o = parseItems(t); if (!o) { DG_ERR = 'parse ' + t.slice(0, 120) + ' … ' + t.slice(-80); return []; }
   const used = new Set();
   return (Array.isArray(o.items) ? o.items : []).filter((x) => { if (!x || !x.title || !/^https?:\/\//.test(x.url || '')) return false; let u; try { u = new URL(x.url); } catch (e) { return false; } const path = u.pathname.replace(/\/+$/, ''); if (!path) return false; const k = u.host + path; if (used.has(k)) return false; used.add(k); return true; })
     .map((x) => ({ kind: /^(opening|recommended|event)$/.test(x.kind) ? 'f-' + x.kind : 'f-recommended', title: String(x.title).slice(0, 140), summary: String(x.summary || '').slice(0, 400), cuisine: x.cuisine ? String(x.cuisine).slice(0, 40) : null, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where ? String(x.where).slice(0, 60) : null, near: x.near === true, url: x.url, source: String(x.source || '').slice(0, 60) })).slice(0, 14);
