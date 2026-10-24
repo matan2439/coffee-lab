@@ -114,7 +114,8 @@ module.exports = async (req, res) => {
     const q = {}; const sp = new URL(req.url, 'http://x').searchParams; ['roasters', 'origins', 'methods', 'loc', 'area', 'areaHe'].forEach((k) => { q[k] = (sp.get(k) || '').slice(0, 200); });
     if (sp.get('mode') === 'food') {
       const t0 = Date.now(); DG_ERR = ''; const fail = (e) => { DG_ERR += ' exc ' + String(e).slice(0, 80); return []; };
-      const [places, work] = await Promise.all([foodDigest(q, 'places').catch(fail), foodDigest(q, 'workshops').catch(fail)]);
+      const cap = (p) => Promise.race([p.catch(fail), new Promise((r) => setTimeout(() => { DG_ERR += ' slow'; r([]); }, 50000))]);
+      const [places, work] = await Promise.all([cap(foodDigest(q, 'places')), cap(foodDigest(q, 'workshops'))]);
       const seenU = new Set(); const items = places.concat(work).filter((x) => { const k = x.url.split('#')[0]; if (seenU.has(k)) return false; seenU.add(k); return true; });
       const left = 55000 - (Date.now() - t0); if (left > 2500) await ogImages(items, Math.min(4000, left - 1500));
       return send(200, { at: new Date().toISOString(), items, dg: items.length, dge: DG_ERR }, items.length >= 3);
