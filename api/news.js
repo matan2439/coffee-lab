@@ -52,10 +52,17 @@ async function digest(q) {
 }
 
 /* parallel category: food & restaurants to try (new openings, recommendations, food events) near the chosen area */
-async function foodDigest(q) {
-  DG_ERR = ''; if (!KEY) return [];
+async function foodDigest(q, part) {
+  if (!KEY) return [];
   const today = new Date().toISOString().slice(0, 10); const area = q.area && q.area !== 'Israel' ? q.area : 'Israel (mainly Tel Aviv, Haifa and the Sharon / Karkur area)';
-  const prompt = 'Today is ' + today + '. Find things worth trying to eat and drink for a curious food lover who lives in ' + area + (q.area && q.area !== 'Israel' ? ', Israel' : '') + '.\n' +
+  const prompt = part === 'workshops' ? 'Today is ' + today + '. Find hands-on food experiences for a curious food lover who lives in ' + area + (q.area && q.area !== 'Israel' ? ', Israel' : '') + '.\n' +
+    'Use web search (Hebrew queries first, e.g. "סדנת בישול ' + (q.areaHe || '') + '", "סדנת אפייה ' + (q.areaHe || '') + '", "סדנת שף", "טעימות יין", "סיור קולינרי", plus English) and find REAL, upcoming or ongoing items:\n' +
+    '1) cooking workshops and classes (any cuisine), chef workshops, pasta/sushi/dumplings making;\n' +
+    '2) baking and pastry workshops (sourdough bread, croissants, cakes), chocolate or ice-cream making;\n' +
+    '3) tastings and food tours: wine, beer, cheese, olive oil, market tours, foraging.\n' +
+    'Use kind "workshop" for all of them. Prefer places within ~30 km of the area. Only include items you found in search results. The url MUST be the specific workshop/event page, never a homepage or a generic listing, never the same url twice. 5 to 9 items.\n' +
+    'In Hebrew text never use the ASCII double quote character (write abbreviations with ״). Reply with ONLY JSON {"items":[{"kind":"workshop","title": Hebrew name,"summary": 1-2 Hebrew sentences: what you make or taste, length and price if known,"cuisine": short Hebrew label or null,"date":"YYYY-MM-DD" or null (next date),"where": town in Hebrew or null,"near": true|false,"url":"https://...","source": site name}]}' :
+  'Today is ' + today + '. Find things worth trying to eat and drink for a curious food lover who lives in ' + area + (q.area && q.area !== 'Israel' ? ', Israel' : '') + '.\n' +
     'Use web search (Hebrew queries first, e.g. "מסעדה חדשה ' + (q.areaHe || '') + '", "מומלץ לאכול ב' + (q.areaHe || 'תל אביב') + '", plus English) on reputable Israeli food media (Haaretz food, Ynet food, Mako food, Walla food, TimeOut Israel, Foody, Rest.co.il lists, local city news sites) and find REAL, current items:\n' +
     '1) restaurants, cafés, bakeries, delis, ice-cream or street-food places that OPENED in the last ~3 months in or near the area;\n' +
     '2) highly recommended places in or near the area from recent reviews or "best of" lists (any cuisine; mix price levels; include at least one bakery/coffee-and-pastry spot and one casual cheap eat);\n' +
@@ -68,7 +75,7 @@ async function foodDigest(q) {
   const o = parseItems(t); if (!o) { DG_ERR = 'parse ' + t.slice(0, 120) + ' … ' + t.slice(-80); return []; }
   const used = new Set();
   return (Array.isArray(o.items) ? o.items : []).filter((x) => { if (!x || !x.title || !/^https?:\/\//.test(x.url || '')) return false; let u; try { u = new URL(x.url); } catch (e) { return false; } const path = u.pathname.replace(/\/+$/, ''); if (!path) return false; const k = u.host + path; if (used.has(k)) return false; used.add(k); return true; })
-    .map((x) => ({ kind: /^(opening|recommended|event)$/.test(x.kind) ? 'f-' + x.kind : 'f-recommended', title: String(x.title).slice(0, 140), summary: String(x.summary || '').slice(0, 400), cuisine: x.cuisine ? String(x.cuisine).slice(0, 40) : null, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where ? String(x.where).slice(0, 60) : null, near: x.near === true, url: x.url, source: String(x.source || '').slice(0, 60) })).slice(0, 14);
+    .map((x) => ({ kind: /^(opening|recommended|event|workshop)$/.test(x.kind) ? 'f-' + x.kind : 'f-recommended', title: String(x.title).slice(0, 140), summary: String(x.summary || '').slice(0, 400), cuisine: x.cuisine ? String(x.cuisine).slice(0, 40) : null, date: /^\d{4}-\d{2}-\d{2}$/.test(x.date || '') ? x.date : null, where: x.where ? String(x.where).slice(0, 60) : null, near: x.near === true, url: x.url, source: String(x.source || '').slice(0, 60) })).slice(0, 14);
 }
 
 const FEEDS = [['https://perfectdailygrind.com/feed/', 'Perfect Daily Grind'], ['https://sprudge.com/feed', 'Sprudge'], ['https://dailycoffeenews.com/feed/', 'Daily Coffee News'], ['https://www.sciencedaily.com/rss/plants_animals/food.xml', 'ScienceDaily'], ['https://worldcoffeeresearch.org/news/rss', 'World Coffee Research'], ['https://www.baristamagazine.com/feed/', 'Barista Magazine']];
@@ -106,7 +113,9 @@ module.exports = async (req, res) => {
   try {
     const q = {}; const sp = new URL(req.url, 'http://x').searchParams; ['roasters', 'origins', 'methods', 'loc', 'area', 'areaHe'].forEach((k) => { q[k] = (sp.get(k) || '').slice(0, 200); });
     if (sp.get('mode') === 'food') {
-      const t0 = Date.now(); const items = await foodDigest(q).catch((e) => { DG_ERR = 'exc ' + String(e).slice(0, 80); return []; });
+      const t0 = Date.now(); DG_ERR = ''; const fail = (e) => { DG_ERR += ' exc ' + String(e).slice(0, 80); return []; };
+      const [places, work] = await Promise.all([foodDigest(q, 'places').catch(fail), foodDigest(q, 'workshops').catch(fail)]);
+      const seenU = new Set(); const items = places.concat(work).filter((x) => { const k = x.url.split('#')[0]; if (seenU.has(k)) return false; seenU.add(k); return true; });
       const left = 55000 - (Date.now() - t0); if (left > 2500) await ogImages(items, Math.min(4000, left - 1500));
       return send(200, { at: new Date().toISOString(), items, dg: items.length, dge: DG_ERR }, items.length >= 3);
     }
