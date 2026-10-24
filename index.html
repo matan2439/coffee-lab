@@ -1229,6 +1229,74 @@ body.froth-on { overflow: hidden; }
 .gadv .ga-dir { display: block; margin-top: 6px; }
 .ga-chip { text-align: center; margin: 6px 0; font-size: 14px; opacity: .9; }
 
+/* sync: new device banner + QR */
+.sync-ban { border-inline-start: 4px solid var(--accent); }
+.qr-ov { position: fixed; inset: 0; z-index: 90; background: rgba(0,0,0,.55); display: grid; place-items: center; padding: 16px; }
+.qr-card { background: var(--surface); color: var(--fg); border-radius: 16px; padding: 18px; display: grid; gap: 10px; justify-items: center; text-align: center; max-width: 320px; }
+.qr-card #qrbox { background: #fff; padding: 10px; border-radius: 8px; overflow-wrap: anywhere; color: #222; font-size: 12px; }
+
+/* timers dock */
+#tmdock { position: fixed; z-index: 19; inset-inline: 0; bottom: 12px; display: flex; gap: 6px; padding: 0 max(10px, env(safe-area-inset-right, 0px)) 0 max(10px, env(safe-area-inset-left, 0px)); overflow-x: auto; scrollbar-width: none; pointer-events: none; }
+#tmdock > * { pointer-events: auto; }
+@media (max-width: 900px) { #tmdock { bottom: calc(70px + env(safe-area-inset-bottom, 0px)); } }
+body.has-dock .main { padding-bottom: 150px; }
+.tm-chip { flex: 0 0 auto; display: grid; grid-template-columns: auto minmax(0, 1fr) auto; align-items: center; gap: 8px; min-width: 190px; max-width: 280px; padding: 7px 12px; border-radius: 14px; border: 1px solid color-mix(in srgb, var(--m) 45%, var(--line)); color: var(--fg); cursor: pointer; text-align: start;
+  background: linear-gradient(90deg, color-mix(in srgb, var(--m) 22%, var(--surface)) var(--p), var(--surface) var(--p)); box-shadow: 0 4px 14px rgba(0,0,0,.14); }
+html[dir="rtl"] .tm-chip { background: linear-gradient(270deg, color-mix(in srgb, var(--m) 22%, var(--surface)) var(--p), var(--surface) var(--p)); }
+.tm-chip.done { animation: tmPulse 1.2s ease-in-out infinite; border-color: var(--m); }
+@keyframes tmPulse { 50% { box-shadow: 0 0 0 5px color-mix(in srgb, var(--m) 35%, transparent); } }
+.tm-ic { font-style: normal; font-size: 16px; } .tm-b { display: grid; min-width: 0; } .tm-b b { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; } .tm-b small { font-size: 11px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.tm-t { font-weight: 700; font-size: 15px; direction: ltr; }
+.tm-all { flex: 0 0 auto; width: 44px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); font-size: 18px; cursor: pointer; box-shadow: 0 4px 14px rgba(0,0,0,.14); }
+.tm-list { display: grid; gap: 8px; }
+.tm-row { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 8px; align-items: center; padding: 8px 10px; border: 1px solid var(--line); border-inline-start: 4px solid var(--m); border-radius: 10px; }
+.tm-row.done { background: color-mix(in srgb, var(--m) 12%, transparent); }
+.tm-row-b { display: grid; gap: 2px; text-align: start; background: none; border: 0; color: inherit; cursor: pointer; min-width: 0; padding: 0; } .tm-row-b small { color: var(--muted); }
+.tm-bar { display: block; height: 4px; border-radius: 3px; background: var(--line); overflow: hidden; } .tm-bar i { display: block; height: 100%; width: var(--p); background: var(--m); }
+.live-par { display: flex; flex-wrap: wrap; gap: 8px; justify-content: center; }
+
+/* step illustrations */
+.sa-host { width: min(100%, 360px); }
+.sa { position: relative; display: grid; justify-items: center; }
+.sa-svg { width: 100%; height: auto; max-height: 34vh; overflow: visible; }
+.sa-svg .ln { fill: none; stroke: var(--fg); stroke-width: 2.2; stroke-linejoin: round; stroke-linecap: round; }
+.sa-svg .ln.thin { stroke-width: 1.2; opacity: .55; } .sa-svg .ln.thick { stroke-width: 3; }
+.sa-svg .ln.gl, .sa-svg .gl { fill: color-mix(in srgb, var(--fg) 6%, transparent); }
+.sa-svg .ln.ac, .sa-svg .ac { stroke: var(--m); } .sa-svg .ahf { fill: var(--m); }
+.sa-svg .cof { fill: #5b3a22; } .sa-svg .crem { fill: #c9955c; } .sa-svg .brew { fill: #9a6a3c; opacity: .9; } .sa-svg .brew.dark { fill: #4a2c17; }
+.sa-svg .wat { fill: #8cc3e8; opacity: .8; } .sa-svg .ice { fill: #dff1fb; stroke: #9cc9e3; stroke-width: 1; }
+.sa-svg .stream { fill: none; stroke: #8cc3e8; stroke-width: 3.2; stroke-linecap: round; stroke-dasharray: 7 5; }
+.sa-svg .stream.dark { stroke: #6b4428; } .sa-svg .stream.wtr { stroke: #8cc3e8; } .sa-svg .fount { stroke: #9a6a3c; }
+.sa-svg .drip { fill: #9a6a3c; } .sa-svg .fire { fill: #f08a2b; } .sa-svg .disp { fill: color-mix(in srgb, var(--fg) 85%, transparent); } .sa-svg .disp.hot { fill: var(--m); }
+.sa-svg .disp-t { fill: var(--surface); font: 700 6.6px/1 var(--f-num, system-ui); }
+.sa-svg .lbl { fill: var(--muted); font: 600 9px/1 system-ui, sans-serif; }
+.sa-svg .mesh { stroke-dasharray: 2 2; }
+.sa-svg .kt.tilt { transform: rotate(-16deg); transform-origin: 200px 44px; }
+.sa-badge { order: -1; margin-bottom: 4px; display: flex; align-items: baseline; flex-wrap: wrap; justify-content: center; gap: 4px 10px; padding: 6px 10px; border-radius: 12px; background: color-mix(in srgb, var(--m) 16%, var(--surface)); border: 1px solid color-mix(in srgb, var(--m) 40%, transparent); text-align: start; }
+.sa-badge b.num { font-size: 22px; line-height: 1; } .sa-badge span { font-size: 12px; color: var(--muted); } .sa-badge span b { color: var(--fg); font-size: 13px; }
+.sa-prep { width: min(100%, 520px); text-align: start; } .sa-prep ul { margin: 6px 0; display: grid; gap: 6px; } .sa-prep li { list-style: none; }
+.sa.run .stream { animation: saStream .45s linear infinite; }
+.sa.run .rise { transform-box: fill-box; transform-origin: 50% 100%; animation: saRise 2.6s ease-in-out infinite alternate; }
+.sa.run .spin { animation: saSpin 1.8s linear infinite; }
+.sa.run .wig { animation: saWig .8s ease-in-out infinite; }
+.sa.run .press { animation: saPress 3.2s ease-in-out infinite; }
+.sa.run .drop { animation: saDrop 1.1s ease-in infinite; } .sa.run .drop.d2 { animation-delay: .55s; }
+.sa.run .flm { transform-box: fill-box; transform-origin: 50% 100%; animation: saFlame .5s ease-in-out infinite alternate; }
+.sa.run .hand { animation: saSpin 4s linear infinite; }
+.sa.run .stm path { animation: saSteam 2s ease-in-out infinite; }
+.sa.run .tilt2 { transform-origin: 190px 50px; animation: saTilt 2.4s ease-in-out infinite alternate; }
+.sa .press, .sa .rise { will-change: transform; }
+@keyframes saStream { to { stroke-dashoffset: -24; } }
+@keyframes saRise { from { transform: scaleY(.25); } to { transform: scaleY(1); } }
+@keyframes saSpin { to { transform: rotate(360deg); } }
+@keyframes saWig { 0%, 100% { transform: rotate(-12deg); } 50% { transform: rotate(12deg); } }
+@keyframes saPress { 0%, 10% { transform: translateY(0); } 85%, 100% { transform: translateY(var(--pd, 40px)); } }
+@keyframes saDrop { 0% { transform: translateY(0); opacity: 0; } 20% { opacity: 1; } 100% { transform: translateY(30px); opacity: 0; } }
+@keyframes saFlame { to { transform: scaleY(.72); } }
+@keyframes saSteam { 0% { opacity: 0; transform: translateY(4px); } 50% { opacity: .7; } 100% { opacity: 0; transform: translateY(-6px); } }
+@keyframes saTilt { from { transform: rotate(-4deg); } to { transform: rotate(-22deg); } }
+@media (prefers-reduced-motion: reduce) { .sa.run * { animation: none !important; } }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -4532,7 +4600,7 @@ RENDER.brew = function () {
   if (cold) {
     const hrs = isNum(params.steepH) ? params.steepH : 16; const ready = new Date(Date.now() + hrs * 3600e3);
     const rd = ready.toLocaleDateString('he-IL', { weekday: 'long' }) + ' ' + ready.toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
-    const go = '<div class="go-row"><button type="button" class="btn go" data-act="brew-skip">' + svgI('play') + 'הכנתי והנחתי להשריה</button></div><p class="tip-l">⏱ יהיה מוכן בערך ב' + esc(rd) + '. אחרי הטעימה דרגו אותו ביומן כדי לקבל טיפים לפעם הבאה.</p>';
+    const go = '<div class="go-row"><button type="button" class="btn go" data-act="tm-steep">' + svgI('play') + 'הכנתי · הפעלת טיימר השריה</button></div><p class="tip-l">⏱ יהיה מוכן בערך ב' + esc(rd) + '. הטיימר ממשיך גם כשהאפליקציה סגורה ותקבלו התראה מתי לסנן ולהוציא מהמקרר. בינתיים אפשר להכין משקאות אחרים.</p>';
     h = h.replace(/<div class="go-row">[\s\S]*?<\/div>/, panel + go);
   } else if (panel) h = h.replace('<div class="go-row">', panel + '<div class="go-row">');
   return h;
@@ -4569,6 +4637,442 @@ function seedColdBrew() {
   } catch (e) { console.error(e); }
 }
 ensureBrew = (function (prev) { return function () { seedColdBrew(); return prev(); }; })(ensureBrew);
+
+/* ============================================================
+   V5a — cloud sync v2: move to a new phone with a link/QR, never overwrite another
+   device's changes (3-way merge on conflict), new-device banner
+   ============================================================ */
+const SYNC_LS = { last: 'cl_sync_last', ids: 'cl_sync_ids', dirty: 'cl_sync_dirty', owner: 'cl_sync_owner', hide: 'cl_sync_hide' };
+const lsGet = (k) => { try { return localStorage.getItem(k); } catch (e) { return null; } };
+const lsSet = (k, v) => { try { if (v == null) localStorage.removeItem(k); else localStorage.setItem(k, v); } catch (e) { /* ignore */ } };
+SYNC.last = lsGet(SYNC_LS.last) || ''; SYNC.dirty = lsGet(SYNC_LS.dirty) === '1'; SYNC.owner = lsGet(SYNC_LS.owner) || '';
+listeners.change.push(() => { SYNC.dirty = true; lsSet(SYNC_LS.dirty, '1'); });
+const syncHasData = (s) => !!((s.beans || []).length || (s.sessions || []).length || (s.bags || []).length);
+function syncMark(updatedAt) {
+  SYNC.last = updatedAt || ''; lsSet(SYNC_LS.last, SYNC.last); SYNC.dirty = false; lsSet(SYNC_LS.dirty, null);
+  const ids = {}; TABLES.forEach((t) => { if (t !== 'prefs') ids[t] = (state[t] || []).map((r) => r.id); }); lsSet(SYNC_LS.ids, JSON.stringify(ids));
+}
+function syncOwner(j) { if (j && j.owner && j.owner !== SYNC.owner) { SYNC.owner = j.owner; lsSet(SYNC_LS.owner, j.owner); try { if (typeof tmOwnerChanged === 'function') tmOwnerChanged(); } catch (e) { /* ignore */ } } }
+syncCall = async function (method, body, since) {
+  const h = { 'x-sync': SYNC.code, 'content-type': 'application/json' }; if (since) h['x-since'] = since;
+  const r = await fetch('api/state', { method, headers: h, body, cache: 'no-store' });
+  if (!r.ok) { const e = new Error('http ' + r.status); e.status = r.status; try { e.body = await r.json(); } catch (x) { /* none */ } throw e; }
+  const j = await r.json(); syncOwner(j); return j;
+};
+function syncJson() { let json = JSON.stringify(state); if (json.length > 3900000) json = JSON.stringify(Object.assign({}, state, { photos: [] })); return json; }
+
+/* 3-way merge: what existed at the last sync and is gone on one side = deleted; new on either side = kept;
+   on both sides = the newer record (updatedAt), else the side whose whole state is newer */
+function mergeStates(L, R, base) {
+  const newerR = String((R.meta || {}).updatedAt || '') > String((L.meta || {}).updatedAt || '');
+  const stamp = (x) => String(x.updatedAt || x.createdAt || '');
+  const pick = (x, y) => { if (JSON.stringify(x) === JSON.stringify(y)) return x; if (x.updatedAt && y.updatedAt && x.updatedAt !== y.updatedAt) return x.updatedAt > y.updatedAt ? x : y; return newerR ? y : x; };
+  const out = Object.assign({}, L);
+  TABLES.forEach((t) => {
+    if (t === 'prefs') return;
+    const a = L[t] || [], b = R[t] || []; const bs = base && base[t] ? new Set(base[t]) : null;
+    const ma = new Map(a.map((x) => [x.id, x])), mb = new Map(b.map((x) => [x.id, x])); const seen = new Set(); const res = [];
+    a.concat(b).forEach((r) => { const id = r.id; if (seen.has(id)) return; seen.add(id); const x = ma.get(id), y = mb.get(id);
+      if (x && y) res.push(pick(x, y)); else if (bs && bs.has(id)) { /* deleted on the other side */ } else res.push(x || y); });
+    out[t] = res.sort((p, q) => (stamp(p) < stamp(q) ? -1 : stamp(p) > stamp(q) ? 1 : 0));
+  });
+  const pa = (L.prefs || [])[0] || {}, pb = (R.prefs || [])[0] || {}; out.prefs = [Object.assign({}, newerR ? pa : pb, newerR ? pb : pa)];
+  // the cold-brew starter preset is seeded on every new device: keep only one unused copy
+  const cb = out.recipes.filter((r) => r.method === 'coldbrew' && r.name === 'קולד ברו');
+  if (cb.length > 1) { const used = (r) => out.sessions.some((s) => s.recipeId === r.id); const keep = cb.find(used) || cb[0]; const drop = new Set(cb.filter((r) => r !== keep && !used(r)).map((r) => r.id)); out.recipes = out.recipes.filter((r) => !drop.has(r.id)); out.recipeVersions = out.recipeVersions.filter((v) => !drop.has(v.recipeId)); }
+  out.meta = Object.assign({}, L.meta || {}, { updatedAt: nowISO() });
+  return out;
+}
+function syncMergeIn(j) {
+  let base = null; try { base = JSON.parse(lsGet(SYNC_LS.ids) || 'null'); } catch (e) { base = null; }
+  if (!SYNC.last) base = null; // first link: plain union
+  makeBackup('before-merge'); const R = migrate(JSON.parse(j.data)); const photos = state.photos;
+  state = migrate(mergeStates(state, R, base)); if ((!state.photos || !state.photos.length) && photos && photos.length) state.photos = photos;
+  SYNC.last = j.updatedAt; lsSet(SYNC_LS.last, SYNC.last); flushSave(); render();
+}
+syncAdopt = (function (prev) { return function (j) { prev(j); syncMark(j.updatedAt); }; })(syncAdopt);
+syncPush = async function (again) {
+  if (!SYNC.code || !SYNC.linked) return;
+  syncSet('busy'); const at = state.meta.updatedAt;
+  try {
+    const body = { data: syncJson(), updatedAt: at }; if (SYNC.last) body.base = SYNC.last;
+    await syncCall('PUT', JSON.stringify(body)); if (state.meta.updatedAt === at) syncMark(at); else { SYNC.last = at; lsSet(SYNC_LS.last, at); } syncSet('ok');
+  } catch (e) {
+    if (e.status === 409 && e.body && e.body.data && !again) { syncMergeIn(e.body); toast('שולבו שינויים ממכשיר אחר'); return syncPush(true); }
+    throw e;
+  }
+};
+syncPull = async function (force) {
+  if (!SYNC.code || (!SYNC.linked && !force) || SYNC.busy) return; SYNC.busy = true;
+  try {
+    syncSet('busy'); const j = await syncCall('GET', undefined, !force && SYNC.last ? SYNC.last : '');
+    SYNC.linked = true; lsSet('cl_sync_ok', '1');
+    if (j.empty) await syncPush();
+    else if (j.same) { if (SYNC.dirty && state.meta.updatedAt !== SYNC.last) await syncPush(); else syncSet('ok'); }
+    else if (SYNC.dirty && syncHasData(state) && state.meta.updatedAt !== j.updatedAt) { syncMergeIn(j); await syncPush(); toast('הנתונים סונכרנו עם הענן'); }
+    else { syncAdopt(j); syncSet('ok'); toast('הנתונים נטענו מהענן'); }
+  } catch (e) { syncSet('err', e.status === 503 ? 'השרת לא מוגדר' : e.status === 413 ? 'הנתונים גדולים מדי' : ''); }
+  finally { SYNC.busy = false; }
+};
+async function syncLinkCode(code, fromLink) {
+  code = String(code || '').trim(); if (code.length < 8) { toast('הקוד קצר מדי (לפחות 8 תווים)'); return; }
+  SYNC.code = code; lsSet('cl_sync', code); SYNC.last = ''; lsSet(SYNC_LS.last, null); lsSet(SYNC_LS.ids, null);
+  let j; try { j = await syncCall('GET'); } catch (e) { syncSet('err', e.status === 503 ? 'השרת לא מוגדר' : ''); toast('אין חיבור לשרת. נסו שוב.'); return; }
+  SYNC.linked = true; lsSet('cl_sync_ok', '1'); lsSet(SYNC_LS.hide, null);
+  if (j.empty) { await syncPush().catch(() => syncSet('err')); toast('החיבור לענן הופעל'); }
+  else if (syncHasData(state)) { syncMergeIn(j); await syncPush().catch(() => syncSet('err')); toast('המכשיר חובר. הנתונים מהענן ומהמכשיר אוחדו ✓'); }
+  else { syncAdopt(j); syncSet('ok'); toast((fromLink ? 'המכשיר חובר. ' : '') + 'כל הנתונים נטענו מהענן ✓'); }
+  render();
+}
+ACT['sync-link'] = () => { const i = $('#sync_code') || $('#sync_code2'); syncLinkCode(i && i.value); };
+ACT['sync-hide'] = () => { lsSet(SYNC_LS.hide, '1'); render(); };
+const syncLink = () => location.origin + location.pathname + '#sync=' + encodeURIComponent(SYNC.code);
+ACT['sync-copy'] = async () => { const u = syncLink(); try { await navigator.clipboard.writeText(u); toast('הקישור הועתק. פתחו אותו בטלפון החדש.'); } catch (e) { prompt('העתיקו את הקישור:', u); } };
+ACT['sync-share'] = async () => { const u = syncLink(); if (navigator.share) { try { await navigator.share({ title: 'מעבדת קפה', text: 'קישור לחיבור המכשיר לנתונים שלי', url: u }); } catch (e) { /* cancelled */ } } else ACT['sync-copy'](); };
+ACT['sync-qr'] = () => {
+  const u = syncLink(); const ov = document.createElement('div'); ov.className = 'qr-ov'; ov.innerHTML = '<div class="qr-card"><b>סרקו מהטלפון החדש</b><div id="qrbox"></div><small>המצלמה תפתח את האפליקציה עם כל הנתונים שלכם.</small><button class="btn" type="button">סגירה</button></div>';
+  ov.addEventListener('click', (e) => { if (e.target === ov || e.target.tagName === 'BUTTON') ov.remove(); }); document.body.appendChild(ov);
+  const draw = () => { try { new window.QRCode($('#qrbox'), { text: u, width: 220, height: 220, correctLevel: window.QRCode.CorrectLevel.M }); } catch (e) { $('#qrbox').textContent = u; } };
+  if (window.QRCode) draw(); else { const s = document.createElement('script'); s.src = 'https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js'; s.onload = draw; s.onerror = () => { $('#qrbox').textContent = u; }; document.head.appendChild(s); }
+};
+/* settings: transfer tools next to the existing sync box */
+AFTER.settings = (function (prev) {
+  return async function () {
+    await prev(); const box = $('.syncbox'); if (!box || !SYNC.linked) return;
+    const d = document.createElement('div'); d.className = 'sync-move';
+    d.innerHTML = '<div class="blk-h" style="margin-top:12px">העברה לטלפון חדש</div><p class="muted s" style="margin:4px 0">פתחו את הקישור או סרקו את הקוד בטלפון החדש, וכל הפולים, השקיות והחליטות יופיעו שם. שני המכשירים ימשיכו להסתנכרן.</p><div class="row wrap"><button class="btn sm" data-act="sync-qr">קוד QR</button><button class="btn sm" data-act="sync-share">שליחת קישור</button><button class="btn sm" data-act="sync-copy">העתקת קישור</button></div>';
+    box.appendChild(d);
+  };
+})(AFTER.settings);
+/* a fresh device that isn't linked: offer to bring the data in, right where you start */
+function syncBanner() {
+  if (SYNC.linked || location.protocol !== 'https:' || lsGet(SYNC_LS.hide) === '1') return '';
+  return '<section class="card sync-ban"><div class="blk-h">☁️ יש לכם נתונים בטלפון אחר?</div><p class="s" style="margin:4px 0 8px">בטלפון הישן: הגדרות ← סנכרון בענן ← "קוד QR" או "שליחת קישור". או הקלידו כאן את הקוד האישי:</p><div class="row wrap"><input type="text" id="sync_code2" dir="ltr" placeholder="coffee-…" aria-label="קוד אישי" autocapitalize="off" autocomplete="off" style="max-width:220px"><button class="btn sm pri" data-act="sync-link">חיבור</button><button class="btn ghost sm" data-act="sync-hide">לא עכשיו</button></div></section>';
+}
+/* open-with-link: #sync=CODE */
+(function () {
+  const m = /[#&]sync=([A-Za-z0-9_%-]{8,120})/.exec(location.hash || ''); if (!m) return;
+  try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ }
+  setTimeout(() => syncLinkCode(decodeURIComponent(m[1]), true), 400);
+})();
+['brew', 'beans'].forEach((v) => { const f = RENDER[v]; if (!f) return; RENDER[v] = function () { const h = f.apply(this, arguments); const b = syncBanner(); return b ? h.replace(/<div class="page[^"]*">/, (m) => m + b) : h; }; });
+
+/* ============================================================
+   V5b — timers that survive closing the app + several in parallel
+   - the live brew runs on wall-clock time and is restored after the app is closed
+   - any brew can continue "in the background" while you start another one
+   - long timers (cold brew steeping, custom timers) live in a dock above the nav
+   - alarms: sound + vibration while the app is open, Web Push when it is closed
+   ============================================================ */
+const TMF = 'https://br-curly-unit-awvgmofa-coffeetimer.compute.c-12.us-east-1.aws.neon.tech';
+const TM_VAPID = 'BPn66TXPF76AoBjI3dTK8Pf5da2p_MAuyAP23CgLJb8QECe6jyKGQkbi2RLDbDuh_3ncw2AVl8uxuc5JLyZMGI0';
+const TM = { list: [], LS: 'cl_timers_v1', LIVE: 'cl_live_v2', tick: null };
+try { TM.list = JSON.parse(localStorage.getItem(TM.LS) || '[]') || []; } catch (e) { TM.list = []; }
+const tmSave = () => { try { localStorage.setItem(TM.LS, JSON.stringify(TM.list)); } catch (e) { /* ignore */ } };
+const tmUid = () => 't' + Date.now().toString(36) + Math.random().toString(36).slice(2, 6);
+function tmFmt(sec) { sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.floor((sec % 3600) / 60), s = sec % 60; return h ? h + ':' + String(m).padStart(2, '0') + ':' + String(s).padStart(2, '0') : m + ':' + String(s).padStart(2, '0'); }
+function tmFmtLong(sec) { sec = Math.max(0, Math.round(sec)); const h = Math.floor(sec / 3600), m = Math.round((sec % 3600) / 60); return h ? h + ' ש׳' + (m ? ' ' + m + ' דק׳' : '') : sec >= 60 ? Math.round(sec / 60) + ' דק׳' : sec + ' שנ׳'; }
+const tmClock = (ms) => new Date(ms).toLocaleTimeString('he-IL', { hour: '2-digit', minute: '2-digit' });
+const tmDay = (ms) => { const d = new Date(ms), n = new Date(); const t = d.toDateString() === n.toDateString() ? 'היום' : new Date(n.getTime() + 864e5).toDateString() === d.toDateString() ? 'מחר' : d.toLocaleDateString('he-IL', { weekday: 'long' }); return t + ' ב-' + tmClock(ms); };
+
+/* ---------- wall-clock live brew (keeps counting while the phone sleeps) ---------- */
+lElapsed = function () { const L = LV(); return (L.base || 0) + (L.running ? (Date.now() - L.t0) / 1000 : 0); };
+function liveSnap(b) { b = b || B(); return deepClone({ presetId: b.presetId, bagId: b.bagId, drink: b.drink, formulaId: b.formulaId, vals: b.vals, valsFor: b.valsFor, src: b.src, stage: b.stage, run: b.run, live: b.live, pre: b.pre || null }); }
+function liveSave() { try { if (B().stage === 'live' && B().run) localStorage.setItem(TM.LIVE, JSON.stringify({ at: Date.now(), b: liveSnap() })); else localStorage.removeItem(TM.LIVE); } catch (e) { /* ignore */ } }
+function liveRelink(s) { if (s && s.run && s.run.p) s.run.p = byId('recipes', s.run.p.id) || s.run.p; return s; }
+function brewTotal(run) { const st = (run && run.steps) || []; return st.length ? st[st.length - 1].at : (run && run.params && run.params[(METHODS[run.p.method] || {}).timeKey]) || 120; }
+function liveEndAt(L, run) { if (!L || !L.running) return null; return L.t0 + (brewTotal(run) - (L.base || 0)) * 1000; }
+function liveSchedule() {
+  const b = B(); const L = b.live; if (b.stage !== 'live' || !L) { pushCancel('live'); return; }
+  const end = liveEndAt(L, b.run); if (end && end - Date.now() > 50000) pushAt('live', end, '⏱ ' + (b.run.p.name || 'החליטה') + ': הזמן נגמר', 'חזרו לאפליקציה לסיים ולדרג', 'live'); else pushCancel('live');
+}
+ACT['live-start'] = () => { const L = LV(); L.started = true; L.running = true; L.t0 = Date.now(); L.base = 0; L.startAt = nowISO(); L.lastIdx = -1; takeWake(); paint(true); tickOn(); liveSave(); liveSchedule(); tmAskOnce(); };
+ACT['live-pause'] = () => { const L = LV(); L.base = lElapsed(); L.running = false; clearInterval(_tick); paint(true); liveSave(); liveSchedule(); };
+ACT['live-resume'] = () => { const L = LV(); L.t0 = Date.now(); L.running = true; paint(true); tickOn(); liveSave(); liveSchedule(); };
+['live-next', 'live-first', 'live-reset'].forEach((k) => { const f = ACT[k]; ACT[k] = (d) => { f(d); liveSave(); liveSchedule(); }; });
+['live-finish'].forEach((k) => { const f = ACT[k]; ACT[k] = (d) => { f(d); try { localStorage.removeItem(TM.LIVE); } catch (e) { /* ignore */ } pushCancel('live'); }; });
+{ const f = ACT['live-cancel']; ACT['live-cancel'] = (d) => { f(d); setTimeout(() => { if (B().stage !== 'live') { liveSave(); pushCancel('live'); } }, 50); }; }
+AFTER.brew = (function (prev) { return function () { prev(); if (B().stage === 'live') liveSave(); }; })(AFTER.brew);
+/* restore a brew that was running when the app was closed */
+(function () {
+  try { const o = JSON.parse(localStorage.getItem(TM.LIVE) || 'null'); if (!o || !o.b || o.b.stage !== 'live' || Date.now() - o.at > 36 * 3600e3) return; Object.assign(UI.brew, liveRelink(o.b)); UI.view = 'brew'; } catch (e) { /* ignore */ }
+})();
+
+/* ---------- parallel: park the current brew, start another ---------- */
+function tmPark(silent) {
+  const b = B(); if (b.stage !== 'live' || !b.run) return null;
+  const s = liveSnap(b); const p = b.run.p; const bag = byId('bags', b.bagId);
+  const t = { id: tmUid(), kind: 'brew', label: p.name, sub: bag ? beanName(bag.beanId) : '', method: p.method, snap: s, created: Date.now() };
+  TM.list.push(t); tmSave(); const end = liveEndAt(s.live, s.run); if (end && end - Date.now() > 50000) pushAt(t.id, end, '⏱ ' + p.name + ': הזמן נגמר', 'חזרו לאפליקציה לסיים ולדרג', t.id);
+  clearInterval(_tick); Object.assign(b, { stage: 'setup', run: null, live: null, valsFor: null, pre: null }); try { localStorage.removeItem(TM.LIVE); } catch (e) { /* ignore */ } pushCancel('live');
+  if (!silent) toast('"' + p.name + '" ממשיך ברקע. אפשר להכין משקה נוסף.');
+  return t;
+}
+ACT['tm-park'] = () => { tmPark(); render(); tmPaint(); };
+function tmResume(id) {
+  const t = TM.list.find((x) => x.id === id); if (!t) return;
+  if (B().stage === 'live') tmPark(true);
+  if (t.kind !== 'steep') { TM.list = TM.list.filter((x) => x !== t); tmSave(); pushCancel(t.id); }
+  if (t.kind === 'brew') { Object.assign(B(), liveRelink(t.snap)); liveSave(); liveSchedule(); if (UI.modal) closeModal(); go('brew'); if (LV().running) tickOn(); return; }
+  if (t.kind === 'steep') { // cold brew: go to tasting / rating; the timer is removed once the brew is saved
+    const s = liveRelink(t.snap); Object.assign(B(), { steepId: t.id, presetId: s.presetId, bagId: s.bagId, drink: null, formulaId: s.formulaId, vals: s.vals, valsFor: s.valsFor, src: s.src, run: s.run, stage: 'finish', live: { final: Math.round((Date.now() - t.start) / 1000), startAt: new Date(t.start).toISOString(), log: {} }, fin: { rating: null, taste: 'none' } });
+    if (UI.modal) closeModal(); go('brew'); return;
+  }
+  if (UI.modal) closeModal();
+}
+
+/* ---------- long / custom timers ---------- */
+function tmAdd(o) {
+  const t = Object.assign({ id: tmUid(), kind: 'custom', created: Date.now(), start: Date.now() }, o); TM.list.push(t); tmSave();
+  pushAt(t.id, t.end, o.pushTitle || ('⏰ ' + t.label), o.pushBody || 'הטיימר הסתיים', t.id); tmAskOnce(); tmPaint(); return t;
+}
+function tmRemove(id) { TM.list = TM.list.filter((x) => x.id !== id); tmSave(); pushCancel(id); tmPaint(); }
+ACT['tm-del'] = (d) => { const t = TM.list.find((x) => x.id === d.id); if (!t) return; if (t.kind === 'custom' || t.done) { tmRemove(d.id); tmSheetRe(); return; } confirmDialog('לבטל את "' + t.label + '"?', () => { tmRemove(d.id); }, { yes: 'ביטול הטיימר' }); };
+ACT['tm-open'] = (d) => { const t = TM.list.find((x) => x.id === d.id); if (!t) { if (d.id === 'live') go('brew'); return; } if (t.kind === 'custom') { if (t.done) tmRemove(t.id); else tmSheet(); return; } if (t.kind === 'steep' && !t.done) { tmSheet(); return; } tmResume(d.id); };
+ACT['tm-finish'] = (d) => tmResume(d.id);
+ACT['tm-live'] = () => go('brew');
+{ const f = ACT['fin-save']; ACT['fin-save'] = (d) => { const sid = B().steepId; f(d); if (sid && B().stage === 'done') { B().steepId = null; tmRemove(sid); } }; }
+{ const f = ACT['fin-back']; ACT['fin-back'] = (d) => { if (B().steepId) { Object.assign(B(), { stage: 'setup', steepId: null, run: null, live: null, valsFor: null }); render(); return; } f(d); }; }
+/* cold brew: "I made it, it's steeping" → a steep timer with the alarm, rating when it's ready */
+ACT['tm-steep'] = () => {
+  const r = checkReady(); if (!r) return; const b = B(); const p = r.p; const params = r.params; const hrs = isNum(params.steepH) ? params.steepH : 16; const bag = byId('bags', b.bagId);
+  const snap = deepClone({ presetId: b.presetId, bagId: b.bagId, formulaId: b.formulaId, vals: b.vals, valsFor: b.valsFor, src: b.src, run: r });
+  const t = tmAdd({ kind: 'steep', label: p.name, sub: bag ? beanName(bag.beanId) : '', method: p.method, start: Date.now(), end: Date.now() + hrs * 3600e3, snap, pushTitle: '🧊 ' + p.name + ' מוכן', pushBody: 'הגיע הזמן לסנן ולהוציא מהמקרר' + (params.place === 'טמפרטורת החדר' ? '' : '') + '. אחרי הטעימה: דירוג באפליקציה.' });
+  Object.assign(b, { valsFor: null }); toast('הטיימר הופעל: מוכן ' + tmDay(t.end) + '. תקבלו התראה.'); render();
+};
+const TM_QUICK = [[1, '1 דק׳'], [2, '2 דק׳'], [3, '3 דק׳'], [4, '4 דק׳'], [5, '5 דק׳'], [8, '8 דק׳'], [10, '10 דק׳'], [15, '15 דק׳'], [12 * 60, '12 ש׳'], [16 * 60, '16 ש׳'], [20 * 60, '20 ש׳'], [24 * 60, '24 ש׳']];
+ACT['tm-quick'] = (d) => { const inp = $('#tm_label'); const lab = (inp && inp.value.trim()) || ('טיימר ' + d.l); const min = +d.m; tmAdd({ label: lab, end: Date.now() + min * 60e3 }); toast('טיימר "' + lab + '" הופעל'); tmSheetRe(); };
+ACT['tm-custom'] = () => { const inp = $('#tm_label'); const m = num(($('#tm_min') || {}).value); const h = num(($('#tm_hr') || {}).value); const tot = (isNum(h) ? h * 60 : 0) + (isNum(m) ? m : 0); if (!(tot > 0)) { toast('הזינו שעות או דקות'); return; } const lab = (inp && inp.value.trim()) || 'טיימר'; tmAdd({ label: lab, end: Date.now() + tot * 60e3 }); toast('טיימר "' + lab + '" הופעל'); tmSheetRe(); };
+
+/* ---------- push notifications (work when the app is closed) ---------- */
+function tmOwner() { if (SYNC.owner) return SYNC.owner; let d = lsGet('cl_dev_id'); if (!d) { d = 'dv-' + Math.random().toString(36).slice(2, 12) + Date.now().toString(36); lsSet('cl_dev_id', d); } return d; }
+const pushOk = () => 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && location.protocol === 'https:';
+const isIOS = () => /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+const isStandalone = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+function b64uToU8(s) { const p = '='.repeat((4 - s.length % 4) % 4); const b = atob((s + p).replace(/-/g, '+').replace(/_/g, '/')); const u = new Uint8Array(b.length); for (let i = 0; i < b.length; i++) u[i] = b.charCodeAt(i); return u; }
+const tmPost = (path, body) => fetch(TMF + path, { method: 'POST', headers: { 'content-type': 'application/json' }, body: JSON.stringify(body), keepalive: true }).then((r) => r.json()).catch(() => null);
+async function pushEnsure(ask) {
+  if (!pushOk()) return false; let perm = Notification.permission;
+  if (perm === 'default' && ask) { try { perm = await Notification.requestPermission(); } catch (e) { perm = 'denied'; } }
+  if (perm !== 'granted') return false;
+  try {
+    const reg = await navigator.serviceWorker.ready; let sub = await reg.pushManager.getSubscription();
+    if (!sub) sub = await reg.pushManager.subscribe({ userVisibleOnly: true, applicationServerKey: b64uToU8(TM_VAPID) });
+    const own = tmOwner(); const key = own + '|' + sub.endpoint; const prev = lsGet('cl_push_reg') || '';
+    if (prev !== key) { const from = prev.split('|')[0]; const r = await tmPost('/sub', { owner: own, sub: sub.toJSON(), from: from && from !== own ? from : undefined, ua: navigator.userAgent.slice(0, 100) }); if (r && r.ok) lsSet('cl_push_reg', key); }
+    return true;
+  } catch (e) { console.warn('push', e); return false; }
+}
+function tmOwnerChanged() { lsSet('cl_push_reg', (lsGet('cl_push_reg') || '').replace(/^[^|]*/, 'x')); pushEnsure(false); TM.list.forEach((t) => { const e = t.kind === 'brew' ? liveEndAt(t.snap.live, t.snap.run) : t.end; if (e && !t.done && e - Date.now() > 50000) pushAt(t.id, e, '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); }); }
+let _tmAsked = false;
+function tmAskOnce() { if (_tmAsked || !pushOk()) return; _tmAsked = true; if (Notification.permission === 'default') { pushEnsure(true).then((ok) => { if (ok) toast('התראות הופעלו: תקבלו התראה גם כשהאפליקציה סגורה'); }); } else pushEnsure(false); }
+function pushAt(id, at, title, body, tag) {
+  if (!at) return; const own = tmOwner();
+  pushEnsure(false).then((ok) => { if (!ok) return; tmPost('/at', { owner: own, id: String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48), at: Math.round(at), title, body, tag: tag || id, url: './#tm=' + encodeURIComponent(id) }); });
+}
+function pushCancel(id) { if (!pushOk() || Notification.permission !== 'granted') return; tmPost('/cancel', { owner: tmOwner(), id: String(id).replace(/[^A-Za-z0-9_-]/g, '').slice(0, 48) }); }
+ACT['tm-test'] = async () => { const ok = await pushEnsure(true); if (!ok) { toast(isIOS() && !isStandalone() ? 'באייפון: הוסיפו את האפליקציה למסך הבית ופתחו משם' : 'ההתראות חסומות. אפשרו אותן בהגדרות הדפדפן.'); return; } const r = await tmPost('/test', { owner: tmOwner(), body: 'ההתראות עובדות ☕ גם כשהאפליקציה סגורה' }); toast(r && r.sent ? 'נשלחה התראת בדיקה' : 'לא נשלחה התראה. נסו שוב בעוד רגע.'); };
+
+/* ---------- local alarm while the app is open ---------- */
+async function tmLocalNotify(title, body, tag) {
+  try { if (document.visibilityState === 'visible') return; if (!pushOk() || Notification.permission !== 'granted') return; const reg = await navigator.serviceWorker.ready; reg.showNotification(title, { body, tag, renotify: true, icon: 'icon-192.png', badge: 'icon-192.png', vibrate: [300, 150, 300, 150, 600], data: { url: './#tm=' + tag, id: tag } }); } catch (e) { /* ignore */ }
+}
+function tmAlarm(title, body, tag) { beep(3); setTimeout(() => beep(3), 900); try { if (navigator.vibrate) navigator.vibrate([400, 150, 400, 150, 700]); } catch (e) { /* ignore */ } toast(title + (body ? ' · ' + body : '')); tmLocalNotify(title, body, tag); }
+function brewIdx(s, e) { let i = -1; (s.run.steps || []).forEach((st, k) => { if (e + 0.001 >= st.at) i = k; }); return s.live.started ? Math.max(i, s.live.manual == null ? -1 : s.live.manual) : -1; }
+const snapElapsed = (L) => (L.base || 0) + (L.running ? (Date.now() - L.t0) / 1000 : 0);
+function tmTick() {
+  let dirty = false; const now = Date.now();
+  TM.list.forEach((t) => {
+    if (t.kind === 'brew') {
+      const L = t.snap.live; if (!L || !L.started) return; const e = snapElapsed(L); const idx = brewIdx(t.snap, e);
+      if (idx !== L.lastIdx) { if (idx >= 0 && L.lastIdx != null) { const st = t.snap.run.steps[idx]; tmAlarm(t.label + ': ' + (st ? st.label : 'שלב חדש'), '', t.id); if (!(idx in L.log)) L.log[idx] = Math.round(e * 10) / 10; } L.lastIdx = idx; dirty = true; }
+      const end = brewTotal(t.snap.run); if (!t.done && e >= end) { t.done = true; dirty = true; }
+    } else if (!t.done && t.end && now >= t.end) { t.done = true; dirty = true; tmAlarm(t.kind === 'steep' ? '🧊 ' + t.label + ' מוכן' : '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); pushCancel(t.id); }
+  });
+  if (dirty) tmSave(); tmPaint();
+}
+
+/* ---------- dock (always visible while something runs) ---------- */
+function tmItems() {
+  const out = []; const b = B();
+  if (b.stage === 'live' && b.run && UI.view !== 'brew') { const L = b.live; const e = lElapsed(); const tot = brewTotal(b.run); const idx = lIdx(); const st = b.run.steps[idx]; out.push({ id: 'live', act: 'tm-live', ic: '▶', label: b.run.p.name, txt: L.started ? tmFmt(e) : 'מוכן להתחלה', sub: st ? st.label : '', pct: L.started ? clamp(e / Math.max(1, tot), 0, 1) : 0, m: b.run.p.method }); }
+  TM.list.forEach((t) => {
+    if (t.kind === 'brew') { const L = t.snap.live; const e = snapElapsed(L); const tot = brewTotal(t.snap.run); const st = t.snap.run.steps[brewIdx(t.snap, e)]; out.push({ id: t.id, act: 'tm-open', ic: t.done ? '✓' : '▶', label: t.label, txt: tmFmt(e), sub: t.done ? 'הזמן נגמר: סיום ודירוג' : st ? st.label : '', pct: clamp(e / Math.max(1, tot), 0, 1), m: t.method, done: t.done }); }
+    else { const left = (t.end - Date.now()) / 1000; const tot = (t.end - t.start) / 1000; out.push({ id: t.id, act: 'tm-open', ic: t.kind === 'steep' ? '🧊' : '⏰', label: t.label, txt: t.done ? 'מוכן ✓' : (left > 3600 ? tmFmtLong(left) : tmFmt(left)), sub: t.done ? (t.kind === 'steep' ? 'לסנן, להוציא מהמקרר ולדרג' : 'נגמר') : 'עד ' + (t.end - Date.now() > 10 * 3600e3 ? tmDay(t.end) : tmClock(t.end)), pct: clamp(1 - left / Math.max(1, tot), 0, 1), m: t.method || 'custom', done: t.done }); }
+  });
+  return out;
+}
+function tmPaint() {
+  let host = document.getElementById('tmdock'); const items = tmItems();
+  if (!host) { host = document.createElement('div'); host.id = 'tmdock'; host.setAttribute('role', 'region'); host.setAttribute('aria-label', 'טיימרים פעילים'); document.body.appendChild(host); }
+  host.hidden = !items.length || !!UI.modal; document.body.classList.toggle('has-dock', !host.hidden);
+  if (host.hidden) return;
+  host.innerHTML = items.map((x) => '<button type="button" class="tm-chip' + (x.done ? ' done' : '') + '" data-act="' + x.act + '" data-id="' + esc(x.id) + '" style="--m:' + ((METHODS[x.m] || METHODS.custom).color || 'var(--accent)') + ';--p:' + Math.round(x.pct * 100) + '%"><i class="tm-ic">' + x.ic + '</i><span class="tm-b"><b>' + esc(x.label) + '</b><small>' + esc(x.sub || '') + '</small></span><span class="tm-t num">' + esc(x.txt) + '</span></button>').join('') + '<button type="button" class="tm-all" data-act="tm-sheet" aria-label="כל הטיימרים">⏱</button>';
+}
+function tmEnsureTick() { if (TM.tick) return; TM.tick = setInterval(tmTick, 1000); }
+tmEnsureTick();
+document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') { tmTick(); if (B().stage === 'live' && UI.view === 'brew') paint(true); } });
+
+/* ---------- timers sheet ---------- */
+function tmSheetHTML() {
+  const items = tmItems();
+  const list = items.length ? '<div class="tm-list">' + items.map((x) => '<div class="tm-row' + (x.done ? ' done' : '') + '" style="--m:' + ((METHODS[x.m] || METHODS.custom).color || 'var(--accent)') + ';--p:' + Math.round(x.pct * 100) + '%"><button type="button" class="tm-row-b" data-act="' + x.act + '" data-id="' + esc(x.id) + '"><b>' + x.ic + ' ' + esc(x.label) + '</b><small>' + esc(x.sub || '') + '</small><span class="tm-bar"><i></i></span></button><span class="num tm-t">' + esc(x.txt) + '</span>' + (x.id !== 'live' ? '<button type="button" class="btn ghost sm" data-act="tm-del" data-id="' + esc(x.id) + '" aria-label="מחיקה">✕</button>' : '') + '</div>').join('') + '</div>' : '<p class="muted">אין טיימרים פעילים.</p>';
+  const pushTxt = !pushOk() ? (isIOS() && !isStandalone() ? 'באייפון, התראות כשהאפליקציה סגורה עובדות רק אחרי "הוספה למסך הבית" ופתיחה משם.' : 'הדפדפן הזה לא תומך בהתראות. הטיימרים יצלצלו רק כשהאפליקציה פתוחה.') : Notification.permission === 'granted' ? 'התראות פעילות: תקבלו התראה גם כשהאפליקציה סגורה.' : Notification.permission === 'denied' ? 'ההתראות חסומות. אפשרו אותן בהגדרות הדפדפן כדי לקבל התראה כשהאפליקציה סגורה.' : 'הפעילו התראות כדי לקבל התראה גם כשהאפליקציה סגורה.';
+  return list +
+    '<div class="blk-h" style="margin-top:14px">טיימר חדש</div><input type="text" id="tm_label" placeholder="שם (למשל: חימום מכונה)" aria-label="שם הטיימר" style="width:100%">' +
+    '<div class="chips-row wrap" style="margin-top:8px">' + TM_QUICK.map(([m, l]) => '<button type="button" class="tchip" data-act="tm-quick" data-m="' + m + '" data-l="' + l + '">' + l + '</button>').join('') + '</div>' +
+    '<div class="row wrap" style="margin-top:8px;align-items:center;gap:6px"><input type="number" inputmode="numeric" id="tm_hr" placeholder="שעות" aria-label="שעות" style="width:84px"><input type="number" inputmode="numeric" id="tm_min" placeholder="דקות" aria-label="דקות" style="width:84px"><button type="button" class="btn sm pri" data-act="tm-custom">הפעלה</button></div>' +
+    '<p class="s muted" style="margin-top:12px">🔔 ' + esc(pushTxt) + '</p>' + (pushOk() ? '<button type="button" class="btn sm" data-act="tm-test">' + (Notification.permission === 'granted' ? 'בדיקת התראה' : 'הפעלת התראות') + '</button>' : '');
+}
+function tmSheet() { openModal({ title: 'טיימרים', body: '<div id="tmsheet">' + tmSheetHTML() + '</div>', actions: [{ label: 'סגירה', cls: 'pri' }], noFocus: true }); }
+function tmSheetRe() { const h = $('#tmsheet'); if (h) h.innerHTML = tmSheetHTML(); }
+ACT['tm-sheet'] = () => tmSheet();
+setInterval(() => { const h = $('#tmsheet'); if (h && !h.contains(document.activeElement)) { const items = tmItems(); $$('#tmsheet .tm-row').forEach((r, i) => { const x = items[i]; if (!x) return; const t = $('.tm-t', r); if (t) t.textContent = x.txt; r.style.setProperty('--p', Math.round(x.pct * 100) + '%'); }); } }, 1000);
+const _rm = renderModal; renderModal = function () { _rm(); tmPaint(); };
+
+/* the live screen: "continue in the background" so another drink can be started */
+brewLive = (function (prev) {
+  return function () {
+    const h = prev(); const n = TM.list.length;
+    return h.replace('<div class="live-ctl" id="lctl"></div>', '<div class="live-ctl" id="lctl"></div><div class="live-par"><button type="button" class="btn ghost sm" data-act="tm-park">↧ להמשיך ברקע ולהכין משקה נוסף</button>' + (n ? '<button type="button" class="btn ghost sm" data-act="tm-sheet">⏱ ' + n + ' טיימרים פעילים</button>' : '') + '</div>');
+  };
+})(brewLive);
+/* open from a notification: #tm=ID, or a message from the service worker */
+function tmFromHash() { const m = /[#&]tm=([A-Za-z0-9_-]{1,48})/.exec(location.hash || ''); if (!m) return; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } setTimeout(() => { if (m[1] === 'live') go('brew'); else if (TM.list.some((t) => t.id === m[1])) ACT['tm-open']({ id: m[1] }); }, 300); }
+tmFromHash(); window.addEventListener('hashchange', tmFromHash);
+try { navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', (e) => { const d = e.data || {}; if (d.type === 'tm-open' && d.id) { if (d.id === 'live') go('brew'); else if (TM.list.some((t) => t.id === d.id)) ACT['tm-open']({ id: d.id }); } }); } catch (e) { /* ignore */ }
+setTimeout(() => { if (pushOk() && Notification.permission === 'granted') pushEnsure(false); tmPaint(); }, 2500);
+
+/* ============================================================
+   V5c — step illustrations in the live timer: what to do right now, how much water,
+   per method (pour-over, AeroPress, French press, moka, cold brew). Espresso stays as is.
+   ============================================================ */
+const SA = {
+  kettle(pour) { // gooseneck kettle, top right; pour=true tilts it and draws the stream
+    return '<g class="kt' + (pour ? ' tilt' : '') + '"><path class="ln gl" d="M186 26 h30 a4 4 0 0 1 4 4 v24 a8 8 0 0 1 -8 8 h-22 a8 8 0 0 1 -8 -8 v-24 a4 4 0 0 1 4 -4z"/><path class="ln" d="M196 26 v-5 h10 v5"/><path class="ln" d="M220 34 q12 2 10 14 q-2 8 -10 8"/><path class="ln" d="M182 50 q-22 2 -30 -10 q-4 -6 -12 -4"/></g>' +
+      (pour ? '<path class="stream" d="M140 37 C 133 44, 124 54, 120 74"/>' : '');
+  },
+  scale(txt, hot) { return '<g class="scl"><rect class="ln gl" x="58" y="150" width="124" height="12" rx="4"/><rect class="disp' + (hot ? ' hot' : '') + '" x="99" y="152.5" width="42" height="7.5" rx="2"/>' + (txt ? '<text class="disp-t" x="120" y="158.6" text-anchor="middle">' + esc(txt) + '</text>' : '') + '</g>'; },
+  clock(x, y, txt) { return '<g class="clk"><circle class="ln gl" cx="' + x + '" cy="' + y + '" r="15"/><path class="ln hand" style="transform-origin:' + x + 'px ' + y + 'px" d="M' + x + ' ' + y + ' v-10"/><path class="ln" d="M' + x + ' ' + y + ' h6"/>' + (txt ? '<text class="lbl" x="' + x + '" y="' + (y + 28) + '" text-anchor="middle">' + esc(txt) + '</text>' : '') + '</g>'; },
+  swirl(cx, cy, r) { return '<g class="spin" style="transform-origin:' + cx + 'px ' + cy + 'px"><path class="ln ac" d="M' + (cx - r) + ' ' + cy + ' a' + r + ' ' + (r * 0.45) + ' 0 0 1 ' + (2 * r) + ' 0" marker-end="url(#saAh)"/><path class="ln ac" d="M' + (cx + r) + ' ' + (cy + 2) + ' a' + r + ' ' + (r * 0.45) + ' 0 0 1 ' + (-2 * r) + ' 0" marker-end="url(#saAh)"/></g>'; },
+  spoon(x, y) { return '<g class="wig" style="transform-origin:' + x + 'px ' + (y - 40) + 'px"><path class="ln" d="M' + x + ' ' + (y - 46) + ' L' + x + ' ' + (y - 6) + '"/><ellipse class="ln gl" cx="' + x + '" cy="' + y + '" rx="5" ry="8"/></g>'; },
+  steam(x, y) { return '<g class="stm"><path class="ln thin" d="M' + (x - 8) + ' ' + y + ' q-5 -8 0 -16"/><path class="ln thin" d="M' + x + ' ' + (y - 2) + ' q-5 -8 0 -16"/><path class="ln thin" d="M' + (x + 8) + ' ' + y + ' q-5 -8 0 -16"/></g>'; },
+  arrow(x1, y1, x2, y2) { return '<path class="ln ac thick" d="M' + x1 + ' ' + y1 + ' L' + x2 + ' ' + y2 + '" marker-end="url(#saAh)"/>'; },
+  defs: '<defs><marker id="saAh" viewBox="0 0 10 10" refX="7" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0 0L10 5L0 10z" class="ahf"/></marker>' +
+    '<clipPath id="saCone"><path d="M80 62 L160 62 L131 106 L109 106 Z"/></clipPath><clipPath id="saAP"><rect x="101" y="47" width="38" height="70"/></clipPath><clipPath id="saFP"><rect x="93" y="61" width="54" height="88" rx="3"/></clipPath><clipPath id="saJar"><rect x="87" y="62" width="66" height="87" rx="9"/></clipPath></defs>',
+};
+function saPour(step, steps) {
+  if (!isNum(step.water)) return null; const i = steps.indexOf(step); let prev = 0;
+  for (let k = 0; k < i; k++) if (isNum(steps[k].water) && steps[k].kind === 'pour') prev = Math.max(prev, steps[k].water);
+  return { add: Math.max(0, Math.round(step.water - prev)), to: Math.round(step.water) };
+}
+function saKind(method, step) {
+  const k = step.kind || 'step'; const l = step.label || '';
+  if (['pour', 'stir', 'press', 'prep', 'wait', 'check', 'end', 'start'].includes(k)) return k === 'end' && /סננו|סינון/.test(l) ? 'filter' : k;
+  if (/סננו|סינון/.test(l)) return 'filter';
+  if (/שפכו|שפיכה|בלום/.test(l)) return 'pour';
+  if (/ערבב|ערבוב|סחרר|סחרור|שברו את הקרום/.test(l)) return 'stir';
+  if (/לחצו|לחיצה/.test(l)) return 'press';
+  if (/המתינו|השרי|כסו/.test(l)) return 'wait';
+  return 'step';
+}
+/* ---------- scenes ---------- */
+function saV60(kind, pour, method) {
+  const chem = method === 'chemex';
+  const carafe = chem ? '<path class="ln gl" d="M92 150 Q82 128 104 112 L136 112 Q158 128 148 150 Z"/>' : '<path class="ln gl" d="M90 150 Q84 124 98 112 L142 112 Q156 124 150 150 Z"/>';
+  const lvl = kind === 'end' || kind === 'step' ? '<rect class="brew" x="88" y="134" width="64" height="16"/>' : '<rect class="brew" x="88" y="142" width="64" height="8"/>';
+  const cone = '<path class="ln gl" d="M78 60 L162 60 L132 108 L108 108 Z"/><path class="ln thin" d="M100 70 L114 104 M140 70 L126 104 M120 66 L120 104"/>';
+  const bed = '<g clip-path="url(#saCone)"><rect class="cof" x="80" y="88" width="80" height="20"/>' + (kind === 'pour' ? '<rect class="wat rise" x="80" y="70" width="80" height="18"/>' : kind === 'stir' ? '<rect class="wat" x="80" y="78" width="80" height="10"/>' : '') + '</g>';
+  const drops = kind === 'end' || kind === 'pour' || kind === 'stir' ? '<circle class="drip drop" cx="120" cy="112" r="2.4"/><circle class="drip drop d2" cx="120" cy="112" r="2"/>' : '';
+  const extra = kind === 'stir' ? SA.swirl(120, 70, 30) : kind === 'end' ? '<text class="lbl" x="120" y="54" text-anchor="middle">ניקוז…</text>' : '';
+  return carafe + lvl + drops + cone + bed + extra + (kind === 'pour' ? SA.kettle(true) : '');
+}
+function saAero(kind, pour) {
+  const mug = '<path class="ln gl" d="M90 150 L92 120 L148 120 L150 150 Z"/><path class="ln" d="M150 126 q14 0 12 12 q-2 8 -12 8"/>';
+  const fill = kind === 'pour' ? '<rect class="brew rise" x="100" y="62" width="40" height="55"/>' : kind === 'end' ? '' : '<rect class="brew" x="100" y="62" width="40" height="55"/>';
+  const ch = '<g clip-path="url(#saAP)">' + fill + (kind !== 'end' ? '<rect class="cof" x="100" y="104" width="40" height="13"/>' : '') + '</g><rect class="ln gl" x="100" y="46" width="40" height="72" rx="3"/><rect class="ln" x="97" y="116" width="46" height="6" rx="2"/><path class="ln thin" d="M104 58 h6 M104 70 h6 M104 82 h6 M104 94 h6"/>';
+  let top = '';
+  if (kind === 'stir') top = '<g class="wig" style="transform-origin:120px 30px"><rect class="ln gl" x="117" y="28" width="6" height="60" rx="2"/><rect class="ln" x="112" y="82" width="16" height="10" rx="2"/></g>';
+  if (kind === 'prep' || kind === 'wait') top = '<rect class="ln gl" x="103" y="18" width="34" height="40" rx="2"/><rect class="ln" x="98" y="12" width="44" height="7" rx="2"/>' + (kind === 'prep' ? SA.arrow(170, 64, 170, 46) + '<text class="lbl" x="170" y="78" text-anchor="middle">למשוך קצת</text>' : '');
+  if (kind === 'press') top = '<g class="press" style="--pd:44px"><rect class="ln gl" x="103" y="12" width="34" height="40" rx="2"/><rect class="ln" x="98" y="6" width="44" height="7" rx="2"/><path class="ln hand" d="M104 4 q16 -12 32 0"/></g>' + SA.arrow(172, 20, 172, 70) + '<text class="lbl" x="172" y="84" text-anchor="middle">לאט, ~30 שנ׳</text>';
+  const cup = kind === 'end' ? '<rect class="brew" x="94" y="132" width="52" height="16"/>' + SA.steam(120, 116) : kind === 'press' ? '<rect class="brew rise" x="94" y="136" width="52" height="12"/>' : '';
+  return mug + cup + (kind === 'end' ? '<rect class="ln gl" x="100" y="46" width="40" height="72" rx="3" opacity=".35"/>' : ch) + top + (kind === 'pour' ? SA.kettle(true) : kind === 'stir' ? SA.swirl(120, 60, 28) : '');
+}
+function saFrench(kind) {
+  const glass = '<g clip-path="url(#saFP)">' + (kind === 'pour' ? '<rect class="brew rise" x="92" y="70" width="56" height="80"/>' : '<rect class="brew" x="92" y="70" width="56" height="80"/>') + (kind === 'wait' || kind === 'stir' ? '<rect class="crem" x="92" y="70" width="56" height="8"/>' : '') + (kind === 'pour' || kind === 'wait' || kind === 'stir' ? '<rect class="cof" x="92" y="136" width="56" height="14" opacity=".55"/>' : '') + '</g>' +
+    '<rect class="ln gl" x="92" y="60" width="56" height="90" rx="4"/><path class="ln" d="M148 76 q18 0 18 18 v20 q0 14 -18 14"/><rect class="ln" x="88" y="52" width="64" height="8" rx="3"/>';
+  let rod = '<path class="ln" d="M120 52 V30"/><circle class="ln gl" cx="120" cy="27" r="5"/><rect class="ln thin" x="94" y="64" width="52" height="4" rx="1"/>';
+  if (kind === 'press') rod = '<g class="press" style="--pd:62px"><path class="ln" d="M120 54 V28"/><circle class="ln gl" cx="120" cy="25" r="5"/><rect class="ln mesh" x="94" y="64" width="52" height="4" rx="1"/></g>' + SA.arrow(176, 30, 176, 90) + '<text class="lbl" x="176" y="104" text-anchor="middle">לאט</text>';
+  const extra = kind === 'stir' ? SA.spoon(108, 78) + SA.spoon(132, 78) + '<text class="lbl" x="186" y="72" text-anchor="middle">שוברים</text><text class="lbl" x="186" y="84" text-anchor="middle">ואוספים קצף</text>' : kind === 'wait' ? SA.clock(190, 70) : kind === 'end' ? '<path class="ln gl" d="M176 150 L178 128 L206 128 L208 150 Z"/>' + SA.steam(192, 122) : '';
+  return glass + rod + extra + (kind === 'pour' ? SA.kettle(true) : '');
+}
+function saMoka(kind) {
+  const flame = kind === 'start' || kind === 'check' ? '<g class="flm"><path class="fire" d="M104 166 q4 -12 8 -4 q3 -10 8 -2 q4 -10 8 0 q4 -8 8 4 z"/></g><path class="ln" d="M86 166 h68"/>' : '<path class="ln" d="M86 166 h68"/>';
+  const pot = '<path class="ln gl" d="M98 150 L104 112 L136 112 L142 150 Z"/><path class="ln" d="M101 108 h38"/><path class="ln gl" d="M102 104 L107 70 L133 70 L138 104 Z"/><path class="ln" d="M104 66 h32 l-4 -6 h-24 z"/><path class="ln" d="M133 72 l10 -6"/><path class="ln" d="M138 80 q18 4 14 22"/>';
+  const brew = kind === 'check' ? '<path class="brew" d="M108 102 L110 90 L130 90 L132 102 Z"/><path class="fount stream" d="M120 92 V76"/>' : kind === 'end' ? '<path class="brew" d="M106 102 L109 80 L131 80 L134 102 Z"/>' : '';
+  const extra = kind === 'end' ? '<path class="ln" d="M168 96 h22 v-8"/><path class="wat drop" d="M182 104 q3 6 0 9 q-3 -3 0 -9"/><path class="wat drop d2" d="M182 104 q3 6 0 9 q-3 -3 0 -9"/><text class="lbl" x="186" y="134" text-anchor="middle">קירור</text><text class="lbl" x="186" y="146" text-anchor="middle">הבסיס</text>' : kind === 'check' ? '<text class="lbl" x="178" y="80" text-anchor="middle">קפה ראשון</text><text class="lbl" x="178" y="92" text-anchor="middle">עולה</text>' : kind === 'start' ? '<text class="lbl" x="178" y="150" text-anchor="middle">אש ' + 'בינונית</text>' : '';
+  return flame + pot + brew + extra;
+}
+function saCold(kind, step) {
+  const jar = '<g clip-path="url(#saJar)">' + (kind === 'pour' ? '<rect class="cof" x="86" y="118" width="68" height="32"/><rect class="wat rise" x="86" y="72" width="68" height="46"/>' : kind === 'filter' || kind === 'end' ? '<rect class="brew dark" x="86" y="72" width="68" height="78"/>' : '<rect class="brew" x="86" y="72" width="68" height="78"/><rect class="cof" x="86" y="118" width="68" height="32" opacity=".6"/>') + '</g><rect class="ln gl" x="86" y="60" width="68" height="90" rx="10"/><rect class="ln" x="90" y="50" width="60" height="10" rx="3"/>';
+  if (kind === 'wait') return '<rect class="ln gl frg" x="60" y="18" width="120" height="146" rx="8"/><path class="ln thin" d="M60 64 h120"/><path class="ln" d="M168 30 v18 M168 74 v24"/><g class="snow"><path class="ln thin ac" d="M78 34 l10 10 M88 34 l-10 10 M83 31 v16"/></g>' + jar.replace(/y="60"/, 'y="70"').replace(/y="50"/, 'y="62"') + SA.clock(205, 44, (step && step._h ? step._h + ' ש׳' : ''));
+  if (kind === 'filter') return '<path class="ln gl" d="M164 96 L208 96 L192 120 L180 120 Z"/><path class="ln gl" d="M174 150 L176 124 L196 124 L198 150 Z"/><circle class="drip drop" cx="186" cy="122" r="2"/><g transform="rotate(-24 120 105)">' + jar + '</g><path class="stream dark" d="M150 64 C 166 66, 178 80, 184 98"/>';
+  if (kind === 'end') return '<path class="ln gl" d="M92 150 L96 82 L144 82 L148 150 Z"/><rect class="brew dark" x="96" y="96" width="48" height="52"/><rect class="ice" x="102" y="100" width="14" height="14" rx="3" transform="rotate(12 109 107)"/><rect class="ice" x="122" y="108" width="14" height="14" rx="3" transform="rotate(-10 129 115)"/><rect class="ice" x="110" y="122" width="13" height="13" rx="3"/><text class="lbl" x="186" y="96" text-anchor="middle">דילול</text><text class="lbl" x="186" y="108" text-anchor="middle">ומעל קרח</text>';
+  const jug = kind === 'pour' ? '<g class="tilt2"><path class="ln gl" d="M172 26 h34 v40 a6 6 0 0 1 -6 6 h-22 a6 6 0 0 1 -6 -6z"/><path class="ln" d="M172 30 l-10 -4"/><path class="ln" d="M206 34 q12 4 0 22"/></g><path class="stream wtr" d="M160 30 C 148 38, 134 52, 126 72"/>' : '';
+  return jar + jug + (kind === 'stir' ? SA.spoon(120, 104) + SA.swirl(120, 100, 26) : '');
+}
+function saArt(method, step, steps, running) {
+  if (!step || method === 'espresso') return '';
+  const kind = saKind(method, step); const pour = kind === 'pour' ? saPour(step, steps) : null;
+  if (method === 'coldbrew' && kind === 'wait') { const m = /(\d+)\s*שעות/.exec(step.label || ''); step = Object.assign({}, step, { _h: m ? m[1] : '' }); }
+  let body = '';
+  if (method === 'v60' || method === 'kalita' || method === 'chemex') body = saV60(kind, pour, method);
+  else if (method === 'aeropress') body = saAero(kind, pour);
+  else if (method === 'french') body = saFrench(kind);
+  else if (method === 'moka') body = saMoka(kind);
+  else if (method === 'coldbrew') body = saCold(kind, step);
+  else return '';
+  const showScale = method !== 'moka' && !(method === 'coldbrew' && (kind === 'wait' || kind === 'filter' || kind === 'end')) && !(method === 'aeropress' && kind === 'press') ;
+  const scaleTxt = pour ? pour.to + ' g' : '';
+  const svg = '<svg viewBox="0 0 240 172" class="sa-svg" aria-hidden="true">' + SA.defs + body + (showScale ? SA.scale(scaleTxt, !!pour) : '') + '</svg>';
+  const badge = pour && pour.add ? '<div class="sa-badge"><b class="num">+' + pour.add + ' g</b><span>' + (pour.add !== pour.to ? 'עד <b class="num">' + pour.to + ' g</b> על המשקל' : method === 'coldbrew' ? 'מים קרים' : 'מים חמים') + '</span></div>' : '';
+  return '<div class="sa' + (running ? ' run' : '') + '" data-k="' + kind + '">' + svg + badge + '</div>';
+}
+/* ---------- wire into the live screen ---------- */
+brewLive = (function (prev) {
+  return function () { const h = prev(); const { p } = B().run; if (p.method === 'espresso') return h; return h.replace('<div class="stg" id="stg">', '<div class="sa-host" id="sart"></div><div class="stg" id="stg">'); };
+})(brewLive);
+paint = (function (prev) {
+  return function (full) {
+    const b = B(); const before = b.live ? b.live.lastIdx : null; prev(full);
+    const host = document.getElementById('sart'); if (!host || !b.run) return;
+    const L = b.live; if (L.started) { const pc = document.querySelector('.sa-prep'); if (pc) pc.remove(); } const idx = lIdx(); const st = b.run.steps[Math.max(0, idx)]; const key = (L.started ? idx : 'r') + '|' + (L.running ? 1 : 0);
+    if (host.dataset.k !== key || full || before !== L.lastIdx) { host.dataset.k = key; host.innerHTML = saArt(b.run.p.method, st, b.run.steps, L.running); }
+  };
+})(paint);
+/* before the timer starts (non-espresso): show what to prepare, start when ready */
+function saPrep(run) {
+  const p = run.p, q = run.params, out = []; const g = byId('equipment', p.grinderId);
+  if (isNum(q.dose)) out.push('לשקול <b class="num">' + fmtN(q.dose, 1) + ' g</b> קפה' + (isNum(q.grind) ? ' ולטחון ב-<b class="num">' + fmtN(q.grind, 1) + '</b>' + (g ? ' (' + esc(g.name) + ')' : '') : ''));
+  if (p.method === 'coldbrew') out.push('מים קרים ומסוננים: <b class="num">' + fmtN(q.water, 0) + ' g</b>');
+  else if (p.method === 'moka') out.push('מים חמים בבסיס עד מתחת לשסתום' + (isNum(q.water) ? ' (כ-<b class="num">' + fmtN(q.water, 0) + ' g</b>)' : '') + '. למלא את הסל בלי לדחוס');
+  else if (isNum(q.water)) out.push('לחמם <b class="num">' + fmtN(q.water + (p.method === 'french' ? 0 : 100), 0) + ' g</b> מים' + (isNum(q.temp) ? ' ל-<b class="num">' + fmtN(q.temp, 0) + '°</b>' : ''));
+  if (/v60|kalita|chemex/.test(p.method)) out.push('לשטוף את הפילטר במים חמים ולשפוך את מי השטיפה');
+  if (p.method === 'aeropress') out.push(q.technique === 'inverted' ? 'להרכיב הפוך: בוכנה בפנים, פתח למעלה' : 'פילטר שטוף בתוך המכסה, האירופרס על הכוס');
+  if (p.method !== 'moka') out.push('להניח על המשקל ולאפס אותו');
+  return out;
+}
+brewLive = (function (prev) {
+  return function () {
+    const h = prev(); const b = B(); const p = b.run.p; if (p.method === 'espresso' || b.live.started) return h;
+    const items = saPrep(b.run); if (!items.length) return h;
+    return h.replace('<div class="sa-host" id="sart"></div>', '<section class="card sa-prep"><div class="blk-h">לפני שמתחילים</div><ul class="plain">' + items.map((x) => '<li><label class="check"><input type="checkbox"><span>' + x + '</span></label></li>').join('') + '</ul><small class="muted">הטיימר יתחיל כשתלחצו "התחלה".</small></section><div class="sa-host" id="sart"></div>');
+  };
+})(brewLive);
+/* don't auto-start the clock for manual methods: you start it when the water hits the coffee */
+ACT['brew-go'] = (function (prev) {
+  return function (d) { const p = presetOf(); if (p && p.method === 'espresso') return prev(d); const r = checkReady(); if (!r) return; Object.assign(B(), { stage: 'live', run: r, live: { running: false, started: false, t0: 0, base: 0, manual: -1, lastIdx: -1, log: {}, first: null } }); render(); liveSave(); window.scrollTo(0, 0); };
+})(ACT['brew-go']);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
