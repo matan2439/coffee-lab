@@ -1310,6 +1310,17 @@ html[dir="rtl"] .tm-chip { background: linear-gradient(270deg, color-mix(in srgb
 .nw-city { gap: 6px; align-items: center; }
 .nw-near { display: inline-block; font-size: 11px; font-weight: 700; color: var(--accent); margin-inline-end: 6px; }
 
+/* alarm */
+.alarm-ov { position: fixed; inset: 0; z-index: 120; display: grid; place-items: center; padding: 16px; background: color-mix(in srgb, #1b120b 78%, transparent); animation: alFlash 1.7s ease-in-out infinite; }
+@keyframes alFlash { 50% { background: color-mix(in srgb, #8a3b12 70%, transparent); } }
+.alarm-card { width: min(100%, 360px); display: grid; gap: 12px; justify-items: center; text-align: center; padding: 26px 20px; border-radius: 22px; background: var(--surface); color: var(--fg); box-shadow: 0 20px 60px rgba(0,0,0,.4); }
+.alarm-card b { font-size: 22px; font-family: var(--f-display); text-wrap: balance; } .alarm-card p { margin: 0; color: var(--muted); }
+.alarm-bell { font-size: 64px; line-height: 1; animation: alShake .5s ease-in-out infinite; }
+@keyframes alShake { 0%, 100% { transform: rotate(-14deg); } 50% { transform: rotate(14deg); } }
+.alarm-card .btn { width: 100%; justify-content: center; } .alarm-stop { font-size: 20px; padding: 16px; }
+.nw-far { font-size: 14px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
+@media (prefers-reduced-motion: reduce) { .alarm-ov, .alarm-bell { animation: none; } }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -4922,8 +4933,8 @@ function tmTick() {
     if (t.kind === 'brew') {
       const L = t.snap.live; if (!L || !L.started) return; const e = snapElapsed(L); const idx = brewIdx(t.snap, e);
       if (idx !== L.lastIdx) { if (idx >= 0 && L.lastIdx != null) { const st = t.snap.run.steps[idx]; tmAlarm(t.label + ': ' + (st ? st.label : 'שלב חדש'), '', t.id); if (!(idx in L.log)) L.log[idx] = Math.round(e * 10) / 10; } L.lastIdx = idx; dirty = true; }
-      const end = brewTotal(t.snap.run); if (!t.done && e >= end) { t.done = true; dirty = true; }
-    } else if (!t.done && t.end && now >= t.end) { t.done = true; dirty = true; tmOngoingClose(t.id); tmAlarm(t.kind === 'steep' ? '🧊 ' + t.label + ' מוכן' : '⏰ ' + t.label, t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים', t.id); pushCancel(t.id); }
+      const end = brewTotal(t.snap.run); if (!t.done && e >= end) { t.done = true; dirty = true; alarmStart(t.id, '⏱ ' + t.label + ': הזמן נגמר', 'חזרו לסיים ולדרג'); }
+    } else if (!t.done && t.end && now >= t.end) { t.done = true; dirty = true; tmOngoingClose(t.id); const ti = t.kind === 'steep' ? '🧊 ' + t.label + ' מוכן' : '⏰ ' + t.label, bo = t.kind === 'steep' ? 'הגיע הזמן לסנן ולהוציא מהמקרר' : 'הטיימר הסתיים'; tmLocalNotify(ti, bo, t.id); alarmStart(t.id, ti, bo); }
   });
   if (dirty) tmSave(); tmPaint();
 }
@@ -4980,7 +4991,7 @@ brewLive = (function (prev) {
   };
 })(brewLive);
 /* open from a notification: #tm=ID, or a message from the service worker */
-function tmFromHash() { const m = /[#&]tm=([A-Za-z0-9_-]{1,48})/.exec(location.hash || ''); if (!m) return; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } setTimeout(() => { if (m[1] === 'live') go('brew'); else if (TM.list.some((t) => t.id === m[1])) ACT['tm-open']({ id: m[1] }); }, 300); }
+function tmFromHash() { const m = /[#&]tm=([A-Za-z0-9_-]{1,48})/.exec(location.hash || ''); if (!m) return; (TM.acked = TM.acked || {})[m[1]] = true; try { history.replaceState(null, '', location.pathname + location.search); } catch (e) { /* ignore */ } setTimeout(() => { if (m[1] === 'live') go('brew'); else if (TM.list.some((t) => t.id === m[1])) ACT['tm-open']({ id: m[1] }); }, 300); }
 tmFromHash(); window.addEventListener('hashchange', tmFromHash);
 try { navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', (e) => { const d = e.data || {}; if (d.type === 'tm-open' && d.id) { if (d.id === 'live') go('brew'); else if (TM.list.some((t) => t.id === d.id)) ACT['tm-open']({ id: d.id }); } }); } catch (e) { /* ignore */ }
 setTimeout(() => { if (pushOk() && Notification.permission === 'granted') pushEnsure(false); tmPaint(); }, 2500);
@@ -5200,6 +5211,110 @@ RENDER.news = (function (prev) {
 })(RENDER.news);
 ACT['nw-refresh'] = () => (NW.cat === 'food' ? foodLoad(true) : newsLoad(true));
 AFTER.news = (function (prev) { return function () { try { const on = document.querySelector('.nw-areas .tchip.on'); if (on) on.scrollIntoView({ block: 'nearest', inline: 'center' }); } catch (e) { /* ignore */ } if (NW.cat === 'food') { foodLoad(false); shopAuto(); } else prev(); }; })(AFTER.news);
+
+/* ---------- v5e: every area/category loads on its own (switching while loading used to leave the page empty) ---------- */
+NW.busyK = new Set(); NW.errK = {};
+const nwKey = (cat) => cat + '|' + nwArea().k;
+newsLoad = async function (force) {
+  const a = nwArea(); const key = 'coffee|' + a.k; const cur = NW.cache[a.k]; NEWS.data = cur || null; NEWS.busy = NW.busyK.has(key);
+  const fresh = cur && cur.at && Date.now() - new Date(cur.at).getTime() < 12 * 3600e3; if ((fresh && !force) || NW.busyK.has(key)) return;
+  NW.busyK.add(key); NEWS.busy = true; NW.errK[key] = ''; if (UI.view === 'news') render();
+  try { const r = await fetch('api/news?' + newsQuery() + (force ? '&t=' + Math.floor(Date.now() / 3600e3) : '')); const j = await r.json(); if (!r.ok || j.error) throw new Error('news'); NW.cache[a.k] = j; nwSave(); }
+  catch (e) { NW.errK[key] = 'לא הצלחתי לטעון חדשות עכשיו. נסו "רענון".'; }
+  NW.busyK.delete(key); if (UI.view === 'news') render();
+};
+foodLoad = async function (force) {
+  const a = nwArea(); const key = 'food|' + a.k; const cur = NW.food[a.k]; const fresh = cur && cur.at && Date.now() - new Date(cur.at).getTime() < 24 * 3600e3;
+  if ((fresh && !force) || NW.busyK.has(key)) return;
+  NW.busyK.add(key); NW.errK[key] = ''; if (UI.view === 'news') render();
+  try { const r = await fetch('api/news?mode=food&v=2&area=' + encodeURIComponent(a.en) + '&areaHe=' + encodeURIComponent(a.q || a.he) + (force ? '&t=' + Math.floor(Date.now() / 3600e3) : '')); const j = await r.json(); if (!r.ok || j.error) throw new Error('food'); NW.food[a.k] = j; nwSave(); if (!(j.items || []).length) NW.errK[key] = 'לא נמצאו כרגע המלצות לאזור הזה. נסו "רענון" בעוד כמה דקות.'; }
+  catch (e) { NW.errK[key] = 'לא הצלחתי לטעון המלצות אוכל עכשיו. נסו "רענון".'; }
+  NW.busyK.delete(key); if (UI.view === 'news') render();
+};
+Object.assign(NEWS_KIND, { 'f-workshop': ['סדנה', '👩‍🍳'] });
+const nwSortNear = (arr, byDate) => arr.slice().sort((x, y) => (y.near ? 1 : 0) - (x.near ? 1 : 0) || byDate(x, y));
+function nwList(items, here) {
+  if (!items.length) return '';
+  if (!here) return '<div class="nw-list">' + items.map(newsCard).join('') + '</div>';
+  const near = items.filter((x) => x.near), far = items.filter((x) => !x.near);
+  return (near.length ? '<div class="nw-list">' + near.map(newsCard).join('') + '</div>' : '<p class="muted s">לא נמצא משהו באזור עצמו כרגע.</p>') + (far.length ? '<h3 class="nw-far">בשאר הארץ</h3><div class="nw-list">' + far.map(newsCard).join('') + '</div>' : '');
+}
+function coffeeView() {
+  const a = nwArea(); const here = a.k !== 'all'; const D = NW.cache[a.k]; const busy = NW.busyK.has('coffee|' + a.k); const err = NW.errK['coffee|' + a.k];
+  const shopW = allProducts().filter((p) => pcat(p) === 'workshop').map((p) => ({ kind: 'workshop', title: spSplit(p.title)[0], summary: (p.desc || '').slice(0, 180), url: p.url, image: p.thumb || p.image, source: p.g.name, price: p.price }));
+  const all = ((D && D.items) || []).concat(shopW, ((D && D.posts) || []));
+  const asc = (x, y) => String(x.date || '9999').localeCompare(String(y.date || '9999')), desc = (x, y) => String(y.date || '').localeCompare(String(x.date || ''));
+  const groups = [['learn', 'סדנאות ואירועים', nwSortNear(all.filter((x) => x.kind === 'workshop' || x.kind === 'event'), asc), true], ['mine', 'מהקליות שלך', all.filter((x) => x.kind === 'blog' || x.kind === 'release').sort(desc), false], ['world', 'גילויים וחידושים מהעולם', all.filter((x) => x.kind === 'news').sort(desc), false]];
+  const chips = '<div class="chips-row wrap nw-chips">' + [['all', 'הכל']].concat(groups.map((g) => [g[0], g[1]])).map((c) => '<button type="button" class="tchip' + (NEWS.f === c[0] ? ' on' : '') + '" data-act="nw-f" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
+  const when = D && D.at ? new Date(D.at).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const body = !D && busy ? '<div class="nw-load"><i></i><span>מחפש סדנאות, אירועים וחדשות' + (here ? ' ב' + esc(a.he) : '') + '… זה לוקח כחצי דקה.</span></div>' :
+    groups.filter((g) => NEWS.f === 'all' || NEWS.f === g[0]).map((g) => '<section class="nw-sec"><h2>' + g[1] + (g[3] && here ? ' <small class="muted">· ' + esc(a.he) + '</small>' : '') + '</h2>' + (g[2].length ? nwList(g[2], g[3] && here) : '<p class="muted s">' + (busy ? 'מחפש…' : 'אין כרגע פריטים.') + '</p>') + '</section>').join('');
+  return '<p class="muted s">' + (here ? '📍 סדנאות ואירועים ב' + esc(a.he) + ' ובסביבה קודם. ' : '') + 'מה חדש אצל הקליות שלך, וחדשות קלילות מעולם הקפה.' + (when ? ' עודכן ' + when + '.' : '') + (busy && D ? ' מעדכן…' : '') + '</p>' + (err ? '<div class="note warn">' + esc(err) + '</div>' : '') + chips + body;
+}
+foodView = function () {
+  const a = nwArea(); const here = a.k !== 'all'; const D = NW.food[a.k]; const items = (D && D.items) || []; const busy = NW.busyK.has('food|' + a.k); const err = NW.errK['food|' + a.k];
+  const byDate = (x, y) => String(y.date || '').localeCompare(String(x.date || ''));
+  const groups = [['f-opening', 'נפתח לאחרונה'], ['f-recommended', 'מומלצים לנסות'], ['f-workshop', 'סדנאות בישול, אפייה וטעימות'], ['f-event', 'אירועי אוכל ושווקים']].map((g) => [g[0], g[1], nwSortNear(items.filter((x) => x.kind === g[0]), byDate)]);
+  const when = D && D.at ? new Date(D.at).toLocaleString('he-IL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : '';
+  const fchips = '<div class="chips-row wrap nw-chips">' + [['all', 'הכל']].concat(groups.map((g) => [g[0], g[1]])).map((c) => '<button type="button" class="tchip' + ((NW.ff || 'all') === c[0] ? ' on' : '') + '" data-act="nw-ff" data-v="' + c[0] + '">' + c[1] + '</button>').join('') + '</div>';
+  const body = !D && busy ? '<div class="nw-load"><i></i><span>מחפש מסעדות חדשות, המלצות, סדנאות ואירועי אוכל' + (here ? ' ב' + esc(a.he) : '') + '… זה לוקח עד דקה.</span></div>' :
+    groups.filter((g) => (NW.ff || 'all') === 'all' || NW.ff === g[0]).map((g) => '<section class="nw-sec"><h2>' + g[1] + '</h2>' + (g[2].length ? nwList(g[2], here) : '<p class="muted s">' + (busy ? 'מחפש…' : 'אין כרגע פריטים.') + '</p>') + '</section>').join('');
+  return '<p class="muted s">מקומות חדשים ומומלצים, סדנאות וטעימות ' + (here ? 'ב' + esc(a.he) + ' ובסביבה' : 'בארץ') + ', לפי כתבות עדכניות.' + (when ? ' עודכן ' + when + '.' : '') + (busy && D ? ' מעדכן…' : '') + '</p>' + (err ? '<div class="note warn">' + esc(err) + '</div>' : '') + fchips + body;
+};
+ACT['nw-ff'] = (d) => { NW.ff = d.v; render(); };
+RENDER.news = function () {
+  const busy = NW.busyK.has(nwKey(NW.cat));
+  return '<div class="page narrow nw">' + head('חדשות', '<button class="btn" data-act="nw-refresh"' + (busy ? ' disabled' : '') + '>' + (busy ? 'מעדכן…' : 'רענון') + '</button>') + nwTabs() + nwAreaBar() + (NW.cat === 'food' ? foodView() : coffeeView()) + '</div>';
+};
+ACT['nw-area'] = (d) => {
+  const pr = prefs(); if (d.v === 'custom') { NW.cityEdit = true; render(); const i = $('#nw_city'); if (i) i.focus(); return; }
+  NW.cityEdit = false; pr.newsArea = d.v; save(); render(); (NW.cat === 'food' ? foodLoad : newsLoad)(false);
+};
+ACT['nw-city'] = () => { const v = (($('#nw_city') || {}).value || '').trim(); if (v.length < 2) { toast('הקלידו שם עיר'); return; } const pr = prefs(); pr.newsCity = v.slice(0, 40); pr.newsArea = 'custom'; NW.cityEdit = false; save(); render(); (NW.cat === 'food' ? foodLoad : newsLoad)(false); };
+ACT['nw-cat'] = (d) => { NW.cat = d.v; try { localStorage.setItem('cl_news_cat', d.v); } catch (e) { /* ignore */ } render(); (NW.cat === 'food' ? foodLoad : newsLoad)(false); };
+try { const c = localStorage.getItem('cl_news_cat'); if (c === 'food' || c === 'coffee') NW.cat = c; } catch (e) { /* ignore */ }
+
+/* ============================================================
+   V5f — a real alarm: when a timer ends it keeps ringing and vibrating until "עצירה"
+   (in the app: full-screen alarm; app closed: the server re-alerts every minute until stopped)
+   ============================================================ */
+TM.acked = TM.acked || {};
+const RING = { cur: null };
+function alarmTone() {
+  try {
+    const ac = beep.ac || (beep.ac = new (window.AudioContext || window.webkitAudioContext)()); if (ac.state === 'suspended') ac.resume();
+    const t0 = ac.currentTime + 0.02;
+    [[0, 880], [0.22, 1175], [0.44, 880], [0.66, 1175]].forEach(([d, f]) => { const o = ac.createOscillator(), g = ac.createGain(); o.type = 'square'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t0 + d); g.gain.exponentialRampToValueAtTime(0.25, t0 + d + 0.02); g.gain.exponentialRampToValueAtTime(0.0001, t0 + d + 0.19); o.connect(g); g.connect(ac.destination); o.start(t0 + d); o.stop(t0 + d + 0.2); });
+  } catch (e) { /* ignore */ }
+}
+/* browsers only allow sound after a tap: unlock the audio on the first touch so the alarm can ring later */
+document.addEventListener('pointerdown', function unlock() { try { const ac = beep.ac || (beep.ac = new (window.AudioContext || window.webkitAudioContext)()); if (ac.state === 'suspended') ac.resume(); const o = ac.createOscillator(), g = ac.createGain(); g.gain.value = 0.0001; o.connect(g); g.connect(ac.destination); o.start(); o.stop(ac.currentTime + 0.01); } catch (e) { /* ignore */ } document.removeEventListener('pointerdown', unlock, true); }, true);
+async function tmCloseNotif(id) { try { if (!('serviceWorker' in navigator)) return; const reg = await navigator.serviceWorker.ready; (await reg.getNotifications({ tag: id })).forEach((n) => n.close()); } catch (e) { /* ignore */ } }
+function alarmStart(id, title, body) {
+  if (TM.acked[id]) return; if (RING.cur && RING.cur.id === id) return; if (RING.cur) alarmStop(false, true);
+  const ov = document.createElement('div'); ov.className = 'alarm-ov'; ov.setAttribute('role', 'alertdialog'); ov.setAttribute('aria-label', title);
+  ov.innerHTML = '<div class="alarm-card"><div class="alarm-bell" aria-hidden="true">⏰</div><b>' + esc(title) + '</b><p>' + esc(body || '') + '</p><button type="button" class="btn go alarm-stop" data-act="alarm-stop">⏹ עצירה</button><button type="button" class="btn ghost" data-act="alarm-snooze">💤 עוד 5 דקות</button></div>';
+  document.body.appendChild(ov);
+  const ring = () => { alarmTone(); try { if (navigator.vibrate) navigator.vibrate([700, 200, 700]); } catch (e) { /* ignore */ } };
+  ring(); RING.cur = { id, title, body, ov, iv: setInterval(ring, 1700), until: setTimeout(() => alarmStop(false, true), 15 * 60e3) };
+  try { takeWake(); } catch (e) { /* ignore */ }
+}
+function alarmStop(snooze, quiet) {
+  const c = RING.cur; if (!c) return; clearInterval(c.iv); clearTimeout(c.until); c.ov.remove(); RING.cur = null;
+  try { if (navigator.vibrate) navigator.vibrate(0); } catch (e) { /* ignore */ }
+  if (quiet) return;
+  TM.acked[c.id] = true; pushCancel(c.id); tmCloseNotif(c.id); tmOngoingClose(c.id); try { relWake(); } catch (e) { /* ignore */ }
+  const t = TM.list.find((x) => x.id === c.id);
+  if (snooze) { if (t && t.kind !== 'brew') { TM.acked[c.id] = false; tmSetEnd(c.id, Date.now() + 5 * 60e3); } else tmAdd({ label: c.title.replace(/^\S+\s/, ''), end: Date.now() + 5 * 60e3, pushTitle: c.title, pushBody: c.body }); toast('נודניק: עוד 5 דקות'); }
+  else if (t && t.kind === 'custom') tmRemove(t.id);
+  tmPaint();
+}
+ACT['alarm-stop'] = () => alarmStop(false);
+ACT['alarm-snooze'] = () => alarmStop(true);
+/* stopped from the notification ("עצירה" or a tap) → stop ringing here too */
+try { navigator.serviceWorker && navigator.serviceWorker.addEventListener('message', (e) => { const d = e.data || {}; if ((d.type === 'tm-stop' || (d.type === 'tm-open' && d.stop)) && d.id) { TM.acked[d.id] = true; if (RING.cur && RING.cur.id === d.id) alarmStop(false, true); } }); } catch (e) { /* ignore */ }
+/* a timer whose end was moved later can ring again */
+tmSetEnd = (function (prev) { return function (id, end) { TM.acked[id] = false; if (RING.cur && RING.cur.id === id) alarmStop(false, true); return prev(id, end); }; })(tmSetEnd);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
