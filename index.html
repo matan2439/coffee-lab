@@ -5317,6 +5317,75 @@ try { navigator.serviceWorker && navigator.serviceWorker.addEventListener('messa
 tmSetEnd = (function (prev) { return function (id, end) { TM.acked[id] = false; if (RING.cur && RING.cur.id === id) alarmStop(false, true); return prev(id, end); }; })(tmSetEnd);
 
 /* ============================================================
+   V5g — edit a saved drink: change the drink type (cortado → espresso), the recipe values,
+   the beans, the date and the note. Stats, coach, per-method consumption and the bag stock follow.
+   ============================================================ */
+const _locIn = (iso) => { const d = new Date(iso); if (isNaN(d)) return ''; const p = (n) => String(n).padStart(2, '0'); return d.getFullYear() + '-' + p(d.getMonth() + 1) + '-' + p(d.getDate()) + 'T' + p(d.getHours()) + ':' + p(d.getMinutes()); };
+ACT['sess-edit'] = (d) => {
+  const s = byId('sessions', d.id); if (!s) return; const M = METHODS[s.method] || METHODS.custom; const e = eff(s); const m = measOf(s.id) || {}; const params = (s.planned && s.planned.params) || {};
+  const esp = s.method === 'espresso'; const dr = s.drink || null; const dt = (dr && dr.type) || 'espresso';
+  const beans = state.beans.slice().sort((a, b) => a.name.localeCompare(b.name, 'he')).map((b) => [b.id, b.name + (b.roaster ? ' · ' + b.roaster : '')]);
+  const presets = state.recipes.filter((r) => r.method === s.method && (!r.archived || r.id === s.recipeId)).map((r) => [r.id, r.name]);
+  const hadTx = state.transactions.some((t) => t.sessionId === s.id && t.type === 'brew');
+  const kinds = prefs().milkTypes || DEFAULT_MILKS; const mk = dr && dr.milk && !dr.milk.cold ? dr.milk : null;
+  const body = '<p class="muted s">שינויים כאן מתעדכנים בכל הסטטיסטיקות, בצריכה לפי שיטה, במאמן ובמלאי השקית.</p><div class="form-g">' +
+    (esp ? fld('drink', 'סוג המשקה', { type: 'select', opts: DRINKS.map((x) => [x.id, x.he]), v: dt, blank: false, cls: 'full' }) : '') +
+    (presets.length > 1 ? fld('recipeId', 'פריסט', { type: 'select', opts: presets, v: s.recipeId, blank: false, cls: 'full' }) : '') +
+    fld('beanId', 'פולים', { type: 'select', opts: beans, v: s.beanId || '', blank: 'ללא', cls: 'full' }) +
+    fld('dose', 'מנת קפה', { type: 'number', u: 'g', v: isNum(e.dose) ? e.dose : '', step: 0.1, min: 0 }) +
+    (esp ? fld('yield', 'משקה בפועל', { type: 'number', u: 'g', v: isNum(e.yield) ? e.yield : '', step: 0.1, min: 0 }) : fld('water', 'מים', { type: 'number', u: 'g', v: isNum(e.water) ? e.water : '', step: 1, min: 0 })) +
+    fld('time', 'זמן', { type: 'number', u: 'שנ׳', v: isNum(e.time) ? e.time : '', step: 1, min: 0 }) +
+    fld('grind', 'טחינה', { type: 'number', v: isNum(e.grind) ? e.grind : '', step: 0.1, min: 0 }) +
+    (esp ? fld('milkKind', 'סוג חלב', { type: 'select', opts: kinds, v: mk ? mk.kind : kinds[0], blank: false }) + fld('milkMl', 'חלב (מ״ל)', { type: 'number', v: mk ? mk.ml : '', step: 5, min: 0, hint: 'רלוונטי רק למשקה עם חלב. ריק = ברירת המחדל של המשקה' }) : '') +
+    fld('date', 'תאריך ושעה', { type: 'datetime-local', v: _locIn(s.date), cls: 'full' }) +
+    (s.bagId || s.beanId ? fld('deduct', 'להוריד מהמלאי של השקית', { type: 'check', v: hadTx, cls: 'full' }) : '') +
+    fld('notes', 'הערה', { type: 'textarea', rows: 2, v: s.notes || '', cls: 'full' }) + '</div>';
+  openModal({ title: 'עריכת המשקה', body, actions: [{ label: 'ביטול' }, { label: 'שמירה', cls: 'pri', run: (v, form) => {
+    const f = Object.assign({}, v, readForm(form || $('#mform')));
+    const dose = f.dose, time = f.time, grind = f.grind;
+    if (isNum(time) && (time < 0 || time > 7200 * 12)) { toast('זמן לא תקין'); return false; }
+    // preset
+    if (f.recipeId && f.recipeId !== s.recipeId) { const p = byId('recipes', f.recipeId); if (p && p.method === s.method) { s.recipeId = p.id; const ver = currentVersion(p); s.recipeVersionId = ver ? ver.id : null; } }
+    // beans & bag
+    const beanId = f.beanId || null;
+    if (beanId !== (s.beanId || null)) { s.beanId = beanId; const bags = state.bags.filter((g) => g.beanId === beanId); const bag = bags.find((g) => g.status === 'active') || bags[0] || null; s.bagId = bag ? bag.id : null; }
+    // numbers: planned recipe values and the measured ones stay in sync
+    s.planned = s.planned || {}; const P = s.planned.params = s.planned.params || {}; const meas = measOf(s.id) || insert('measurements', { sessionId: s.id, stageLog: {} }, 'mea');
+    const setN = (k, val, mk_, pk) => { if (!isNum(val)) return; if (mk_) meas[mk_] = val; if (pk) P[pk] = val; };
+    setN('dose', dose, 'aDose', 'dose'); setN('time', time, 'aTime', M.timeKey || 'time'); setN('grind', grind, isNum(meas.aGrind) ? 'aGrind' : null, 'grind');
+    if (esp) setN('yield', f.yield, 'aYield', 'yield'); else setN('water', f.water, 'aWater', 'water');
+    // drink type + milk
+    if (esp) {
+      const dk = DRINK_MAP[f.drink] || DRINKS[0]; const old = s.drink || {}; const kind = f.milkKind || kinds[0]; let milk = null, milkIssue = null, art = null;
+      if (dk.milk && !dk.cold) {
+        const base = old.milk && !old.milk.cold ? deepClone(old.milk) : milkStart(dk.id, kind).m; const ml = isNum(f.milkMl) && f.milkMl > 0 ? f.milkMl : (old.milk && !old.milk.cold && old.type === dk.id ? old.milk.ml : dk.milk);
+        milk = Object.assign(base, { kind, ml }); if (!isNum(milk.g) || ml !== base.ml) milk.g = Math.round(ml * 1.03);
+        milkIssue = old.type === dk.id ? old.milkIssue || 'ok' : 'ok'; art = old.type === dk.id ? old.art || null : null;
+      } else if (dk.cold) milk = { kind, ml: isNum(f.milkMl) && f.milkMl > 0 ? f.milkMl : dk.milk, cold: true };
+      s.drink = { type: dk.id, milk, milkIssue, art, water: dk.water || null };
+    }
+    // date
+    if (f.date) { const nd = new Date(f.date); if (!isNaN(nd)) s.date = nd.toISOString(); }
+    s.notes = f.notes || ''; s.editedAt = nowISO();
+    // stock: re-deduct from the (possibly new) bag
+    state.transactions = state.transactions.filter((t) => !(t.sessionId === s.id && t.type === 'brew'));
+    if ((f.deduct === undefined ? hadTx : f.deduct) && s.bagId && isNum(meas.aDose)) deductForSession(s, meas.aDose);
+    save(); toast('המשקה עודכן'); render();
+  } }] });
+};
+/* the edit button: in the saved-drink sheet in the log … */
+ACT['session-open'] = (function (prev) {
+  return function (d) {
+    prev(d); const m = UI.modal; if (!m || !m.actions) return;
+    m.actions.splice(1, 0, { label: '✎ עריכה', run: () => { setTimeout(() => ACT['sess-edit']({ id: d.id }), 0); } }); renderModal();
+  };
+})(ACT['session-open']);
+/* … and right on the "saved" screen at the end of a brew */
+brewDone = (function (prev) {
+  return function () { const r = B().result; const h = prev(); if (!r || !r.sessionId) return h; return h.replace('<div class="go-row">', '<section class="card"><div class="grow"><b>יצא אחרת ממה שבחרת?</b><small>אפשר לתקן את סוג המשקה והמתכון שנשמרו.</small></div><button class="btn" data-act="sess-edit" data-id="' + r.sessionId + '">✎ עריכת המשקה</button></section><div class="go-row">'); };
+})(brewDone);
+
+/* ============================================================
    MAIN — events, cloud mirror, boot
    ============================================================ */
 document.documentElement.setAttribute('dir', 'rtl'); document.documentElement.setAttribute('lang', 'he');
