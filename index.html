@@ -1321,6 +1321,18 @@ html[dir="rtl"] .tm-chip { background: linear-gradient(270deg, color-mix(in srgb
 .nw-far { font-size: 14px; color: var(--muted); margin: 14px 0 6px; font-weight: 600; }
 @media (prefers-reduced-motion: reduce) { .alarm-ov, .alarm-bell { animation: none; } }
 
+/* V60 scenes (bloom / spiral / swirl / drawdown) */
+.sa-svg .cbub { fill: none; stroke: #e9c9a0; stroke-width: 1.4; opacity: .8; }
+.sa-svg .spiral { stroke-dasharray: 180; stroke-dashoffset: 0; }
+.sa.run .cbub { animation: saBub 1.6s ease-in infinite; }
+.sa.run .spiral { animation: saDraw 2.6s linear infinite; }
+.sa.run .tsw { animation: saSwTilt 1.1s ease-in-out infinite alternate; }
+.sa.run .drain { transform-box: fill-box; transform-origin: 50% 100%; animation: saDrain 6s ease-in infinite; }
+@keyframes saBub { 0% { transform: translateY(6px) scale(.6); opacity: 0; } 30% { opacity: .9; } 100% { transform: translateY(-9px) scale(1.15); opacity: 0; } }
+@keyframes saDraw { from { stroke-dashoffset: 180; } to { stroke-dashoffset: 0; } }
+@keyframes saSwTilt { from { transform: rotate(-5deg); } to { transform: rotate(5deg); } }
+@keyframes saDrain { 0% { transform: scaleY(1); } 100% { transform: scaleY(.05); } }
+
 </style>
 <div class="app"><aside id="side" class="side" aria-label="ניווט ראשי"></aside><div class="main"><header class="top"><b id="topname"></b></header><main id="view" tabindex="-1"></main></div></div>
 <div id="scrim" class="scrim" hidden data-act="menu"></div><div id="modal"></div><nav id="bnav" class="bnav" aria-label="ניווט מהיר"></nav><div id="toasts" class="toast-w" aria-live="polite"></div><div id="tip" class="tip" role="tooltip" hidden></div>
@@ -5384,6 +5396,69 @@ ACT['session-open'] = (function (prev) {
 brewDone = (function (prev) {
   return function () { const r = B().result; const h = prev(); if (!r || !r.sessionId) return h; return h.replace('<div class="go-row">', '<section class="card"><div class="grow"><b>יצא אחרת ממה שבחרת?</b><small>אפשר לתקן את סוג המשקה והמתכון שנשמרו.</small></div><button class="btn" data-act="sess-edit" data-id="' + r.sessionId + '">✎ עריכת המשקה</button></section><div class="go-row">'); };
 })(brewDone);
+
+/* ============================================================
+   V5h — a second V60 method tuned for the Varia VS3 ("V60 מתוק · VS3"):
+   bloom → two spiral pours → gentle swirl → drawdown, with dedicated step animations
+   (bubbling bloom, spiral pour seen from above, swirling the dripper, draining bed).
+   ============================================================ */
+LIBRARY.push({
+  id: 'v60-vs3', name: 'V60 מתוק · מותאם ל-VS3', author: 'מומלץ למטחנת Varia VS3', method: 'v60', grindNote: 'VS3: בערך 7 עד 8 על הסקאלה (כ-650 מיקרון)',
+  params: { dose: 15, water: 250, temp: 94, filter: 'נייר לבן', bloomWater: 45, bloomTime: 40, pours: 2, pattern: 'ספירלה מרכזית', agitation: 'סווירל', drawdown: 165 },
+  steps: [[0, 'בלום: שפכו 45 g בעדינות על כל הקפה (עד 45 g)', 45, 'pour'], [10, 'סחרור קל של הדריפר כדי להרטיב את כל הקפה', null, 'stir'], [40, 'שפיכה 1 בספירלה מהמרכז החוצה, עד 150 g (כ-25 שניות)', 150, 'pour'], [75, 'שפיכה 2 בספירלה צרה במרכז, עד 250 g (כ-25 שניות)', 250, 'pour'], [105, 'סחרור עדין של הדריפר כדי לשטח את המצע', null, 'stir'], [165, 'סוף ניקוז. יעד 2:45 עד 3:00', null, 'end']],
+  tips: ['מטחנת שטוחות כמו ה-VS3 נותנת כוס נקייה ומתוקה. אם הניקוז ארוך מ-3:15, עלו ב-0.5 בסקאלה (גס יותר). אם קצר מ-2:15, רדו ב-0.5.', 'מים ב-94° מתאימים לרוב הקליות. לקלייה בהירה מאוד אפשר 96°.', 'הסחרור האחרון משטח את המצע, ולכן הניקוז אחיד והכוס מאוזנת.', 'שנו משתנה אחד בכל פעם: קודם טחינה, אחר כך טמפרטורה.'],
+});
+function seedV60VS3() {
+  try {
+    const pr = prefs(); if (!pr || pr.v60vs3Seeded) return;
+    if (state.recipes.some((r) => r.source && r.source.lib === 'v60-vs3')) { pr.v60vs3Seeded = true; return; }
+    const L = LIBRARY.find((x) => x.id === 'v60-vs3'); const m = state.methods.find((x) => x.key === 'v60'); if (m) m.active = true;
+    const gs = state.equipment.filter((e) => e.category === 'grinder' && !e.archived); const g = gs.find((e) => /vs\s?-?3|varia/i.test(e.name)) || gs[0];
+    const bt = libBuild(L, 15, {}); if (g) { const model = grinderModel(g); if (model) bt.params.grind = round(umToDial(model, UM_TARGET.v60[2]), model.dec); }
+    const r = createRecipe({ name: L.name, method: 'v60', grinderId: g ? g.id : null, params: bt.params, steps: bt.steps, tags: ['VS3'], source: { lib: L.id, author: L.author, url: null }, notes: L.tips[0], note: 'מהספרייה' });
+    pr.v60vs3Seeded = true; save();
+  } catch (e) { console.error(e); }
+}
+ensureBrew = (function (prev) { return function () { seedV60VS3(); return prev(); }; })(ensureBrew);
+
+/* ---------- scenes ---------- */
+const SAV = {
+  carafe: '<path class="ln gl" d="M90 150 Q84 124 98 112 L142 112 Q156 124 150 150 Z"/>',
+  cone: '<path class="ln gl" d="M78 60 L162 60 L132 108 L108 108 Z"/><path class="ln thin" d="M100 70 L114 104 M140 70 L126 104 M120 66 L120 104"/>',
+  spiral(cx, cy, R) { let d = ''; for (let i = 0; i <= 60; i++) { const a = i / 60 * Math.PI * 5, r = R * i / 60; d += (i ? 'L' : 'M') + (cx + r * Math.cos(a)).toFixed(1) + ' ' + (cy + r * Math.sin(a)).toFixed(1); } return d; },
+};
+function saV60kind(step) {
+  if (!step) return null; const l = step.label || '', k = step.kind || 'step';
+  if (/בלום/.test(l)) return 'bloom';
+  if (k === 'pour' && /ספירל/.test(l)) return 'spiral';
+  if ((k === 'stir' || /^סחרור|^סחרר/.test(l)) && /סחרור|סחרר/.test(l) && !/כפית/.test(l)) return 'swirl';
+  if (k === 'end') return 'drain';
+  return null;
+}
+function saV60x(kind, pour, method) {
+  const wat = '<rect class="wat" x="80" y="80" width="80" height="12" opacity=".75"/>';
+  if (kind === 'bloom') {
+    const bub = [[100, 84, 0], [116, 80, .35], [132, 83, .7], [144, 86, .15], [124, 87, .9]].map(([x, y, dl]) => '<circle class="cbub" style="animation-delay:' + dl + 's" cx="' + x + '" cy="' + y + '" r="2.4"/>').join('');
+    return SAV.carafe + '<rect class="brew" x="88" y="144" width="64" height="6"/><circle class="drip drop" cx="120" cy="112" r="2.2"/>' + SAV.cone + '<g clip-path="url(#saCone)"><rect class="cof" x="80" y="88" width="80" height="20"/>' + wat.replace('y="80"', 'y="84"').replace('height="12"', 'height="6"') + '</g>' + bub +
+      SA.clock(42, 50) + '<text class="lbl" x="42" y="82" text-anchor="middle">הקפה "נושם"</text><text class="lbl" x="42" y="94" text-anchor="middle">מחכים ~40 שנ׳</text>' + SA.kettle(true);
+  }
+  if (kind === 'spiral') {
+    return SAV.carafe + '<rect class="brew" x="88" y="142" width="64" height="8"/><circle class="drip drop" cx="120" cy="112" r="2.4"/><circle class="drip drop d2" cx="120" cy="112" r="2"/>' + SAV.cone + '<g clip-path="url(#saCone)"><rect class="cof" x="80" y="88" width="80" height="20"/><rect class="wat rise" x="80" y="70" width="80" height="18"/></g>' +
+      '<circle class="ln thin" cx="40" cy="62" r="26"/><path class="ln thin" d="M40 36 V88 M14 62 H66"/><path class="ln ac spiral" d="' + SAV.spiral(40, 62, 23) + '"/><text class="lbl" x="40" y="104" text-anchor="middle">מבט מלמעלה:</text><text class="lbl" x="40" y="116" text-anchor="middle">ספירלה מהמרכז</text><text class="lbl" x="40" y="128" text-anchor="middle">החוצה, לאט</text>' + SA.kettle(true);
+  }
+  if (kind === 'swirl') {
+    return SAV.carafe + '<rect class="brew" x="88" y="140" width="64" height="10"/><circle class="drip drop" cx="120" cy="112" r="2.4"/><g class="tsw" style="transform-origin:120px 108px">' + SAV.cone + '<g clip-path="url(#saCone)"><rect class="cof" x="80" y="88" width="80" height="20"/><rect class="wat" x="80" y="74" width="80" height="14"/></g></g>' + SA.swirl(120, 50, 38) +
+      '<text class="lbl" x="40" y="84" text-anchor="middle">סחרור עדין</text><text class="lbl" x="40" y="96" text-anchor="middle">מצע שטוח = ניקוז אחיד</text>';
+  }
+  /* drain */
+  return SAV.carafe + '<rect class="brew rise" x="88" y="134" width="64" height="16"/><circle class="drip drop" cx="120" cy="112" r="2.4"/><circle class="drip drop d2" cx="120" cy="112" r="2"/>' + SAV.cone + '<g clip-path="url(#saCone)"><rect class="cof" x="80" y="94" width="80" height="14"/><rect class="wat drain" x="80" y="70" width="80" height="24"/></g>' + SA.clock(42, 50) + '<text class="lbl" x="42" y="82" text-anchor="middle">ניקוז…</text><text class="lbl" x="42" y="94" text-anchor="middle">יעד 2:45–3:00</text>' + SA.steam(120, 56);
+}
+saArt = (function (prev) {
+  return function (method, step, steps, running) { SA._st = step; try { return prev(method, step, steps, running); } finally { SA._st = null; } };
+})(saArt);
+saV60 = (function (prev) {
+  return function (kind, pour, method) { const k = saV60kind(SA._st); return k ? saV60x(k, pour, method) : prev(kind, pour, method); };
+})(saV60);
 
 /* ============================================================
    MAIN — events, cloud mirror, boot
