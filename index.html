@@ -5677,7 +5677,10 @@ idbBoot().then((ch) => { if (ch) { applyTheme(); render(); } }).catch((e) => con
     if (best) { pre.name = best.b.name; pre._have = best.b; }
     const site = rName && (rs[rName].site || (state.beans.find((b) => b.roaster && V6.sameRoaster(b.roaster, rName) && b.site) || {}).site);
     if (!best && site) { try { const j = await fetch('api/market?site=' + encodeURIComponent(site) + '&roaster=' + encodeURIComponent(rName)).then((r) => r.json()); let bp = null; (j.products || []).forEach((pr) => { const t = String(pr.title || '').split('|')[0]; const sc = overlap(t, text); if (sc >= 0.5 && (!bp || sc > bp.sc)) bp = { pr, sc }; }); if (bp) { const parts = String(bp.pr.title).split('|'); pre.name = parts[0].trim(); if (parts[1]) pre.originCountry = parts[1].trim(); pre._src = bp.pr.url || bp.pr.link || undefined; } } catch (e) { /* offline shop */ } }
-    if (!pre.name) { const line = text.split('\n').map((x) => x.trim()).filter((x) => x.length >= 4 && x.length <= 40 && /[a-zA-Zא-ת]{3}/.test(x) && !(rName && overlap(rName, x) > 0.5)).sort((a, c) => c.length - a.length)[0]; if (line) pre.name = line; }
+    const lines = text.split('\n').map((x) => x.replace(/[|_~=*]+/g, ' ').trim()).filter((x) => x.length >= 3 && x.length <= 48 && /[a-zA-Zא-ת]{3}/.test(x));
+    const junk = (x) => /\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|\d{3,4}\s*(g\b|gr|גרם)|roast|קלי|net|נטו|best|before|www|http|@|\.com/i.test(x);
+    if (!pre.roaster) { const rl = lines.find((x) => /coffee|roaster|roastery|קפה|קלייה/i.test(x) && !junk(x)); if (rl) pre.roaster = V6.canonRoaster(rl.replace(/\s+/g, ' ')); }
+    if (!pre.name) { const letters = (x) => (x.match(/[a-zA-Zא-ת]/g) || []).length; const line = lines.filter((x) => !junk(x) && !(pre.roaster && overlap(pre.roaster, x) >= 0.5)).sort((a, c) => letters(c) - letters(a))[0]; if (line) pre.name = line; }
     const d = text.match(/(\d{1,2})[./-](\d{1,2})[./-](\d{2,4})/); if (d) { let y = +d[3]; if (y < 100) y += 2000; const iso = y + '-' + String(+d[2]).padStart(2, '0') + '-' + String(+d[1]).padStart(2, '0'); if (!isNaN(new Date(iso)) && new Date(iso) <= new Date(Date.now() + DAY)) pre.roastDate = iso; }
     const w = text.match(/(\d{3,4})\s*(g\b|gr|גרם|ג'|ג׳)/i) || text.match(/(1)\s*(kg|ק"ג|ק״ג)/i); if (w) pre.weight = /kg|ק/.test(w[2]) ? 1000 : +w[1];
     pre.uncertain = ['name', 'roaster', 'originCountry'];
