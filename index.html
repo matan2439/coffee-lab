@@ -5584,4 +5584,276 @@ idbBoot().then((ch) => { if (ch) { applyTheme(); render(); } }).catch((e) => con
 
 
 </script>
+<script id="v6js">
+/* ============================================================
+   V6 — live-brew cockpit cleanup (Nov 2026)
+   • method row instead of a long preset row; one chip per bean (not per bag)
+   • values remember themselves per bean × method; recent shots one tap away
+   • compact grind hint, sticky start bar, "update the preset" from the result
+   • scan: clear error messages, "new bag of a bean you already have", one roaster name
+   • stats: per bean × method cards with a trend and the next step
+   ============================================================ */
+(function () {
+  const V6 = (window.V6 = window.V6 || {});
+  const lastOf = (arr) => arr.slice().sort((a, b) => (a.date < b.date ? 1 : -1))[0];
+  const scoreOfS = (s) => { const e = evalOf(s.id); return e && e.scores && isNum(e.scores.overall) ? e.scores.overall : null; };
+  const actOf = (s) => { const m = measOf(s.id) || {}; const pp = (s.planned && s.planned.params) || {}; return { dose: isNum(m.aDose) ? m.aDose : pp.dose, yield: isNum(m.aYield) ? m.aYield : pp.yield, time: isNum(m.aTime) ? m.aTime : pp.time, grind: isNum(m.aGrind) ? m.aGrind : pp.grind, water: isNum(m.aWater) ? m.aWater : pp.water }; };
+
+  const bd = (t) => '<bdi>' + esc(t) + '</bdi>';
+  function valsHTML(method, a, short) {
+    const parts = method === 'espresso' ? [isNum(a.dose) && isNum(a.yield) ? bd(fmtN(a.dose, 1) + '→' + fmtN(a.yield, 0) + 'g') : '', isNum(a.time) ? bd(fmtN(a.time, 0)) + (short ? '″' : ' שנ׳') : ''] : [isNum(a.dose) ? bd(fmtN(a.dose, 1) + 'g') + (short ? '' : ' קפה') : '', isNum(a.water) ? bd(fmtN(a.water, 0) + 'g') + (short ? '' : ' מים') : ''];
+    if (isNum(a.grind)) parts.push((short ? 'טח׳ ' : 'טחינה ') + bd(fmtN(a.grind, 1)));
+    return parts.filter(Boolean).join(' · ');
+  }
+
+  /* ---------- roaster names: "Nahat (נחת)", "נחת (Nahat Coffee)" … are one roaster ---------- */
+  const GENERIC = new Set(['coffee', 'roasters', 'roaster', 'roastery', 'roasting', 'co', 'company', 'specialty', 'the', 'קפה', 'בית', 'קלייה', 'קליה', 'בתי', 'ספשלטי']);
+  const rTokens = (n) => String(n || '').toLowerCase().replace(/[()\[\],.&\-_/|·]/g, ' ').split(/\s+/).map((w) => w.trim()).filter((w) => w.length >= 3 && !GENERIC.has(w));
+  const HE_EN = { 'נחת': 'nahat', 'נחות': 'nahat', 'נומנה': 'nomena' };
+  const rKeys = (n) => new Set(rTokens(n).map((w) => HE_EN[w] || w));
+  V6.sameRoaster = (a, b) => { if (!a || !b) return false; const A = rKeys(a), Bk = rKeys(b); for (const w of A) if (Bk.has(w)) return true; return false; };
+  V6.canonRoaster = (name) => {
+    if (!name) return name; const cands = {};
+    state.beans.forEach((b) => { if (b.roaster && V6.sameRoaster(b.roaster, name)) cands[b.roaster] = (cands[b.roaster] || 0) + 1; });
+    const best = Object.keys(cands).sort((x, y) => cands[y] - cands[x])[0]; return best || name;
+  };
+  const nKey = (s) => String(s || '').toLowerCase().replace(/[^a-z0-9֐-׿]+/g, ' ').trim();
+  V6.findBean = (pre) => {
+    const n = nKey(pre.name); if (!n || n.length < 3) return null;
+    const hits = state.beans.filter((b) => { const bn = nKey(b.name); if (!bn) return false; const nameOk = bn === n || (n.length >= 5 && (bn.includes(n) || n.includes(bn))); return nameOk && (!pre.roaster || !b.roaster || V6.sameRoaster(b.roaster, pre.roaster)); });
+    return hits.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1))[0] || null;
+  };
+
+
+  /* one-time: the same roaster saved under several spellings becomes one name (most used spelling wins) */
+  V6.mergeRoasters = function () {
+    const pr = prefs(); if (!pr || pr.v6roasters) return 0; let n = 0; const done = new Set();
+    state.beans.forEach((b) => { if (!b.roaster || done.has(b.id)) return; const grp = state.beans.filter((x) => x.roaster && V6.sameRoaster(x.roaster, b.roaster)); grp.forEach((x) => done.add(x.id)); if (grp.length < 2) return;
+      const cnt = {}; grp.forEach((x) => { cnt[x.roaster] = (cnt[x.roaster] || 0) + 1; }); const name = Object.keys(cnt).sort((a, c) => cnt[c] - cnt[a] || a.length - c.length)[0];
+      grp.forEach((x) => { if (x.roaster !== name) { x.roaster = name; x.updatedAt = nowISO(); n++; } }); });
+    pr.v6roasters = true; save(); return n;
+  };
+  ensureBrew = (function (prev) { return function () { try { V6.mergeRoasters(); } catch (e) { /* ignore */ } return prev(); }; })(ensureBrew);
+
+  /* ---------- scan: real error messages + "you already have this coffee" ---------- */
+  srvScan = async function (blob, signal) {
+    const r = await fetch('api/scan', { method: 'POST', headers: { 'content-type': blob.type || 'image/jpeg' }, body: blob, signal });
+    let j = null; try { j = await r.json(); } catch (e) { /* not json */ }
+    if (!r.ok) throw { code: r.status === 429 ? 'rate_limited' : r.status === 401 ? 'key' : r.status === 402 ? 'billing' : r.status === 413 ? 'big' : 'upstream', detail: j && j.detail };
+    return j;
+  };
+  const SCAN_ERR = { key: 'מפתח ה-API של Claude בשרת לא תקין או פג', billing: 'נגמר הקרדיט בחשבון ה-API של Claude', upstream: 'שירות הקריאה של Claude לא זמין כרגע', big: 'התמונה גדולה מדי', rate_limited: 'יותר מדי בקשות, נסו בעוד רגע', invalid_json: 'לא הצלחתי לקרוא את השקית', not_granted: 'לא אושר שימוש ב-Claude', image_rejected: 'סוג התמונה לא נתמך', images_unavailable: 'שליחת תמונות ל-Claude לא זמינה כאן', sampling_disabled: 'השימוש ב-Claude כבוי בחשבון' };
+  function addBagFromScan(bean, pre) {
+    const w = isNum(pre.weight) && pre.weight > 0 ? pre.weight : 250;
+    const bag = insert('bags', { beanId: bean.id, weight: w, price: isNum(pre.price) ? pre.price : null, purchaseDate: toDateInput(nowISO()), roastDate: pre.roastDate || null, openedDate: null, status: 'active', storage: STORAGE_METHODS[0], frozen: false, notes: '', createdAt: nowISO() }, 'bag');
+    if (pre._thumb && !photoOf(bean.id, 'pack')) state.photos.push({ id: uid('ph'), beanId: bean.id, kind: 'pack', data: pre._thumb });
+    save(); return bag;
+  }
+  function offerExisting(bean, pre) {
+    const bags = state.bags.filter((g) => g.beanId === bean.id).length;
+    openModal({ title: 'כבר יש לך את הקפה הזה', body: (pre._thumb ? '<img class="scan-th" alt="" src="' + pre._thumb + '">' : '') + '<p><b>' + esc(bean.name) + '</b>' + (bean.roaster ? ' · ' + esc(bean.roaster) : '') + '</p><p class="muted s">' + bags + ' שקיות קודמות. כל החליטות והסטטיסטיקה של הפולים האלה ימשיכו באותו מקום.</p>' +
+      '<div class="form-g">' + fld('weight', 'משקל', { type: 'number', u: 'g', v: isNum(pre.weight) ? pre.weight : 250 }) + fld('roastDate', 'תאריך קלייה', { type: 'date', v: pre.roastDate || '' }) + fld('price', 'מחיר', { type: 'number', u: '₪', v: isNum(pre.price) ? pre.price : '' }) + '</div>',
+      actions: [{ label: 'פולים אחרים', run: () => { setTimeout(() => beanForm(null, pre), 0); } }, { label: '+ שקית חדשה', cls: 'pri', run: (v, form) => {
+        const errs = {}; if (!isNum(v.weight) || v.weight <= 0) errs.weight = 'משקל חיובי'; if (v.roastDate && new Date(v.roastDate) > new Date(Date.now() + DAY)) errs.roastDate = 'בעתיד'; if (!showErrors(form, errs)) return false;
+        const bag = addBagFromScan(bean, Object.assign({}, pre, { weight: v.weight, roastDate: v.roastDate || null, price: v.price }));
+        toast('נוספה שקית של ' + bean.name); if (UI.brew) { UI.brew.bagId = bag.id; UI.brew.valsFor = null; } render();
+      } }] });
+  }
+  runScan = async function (file) {
+    let small, thumb; try { small = await downscale(file, 1600, 0.85); thumb = await downscale(file, 480, 0.6); } catch (e) { toast('לא ניתן לקרוא את התמונה'); return; }
+    const ctl = new AbortController();
+    openModal({ title: 'קורא את השקית…', noFocus: true, body: '<div class="scan-w"><div class="scan-box"><img alt="" src="' + thumb.dataUrl + '"><i class="laser"></i><i class="cn tl"></i><i class="cn tr"></i><i class="cn bl"></i><i class="cn br"></i></div><ol class="scan-steps"><li id="ss1" class="on">קורא את השקית</li><li id="ss2">מחפש את עמוד המוצר באינטרנט</li><li id="ss3">מכין את הטופס</li></ol></div>', actions: [{ label: 'ביטול', run: () => { ctl.abort(); } }] });
+    await Promise.race([CAPS.readyP, new Promise((r) => setTimeout(r, 5000))]);
+    const useSample = CAPS.sample && CAPS.images; const srv = await srvOk();
+    if (!useSample && !srv) { beanForm(null, { _thumb: thumb.dataUrl, _note: (CAPS.why || 'הסריקה לא זמינה כאן') + '. התמונה נשמרה, מלאו את הפרטים ידנית.' }); return; }
+    try {
+      let r; try { r = srv ? await srvScan(small.blob, ctl.signal) : await CAPS.sample.json(SCAN_PROMPT, { images: [small.blob], signal: ctl.signal, modelTier: 'default' }); }
+      catch (e1) { if (ctl.signal.aborted) throw { code: 'cancelled' }; if (srv && useSample) r = await CAPS.sample.json(SCAN_PROMPT, { images: [small.blob], signal: ctl.signal, modelTier: 'default' }); else throw e1; }
+      if (!r || typeof r !== 'object') throw { code: 'invalid_json' };
+      const pre = scanMap(r); pre.uncertain = Array.isArray(r.uncertain) ? r.uncertain.map((k) => (k === 'notes' ? 'roasterNotesText' : k)) : []; pre._thumb = thumb.dataUrl;
+      if (pre.roaster) pre.roaster = V6.canonRoaster(pre.roaster);
+      if (!pre.name && !pre.roaster) pre._note = 'לא זוהו פרטים מהתמונה. נסו צילום קרוב וחד של התווית, או מלאו ידנית.';
+      const have = V6.findBean(pre); if (have) { setStep(3); offerExisting(have, pre); return; }
+      await enrichBean(pre, ctl); if (ctl.signal.aborted) return; setStep(3);
+      if (pre.roaster) pre.roaster = V6.canonRoaster(pre.roaster);
+      beanForm(null, pre);
+    } catch (e) {
+      const c2 = e && e.code; if (c2 === 'cancelled' || ctl.signal.aborted) return;
+      beanForm(null, { _thumb: thumb.dataUrl, _note: (SCAN_ERR[c2] || 'הסריקה נכשלה') + '. התמונה נשמרה, מלאו ידנית.' });
+    }
+  };
+
+  /* ---------- brew setup ---------- */
+  const methodsInUse = () => { const ps = presets(); const seen = []; const lastUse = {}; doneSessions().forEach((s) => { if (!lastUse[s.method] || s.date > lastUse[s.method]) lastUse[s.method] = s.date; }); ps.forEach((p) => { if (!seen.includes(p.method)) seen.push(p.method); }); return seen.sort((a, b) => ((lastUse[b] || '') > (lastUse[a] || '') ? 1 : (lastUse[b] || '') < (lastUse[a] || '') ? -1 : 0)); };
+  const presetForMethod = (m) => { const ps = presets().filter((p) => p.method === m); const ls = lastOf(doneSessions().filter((s) => s.method === m && ps.some((p) => p.id === s.recipeId))); return (ls && byId('recipes', ls.recipeId)) || ps[0] || null; };
+  V6.beanChoices = () => {
+    const byBean = {}; activeBags().forEach((g) => { (byBean[g.beanId] = byBean[g.beanId] || []).push(g); });
+    const lastUse = {}; doneSessions().forEach((s) => { if (s.beanId && (!lastUse[s.beanId] || s.date > lastUse[s.beanId])) lastUse[s.beanId] = s.date; });
+    return Object.keys(byBean).map((bid) => { const bags = byBean[bid].sort((a, b) => (a.createdAt < b.createdAt ? -1 : 1)); return { beanId: bid, bags, bag: bags[0], last: lastUse[bid] || '' }; })
+      .sort((a, b) => (a.last < b.last ? 1 : a.last > b.last ? -1 : (a.bag.createdAt < b.bag.createdAt ? 1 : -1)));
+  };
+  ensureBrew = (function (prev) {
+    return function () {
+      const b = B();
+      if (!b._v6) { b._v6 = true; if (!b.presetId) { const ls = lastOf(doneSessions().filter((s) => s.recipeId && byId('recipes', s.recipeId) && !byId('recipes', s.recipeId).archived)); if (ls) b.presetId = ls.recipeId; } }
+      return prev();
+    };
+  })(ensureBrew);
+  ACT['v6-method'] = (d) => { const p = presetForMethod(d.m); if (!p) return; const b = B(); b.presetId = p.id; b.valsFor = null; b.drink = undefined; render(); };
+  ACT['v6-bean'] = (d) => { const b = B(); const ch = V6.beanChoices().find((x) => x.beanId === d.id); b.bagId = ch ? (ch.bags.some((g) => g.id === b.bagId) ? b.bagId : ch.bag.id) : ''; b.valsFor = null; render(); };
+  ACT['v6-load'] = (d) => { const s = byId('sessions', d.id); const p = presetOf(); if (!s || !p) return; const a = actOf(s); const pp = (s.planned && s.planned.params) || {}; (p.vary || []).forEach((k) => { const v = k === 'yield' || k === 'time' || k === 'dose' ? (isNum(pp[k]) ? pp[k] : a[k]) : pp[k]; if (v !== undefined && v !== null && v !== '') B().vals[k] = v; }); const sc = scoreOfS(s); B().src = 'כמו ב-' + fmtDate(s.date) + (sc != null ? ' (ציון ' + fmtN(sc, 0) + ')' : ''); B().formulaId = null; render(); };
+
+  function historyStrip(p) {
+    const bk = beanKey(); const rows = doneSessions().filter((s) => s.recipeId === p.id && (s.beanId || '_') === bk).sort((a, c) => (a.date < c.date ? 1 : -1)).slice(0, 6);
+    const fs = formulasFor(p, bk).filter((f) => !f.beanId || f.beanId === bk).slice(0, 3);
+    if (!rows.length && !fs.length) return '';
+    const best = rows.reduce((m, s) => { const sc = scoreOfS(s); return sc != null && (!m || sc > m.sc) ? { s, sc } : m; }, null);
+    const chip = (s) => { const a = actOf(s); const sc = scoreOfS(s); const e = evalOf(s.id); const iss = e && e.issue && e.issue !== 'none' ? (TASTES.find((t) => t[0] === e.issue) || ['', ''])[1] : '';
+      return '<button type="button" class="v6-h' + (best && best.s.id === s.id ? ' best' : '') + '" data-act="v6-load" data-id="' + s.id + '"><b class="num" data-sc="' + (sc == null ? '' : sc >= 8 ? 'hi' : sc >= 6 ? 'mid' : 'lo') + '">' + (sc == null ? '–' : fmtN(sc, 0)) + '</b><span class="num">' + valsHTML(p.method, a, true) + '</span>' + (iss ? '<em>' + esc(iss) + '</em>' : '') + '</button>'; };
+    return '<div class="v6-hist"><div class="v6-hist-h">' + (rows.length ? 'הכוסות האחרונות עם הפולים האלה · לחיצה טוענת' : 'מתכונים שמורים') + '</div><div class="v6-hrow">' +
+      fs.map((f) => '<button type="button" class="v6-h pin' + (B().formulaId === f.id ? ' on' : '') + '" data-act="pick-formula" data-id="' + f.id + '"><b>📌</b><span>' + esc(f.name) + '</span></button>').join('') + rows.map(chip).join('') + '</div></div>';
+  }
+  function grindLine(p, params) {
+    let a; try { a = grindAdvice(p, params, byId('bags', B().bagId)); } catch (e) { return ''; } if (!a || a.source === 'none' || a.rec == null) return '';
+    const near = a.cur != null && Math.abs(a.cur - a.rec) < a.step * 1.5; const conf = { high: 'ביטחון גבוה', mid: 'ביטחון בינוני', low: 'מעט נתונים', est: 'הערכה' }[a.conf] || '';
+    return '<details class="v6-ga' + (near ? ' ok' : '') + '"><summary><span>🎯 טחינה מומלצת <b class="num">' + fmtN(a.rec, a.dec) + '</b> <small>(' + fmtN(a.lo, a.dec) + '–' + fmtN(a.hi, a.dec) + ' · ' + conf + ')</small></span>' + (near ? '<small class="ga-ok">✓ מתאים</small>' : '<button type="button" class="btn sm" data-act="ga-apply" data-v="' + a.rec + '">החלה</button>') + '</summary>' +
+      '<p class="ga-why">' + esc(a.why || '') + '</p>' + (a.notes || []).map((n) => '<p class="ga-n">• ' + esc(n) + '</p>').join('') + '<small class="muted">' + (a.finerLower ? 'מספר נמוך יותר = עדין יותר' : 'מספר גבוה יותר = עדין יותר') + ' · ' + esc(a.g.name || '') + '</small></details>';
+  }
+  function methodRow(p) {
+    const ms = methodsInUse(); const sib = presets().filter((x) => x.method === p.method);
+    return '<section class="blk v6-blk"><div class="v6-mrow" role="tablist" aria-label="שיטה">' + ms.map((m) => '<button type="button" role="tab" aria-selected="' + (m === p.method) + '" class="v6-m' + (m === p.method ? ' on' : '') + '" style="--m:' + METHODS[m].color + '" data-act="v6-method" data-m="' + m + '"><i></i>' + esc(methodHe(m)) + '</button>').join('') + '<button type="button" class="v6-m add" data-act="preset-new" aria-label="שיטה או פריסט חדשים">+</button></div>' +
+      (sib.length > 1 ? '<div class="v6-prow">' + sib.map((x) => '<button type="button" class="tchip' + (x.id === p.id ? ' on' : '') + '" data-act="pick-preset" data-id="' + x.id + '">' + esc(x.name) + '</button>').join('') + '</div>' : '') + '</section>';
+  }
+  function beanRow() {
+    const b = B(); const cur = byId('bags', b.bagId); const curBean = cur ? cur.beanId : '';
+    const ch = V6.beanChoices();
+    return '<section class="blk v6-blk"><div class="blk-h">פולים</div><div class="chips-row">' + ch.map((c) => { const bean = byId('beans', c.beanId) || {}; const bag = c.bags.find((g) => g.id === b.bagId) || c.bag; const bi = bagInfo(bag); const rem = sum(c.bags.map(bagRemaining));
+      return '<button type="button" class="bchip' + (c.beanId === curBean ? ' on' : '') + (bean.color ? ' tint' : '') + '"' + (bean.color ? ' style="--bc:' + bean.color + '"' : '') + ' data-act="v6-bean" data-id="' + c.beanId + '"><b>' + esc(bean.name || '?') + '</b><small>' + [freshDays(bag), fmtN(rem, 0) + ' g' + (c.bags.length > 1 ? ' · ' + c.bags.length + ' שקיות' : '')].filter(Boolean).join(' · ') + '</small></button>'; }).join('') +
+      '<button type="button" class="bchip' + (!b.bagId ? ' on' : '') + '" data-act="pick-bag" data-id=""><b>ללא</b></button><button type="button" class="bchip add" data-act="beans-menu" aria-label="סריקה או הוספת שקית">' + svgI('camera') + '</button></div></section>';
+  }
+  const _rbPrev = RENDER.brew;
+  RENDER.brew = function () {
+    let h = _rbPrev(); const b = B(); if (!b || b.stage !== 'setup' && b.stage != null) return h; if (h.indexOf('class="card today"') < 0) return h;
+    const p = presetOf(); if (!p) return h; const params = fullParams();
+    try {
+      h = h.replace(/<section class="blk"><div class="blk-h">פריסט<\/div><div class="chips-row">[\s\S]*?<\/div><\/section>/, methodRow(p));
+      h = h.replace(/<section class="blk"><div class="blk-h">פולים<\/div><div class="chips-row">[\s\S]*?<\/div><\/section>/, beanRow());
+      h = h.replace(/<div class="frow">[\s\S]*?<\/div>/, '');
+      h = h.replace('<div class="today-sum">', historyStrip(p) + '<div class="today-sum">');
+      h = h.replace(/<button type="button" class="best" data-act="load-best">[\s\S]*?<\/button>/, '');
+      const gl = grindLine(p, params); h = h.replace(/<section class="card gadv"[\s\S]*?<\/section>/, '').replace('<div class="today-sum">', gl + '<div class="today-sum">');
+      const tips = h.match(/<p class="tip-l">[\s\S]*?<\/p>/g) || []; tips.slice(1).forEach((t) => { h = h.replace(t, ''); });
+      const go = h.match(/<div class="go-row">[\s\S]*?<\/button>(?:<button[\s\S]*?<\/button>)?<\/div>/);
+      if (go) { h = h.replace(go[0], ''); h = h.replace(/<\/div>\s*$/, '<div class="v6-dock">' + go[0] + '</div></div>'); }
+      h = h.replace('class="page narrow brew"', 'class="page narrow brew v6"');
+    } catch (e) { console.error(e); }
+    return h;
+  };
+  /* the "today" card's source line gets a coach voice */
+  const coachSrc = (src) => (src && /:|חמוץ|מר|חלש|שטוח|מייבש|חזק/.test(src) && !/^כמו/.test(src) ? '💡 ' + src : src);
+  const _rb2 = RENDER.brew;
+  RENDER.brew = function () { const h = _rb2(); return h.replace(/<small class="src">([\s\S]*?)<\/small>/, (m, s) => '<small class="src v6-src">' + coachSrc(s) + '</small>'); };
+
+  /* ---------- result: update the preset in one tap, tiny trend ---------- */
+  ACT['v6-preset-update'] = () => {
+    const r = B().result; const s = r && byId('sessions', r.sessionId); const p = s && byId('recipes', s.recipeId); if (!p) return; const v = currentVersion(p); const a = actOf(s);
+    const np = Object.assign({}, (v && v.params) || {}, (s.planned && s.planned.params) || {}); (p.vary || []).forEach((k) => { if (isNum(a[k]) && (k === 'grind')) np[k] = a[k]; });
+    const steps = p.source ? stepsFor(p, np) : autoSteps(p.method, np);
+    const nv = insert('recipeVersions', { recipeId: p.id, version: bumpVersion(v ? v.version : '1.0'), params: deepClone(np), grinderId: p.grinderId || null, steps, unverifiedGrind: !isNum(np.grind), note: 'עודכן מחליטה ' + fmtDate(s.date), createdAt: nowISO() }, 'rv');
+    p.currentVersionId = nv.id; p.updatedAt = nowISO(); save(); toast('"' + p.name + '" עודכן לערכים האלה'); render();
+  };
+  function trendHTML(p, beanId) {
+    const rows = doneSessions().filter((s) => s.recipeId === p.id && (s.beanId || '_') === (beanId || '_')).sort((a, c) => (a.date < c.date ? -1 : 1)).slice(-10);
+    const sc = rows.map(scoreOfS); if (sc.filter((x) => x != null).length < 2) return '';
+    return '<div class="v6-trend" aria-label="ציונים אחרונים">' + sc.map((x) => '<i style="--h:' + (x == null ? 4 : x * 10) + '%" data-sc="' + (x == null ? '' : x >= 8 ? 'hi' : x >= 6 ? 'mid' : 'lo') + '" title="' + (x == null ? '' : x) + '"></i>').join('') + '</div>';
+  }
+  brewDone = (function (prev) {
+    return function () {
+      let h = prev(); const r = B().result; const s = r && byId('sessions', r.sessionId); if (!s) return h; const p = byId('recipes', s.recipeId); if (!p) return h;
+      // the long "save as a fixed recipe" card becomes two small actions
+      h = h.replace(/<section class="card[^"]*"><div class="grow"><b>יצא טוב\?<\/b>[\s\S]*?<\/section>/, '').replace(/<section class="card[^"]*">(?:(?!<section)[\s\S])*?data-act="sess-formula"[\s\S]*?<\/section>/, '');
+      const rows = doneSessions().filter((x) => x.recipeId === p.id && (x.beanId || '_') === (s.beanId || '_')); const avg = mean(rows.map(scoreOfS).filter((x) => x != null));
+      const card = '<section class="card v6-res"><div class="blk-h">' + esc(s.beanId ? beanName(s.beanId) : 'בלי פולים') + ' · ' + esc(methodHe(p.method)) + '</div>' + trendHTML(p, s.beanId) +
+        '<small class="muted">' + rows.length + ' כוסות' + (isNum(avg) ? ' · ממוצע ' + fmtN(avg, 1) : '') + ' · הערכים נשמרים אוטומטית לפולים האלה</small>' +
+        '<div class="v6-res-a"><button type="button" class="btn sm" data-act="sess-formula" data-id="' + s.id + '">📌 שמירה כמתכון</button><button type="button" class="btn sm" data-act="v6-preset-update">⟳ עדכון הפריסט "' + esc(p.name) + '"</button></div></section>';
+      return h.replace('<div class="go-row">', card + '<div class="go-row">');
+    };
+  })(brewDone);
+
+  /* ---------- stats: one card per bean × method ---------- */
+  function comboCards() {
+    const groups = {}; doneSessions().forEach((s) => { const k = (s.beanId || '_') + '|' + s.method; (groups[k] = groups[k] || []).push(s); });
+    const list = Object.keys(groups).map((k) => { const ss = groups[k].sort((a, b) => (a.date < b.date ? -1 : 1)); const sc = ss.map(scoreOfS).filter((x) => x != null); const last = ss[ss.length - 1]; return { k, ss, sc, last, beanId: last.beanId, method: last.method }; })
+      .filter((g) => g.ss.length >= 2).sort((a, b) => (a.last.date < b.last.date ? 1 : -1)).slice(0, 6);
+    if (!list.length) return '';
+    return '<section class="card v6-combos"><div class="blk-h">לפי פולים ושיטה</div><div class="v6-cg">' + list.map((g) => {
+      const rated = g.ss.filter((s) => scoreOfS(s) != null); const best = rated.sort((a, b) => scoreOfS(b) - scoreOfS(a))[0]; const ba = best ? actOf(best) : null;
+      const recent = g.sc.slice(-3), older = g.sc.slice(-6, -3); const d = recent.length >= 3 && older.length >= 3 ? mean(recent) - mean(older) : null;
+      const arrow = d == null ? '' : d >= 0.75 ? '<em class="up">▲ משתפר</em>' : d <= -0.75 ? '<em class="dn">▼ יורד</em>' : '<em>יציב</em>';
+      const p = byId('recipes', g.last.recipeId); const nx = p && p.next && p.next[g.beanId || '_'];
+      const bv = ba ? valsHTML(g.method, ba, false) : '';
+      return '<div class="v6-c"><div class="v6-c-h"><b>' + esc(g.beanId ? beanName(g.beanId) : 'בלי פולים') + '</b><span class="mtag" style="--m:' + METHODS[g.method].color + '">' + esc(methodHe(g.method)) + '</span></div>' +
+        '<div class="v6-c-k"><span class="num">' + g.ss.length + '</span> כוסות' + (g.sc.length ? ' · ממוצע <span class="num">' + fmtN(mean(g.sc), 1) + '</span>' : '') + ' ' + arrow + '</div>' +
+        (p ? trendHTML(p, g.beanId) : '') + (bv ? '<small>★ הכי טוב (' + fmtN(scoreOfS(best), 0) + '): ' + bv + '</small>' : '') + (nx && nx.reason ? '<small class="v6-next">💡 הבא: ' + esc(nx.reason) + '</small>' : '') + '</div>';
+    }).join('') + '</div></section>';
+  }
+  const _rs = RENDER.stats;
+  if (_rs) RENDER.stats = function () { const h = _rs(); const c = comboCards(); if (!c) return h; const i = h.indexOf('<section'); return i < 0 ? h + c : h.slice(0, i) + c + h.slice(i); };
+
+  /* ---------- styles ---------- */
+  const css = `
+.brew.v6 { padding-bottom: calc(170px + env(safe-area-inset-bottom, 0px)); }
+.v6-blk { gap: 8px; }
+.v6-mrow { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding: 2px; margin: 0 -2px; }
+.v6-mrow::-webkit-scrollbar { display: none; }
+.v6-m { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 8px; min-height: 44px; padding: 0 16px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-weight: 600; cursor: pointer; }
+.v6-m i { width: 9px; height: 9px; border-radius: 50%; background: var(--m); }
+.v6-m.on { background: var(--ink, var(--fg)); color: var(--ink-fg, var(--surface)); border-color: transparent; }
+.v6-m.add { padding: 0 14px; color: var(--muted); }
+.v6-prow { display: flex; gap: 6px; flex-wrap: wrap; }
+.v6-src { font-size: 13px; color: var(--fg); opacity: .85; }
+.v6-hist { display: grid; gap: 6px; margin-top: 4px; }
+.v6-hist-h { font-size: 12px; color: var(--muted); }
+.v6-hrow { display: flex; gap: 6px; overflow-x: auto; scrollbar-width: none; padding-bottom: 2px; }
+.v6-hrow::-webkit-scrollbar { display: none; }
+.v6-h { flex: 0 0 auto; display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 10px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); color: var(--fg); font: inherit; font-size: 13px; cursor: pointer; }
+.v6-h b { min-width: 24px; height: 24px; border-radius: 8px; display: grid; place-items: center; font-size: 12px; background: var(--surface2, var(--line)); }
+.v6-h b[data-sc="hi"] { background: color-mix(in srgb, #3f8f5a 22%, transparent); color: #2f6b44; }
+.v6-h b[data-sc="mid"] { background: color-mix(in srgb, #c08a2e 22%, transparent); color: #8a5d12; }
+.v6-h b[data-sc="lo"] { background: color-mix(in srgb, #b4533e 22%, transparent); color: #8d3726; }
+.v6-h em { font-style: normal; font-size: 11px; color: var(--muted); }
+.v6-h.best { border-color: color-mix(in srgb, #3f8f5a 55%, var(--line)); }
+.v6-h.pin.on { border-color: var(--fg); }
+.v6-ga { border: 1px solid var(--line); border-radius: 14px; padding: 8px 12px; background: var(--surface); }
+.v6-ga summary { display: flex; align-items: center; justify-content: space-between; gap: 8px; cursor: pointer; list-style: none; min-height: 32px; font-size: 14px; }
+.v6-ga summary::-webkit-details-marker { display: none; }
+.v6-ga summary small { color: var(--muted); font-weight: 400; }
+.v6-ga .ga-why, .v6-ga .ga-n { font-size: 13px; margin: 6px 0 0; }
+.v6-dock { position: fixed; z-index: 21; inset-inline: 0; bottom: 0; padding: 10px max(16px, env(safe-area-inset-right, 0px)) calc(10px + env(safe-area-inset-bottom, 0px)) max(16px, env(safe-area-inset-left, 0px)); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: blur(10px); border-top: 1px solid var(--line); }
+.v6-dock .go-row { max-width: 760px; margin: 0 auto; }
+.v6-dock .btn.go { flex: 1; min-height: 52px; font-size: 17px; justify-content: center; }
+@media (max-width: 920px) { .v6-dock { bottom: calc(61px + env(safe-area-inset-bottom, 0px)); padding-bottom: 10px; } }
+body:has(.v6-dock) #tmdock { bottom: calc(146px + env(safe-area-inset-bottom, 0px)); }
+@media (min-width: 921px) { body:has(.v6-dock) #tmdock { bottom: 84px; } }
+.v6-res { display: grid; gap: 8px; }
+.v6-res-a { display: flex; gap: 8px; flex-wrap: wrap; }
+.v6-trend { display: flex; align-items: flex-end; gap: 4px; height: 36px; }
+.v6-trend i { flex: 1; max-width: 22px; height: var(--h); min-height: 3px; border-radius: 4px 4px 2px 2px; background: var(--line); }
+.v6-trend i[data-sc="hi"] { background: #5a9f6f; } .v6-trend i[data-sc="mid"] { background: #d3a24a; } .v6-trend i[data-sc="lo"] { background: #c4694f; }
+.v6-cg { display: grid; gap: 10px; grid-template-columns: repeat(auto-fill, minmax(min(100%, 260px), 1fr)); }
+.v6-c { display: grid; gap: 6px; padding: 12px; border: 1px solid var(--line); border-radius: 14px; background: var(--surface); min-width: 0; }
+.v6-c-h { display: flex; justify-content: space-between; gap: 8px; align-items: center; }
+.v6-c-h b { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.v6-c .mtag { font-size: 12px; padding: 2px 8px; border-radius: 99px; background: color-mix(in srgb, var(--m) 18%, transparent); white-space: nowrap; }
+.v6-c-k { font-size: 13px; color: var(--muted); }
+.v6-c-k em { font-style: normal; margin-inline-start: 6px; } .v6-c-k em.up { color: #2f6b44; } .v6-c-k em.dn { color: #8d3726; }
+.v6-c small { font-size: 12.5px; } .v6-next { color: var(--fg); }
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) .v6-h b[data-sc="hi"] { color: #8fd3a5; } :root:not([data-theme="light"]) .v6-h b[data-sc="mid"] { color: #e8c27a; } :root:not([data-theme="light"]) .v6-h b[data-sc="lo"] { color: #f0a08b; } }
+:root[data-theme="dark"] .v6-h b[data-sc="hi"] { color: #8fd3a5; } :root[data-theme="dark"] .v6-h b[data-sc="mid"] { color: #e8c27a; } :root[data-theme="dark"] .v6-h b[data-sc="lo"] { color: #f0a08b; }
+`;
+  const st = document.createElement('style'); st.id = 'v6css'; st.textContent = css; document.head.appendChild(st);
+  try { render(); } catch (e) { /* first paint happens later */ }
+})();
+
+</script>
 <script>if("serviceWorker" in navigator&&location.protocol==="https:"){addEventListener("load",function(){navigator.serviceWorker.register("sw.js").catch(function(){});});}</script></body></html>
